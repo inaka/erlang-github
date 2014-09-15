@@ -1,0 +1,10 @@
+{
+  application, egithub,
+  [
+   {description, "GitHub API client"},
+   {vsn, "0.1.0-alpha"},
+   {applications, [kernel, stdlib, ibrowse, ssl, jiffy, lager]},
+   {modules, []},
+   {registered, []}
+  ]
+}.
