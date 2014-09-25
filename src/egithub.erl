@@ -2,7 +2,6 @@
 
 %% Pull Requests
 -export([
-         basic_auth_credentials/0,
          %% Pull Requests
          pull_req_files/3,
          pull_req_comment_line/7,
@@ -57,13 +56,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% @doc Gets the github basic auth credentials form the elvis app environment.
--spec basic_auth_credentials() -> credentials().
-basic_auth_credentials() ->
-    User = application:get_env(elvis, github_user, ""),
-    Password = application:get_env(elvis, github_password, ""),
-    {basic, User, Password}.
 
 %% Pull Requests
 
