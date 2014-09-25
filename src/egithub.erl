@@ -253,7 +253,8 @@ delete_team_member(Cred, TeamId, Username) ->
             Error
     end.
 
--spec team_membership(credentials(), integer(), string()) -> active | pending | none.
+-spec team_membership(credentials(), integer(), string()) ->
+    active | pending | none.
 team_membership(Cred, TeamId, Username) ->
     Url = make_url(team_membership, {TeamId, Username}),
     case api_call_json_result(Cred, Url) of
