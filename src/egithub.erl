@@ -1,6 +1,8 @@
 -module(egithub).
 
+%% Pull Requests
 -export([
+         basic_auth_credentials/0,
          %% Pull Requests
          pull_req_files/3,
          pull_req_comment_line/7,
@@ -23,6 +25,7 @@
          add_team_repository/3,
          add_team_member/3,
          delete_team_member/3,
+         team_membership/3,
          %% Hooks
          hooks/2,
          create_webhook/4,
@@ -54,6 +57,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% @doc Gets the github basic auth credentials form the elvis app environment.
+-spec basic_auth_credentials() -> credentials().
+basic_auth_credentials() ->
+    User = application:get_env(elvis, github_user, ""),
+    Password = application:get_env(elvis, github_password, ""),
+    {basic, User, Password}.
 
 %% Pull Requests
 
@@ -238,6 +248,15 @@ delete_team_member(Cred, TeamId, Username) ->
             Error
     end.
 
+-spec team_membership(credentials(), integer(), string()) -> active | pending | none.
+team_membership(Cred, TeamId, Username) ->
+    Url = make_url(team_membership, {TeamId, Username}),
+    case api_call_json_result(Cred, Url) of
+        {ok, #{<<"state">> := <<"active">>}} -> active;
+        {ok, #{<<"state">> := <<"pending">>}} -> pending;
+        {error, {"404", _, _}} -> none
+    end.
+
 %% Hooks
 
 -spec hooks(credentials(), repository()) -> result().
@@ -352,6 +371,9 @@ make_url(teams, {TeamId, Username}) ->
 make_url(teams_repos, {TeamId, RepoFullName}) ->
     Url = ?GITHUB_API ++ "/teams/~p/repos/~s",
     io_lib:format(Url, [TeamId, RepoFullName]);
+make_url(team_membership, {TeamId, Username}) ->
+    Url = ?GITHUB_API ++ "/teams/~p/membership/~s",
+    io_lib:format(Url, [TeamId, Username]);
 
 %% Repositories
 make_url(repo, {RepoFullName}) ->
