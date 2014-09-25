@@ -2,6 +2,9 @@
 
 %% Pull Requests
 -export([
+         %% Credentials
+         basic_auth/2,
+         oauth/1,
          %% Pull Requests
          pull_req_files/3,
          pull_req_comment_line/7,
@@ -56,6 +59,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Credentials
+
+-spec basic_auth(string(), string()) -> egithub:credentials().
+basic_auth(User, Password) ->
+    {basic_auth, User, Password}.
+
+-spec oauth(binary()) -> egithub:credentials().
+oauth(Token) ->
+    {oauth, Token}.
 
 %% Pull Requests
 
