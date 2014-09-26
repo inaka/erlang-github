@@ -8,3 +8,7 @@ dep_jiffy = git https://github.com/davisp/jiffy 0.11.3
 dep_ibrowse = git https://github.com/cmullaparthi/ibrowse v4.1.1
 
 include erlang.mk
+
+ERLC_OPTS += +'{parse_transform, lager_transform}'
+
+SHELL_OPTS= -s egithub -s sync

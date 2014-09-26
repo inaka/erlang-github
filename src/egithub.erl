@@ -1,6 +1,12 @@
 -module(egithub).
+-behavior(application).
 
-%% Pull Requests
+-export([
+         start/0,
+         start/2,
+         stop/1
+        ]).
+
 -export([
          %% Credentials
          basic_auth/2,
@@ -60,11 +66,26 @@
 %% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+-spec start() -> ok.
+start() ->
+    application:ensure_all_started(egithub).
+
+%% Application Behavior
+
+-spec start(application:start_type(), term()) ->
+    {ok, pid()} | {ok, pid(), term()} | {error, term()}.
+start(_StartType, _Arg) ->
+    {ok, self()}.
+
+-spec stop(term()) -> ok.
+stop(_State) ->
+    ok.
+
 %% Credentials
 
 -spec basic_auth(string(), string()) -> egithub:credentials().
 basic_auth(User, Password) ->
-    {basic_auth, User, Password}.
+    {basic, User, Password}.
 
 -spec oauth(binary()) -> egithub:credentials().
 oauth(Token) ->
@@ -291,7 +312,7 @@ create_webhook(Cred, Repo, WebhookUrl, Events) ->
 
 -spec delete_webhook(credentials(), repository(), string()) -> result().
 delete_webhook(Cred, Repo, Id) ->
-    IdStr = elvis_utils:to_str(Id),
+    IdStr = to_str(Id),
     Url = make_url(hooks, {Repo, IdStr}),
     Body = [],
     case auth_req(Cred, Url, delete, Body) of
@@ -342,7 +363,7 @@ remove_collaborator(Cred, Repo, Collaborator) ->
 
 %% Pull Resquest
 make_url({pull_req, Subentity}, {Repo, PR}) ->
-    SubentityStr = elvis_utils:to_str(Subentity),
+    SubentityStr = to_str(Subentity),
     Url = ?GITHUB_API ++ "/repos/~s/pulls/~p/" ++ SubentityStr,
     io_lib:format(Url, [Repo, PR]);
 
@@ -386,10 +407,10 @@ make_url(repo, {RepoFullName}) ->
     Url = ?GITHUB_API ++ "/repos/~s",
     io_lib:format(Url, [RepoFullName]);
 make_url(repos, {User, Opts}) ->
-    Type = elvis_utils:maps_get(type, Opts, "all"),
-    Sort = elvis_utils:maps_get(sort, Opts, "full_name"),
-    Direction = elvis_utils:maps_get(direction, Opts, "asc"),
-    Page = elvis_utils:maps_get(page, Opts, 1),
+    Type = maps_get(type, Opts, "all"),
+    Sort = maps_get(sort, Opts, "full_name"),
+    Direction = maps_get(direction, Opts, "asc"),
+    Page = maps_get(page, Opts, 1),
     case User of
         undefined ->
             Url = ?GITHUB_API
@@ -400,7 +421,7 @@ make_url(repos, {User, Opts}) ->
             io_lib:format(Url, [User, Page])
     end;
 make_url(org_repos, {User, Opts}) ->
-    Page = elvis_utils:maps_get(page, Opts, 1),
+    Page = maps_get(page, Opts, 1),
     Url = ?GITHUB_API ++ "/orgs/~s/repos?page=~p",
     io_lib:format(Url, [User, Page]);
 
@@ -459,4 +480,19 @@ api_call_json_result(Cred, Url) ->
             {ok, JsonResult};
         {error, Reason} ->
             {error, Reason}
+    end.
+
+to_str(Arg) when is_binary(Arg) ->
+    unicode:characters_to_list(Arg);
+to_str(Arg) when is_atom(Arg) ->
+    atom_to_list(Arg);
+to_str(Arg) when is_integer(Arg) ->
+    integer_to_list(Arg);
+to_str(Arg) when is_list(Arg) ->
+    Arg.
+
+maps_get(Key, Map, Default) ->
+    case maps:is_key(Key, Map) of
+        true -> maps:get(Key, Map);
+        false -> Default
     end.
