@@ -407,10 +407,10 @@ make_url(repo, {RepoFullName}) ->
     Url = ?GITHUB_API ++ "/repos/~s",
     io_lib:format(Url, [RepoFullName]);
 make_url(repos, {User, Opts}) ->
-    Type = maps_get(type, Opts, "all"),
-    Sort = maps_get(sort, Opts, "full_name"),
-    Direction = maps_get(direction, Opts, "asc"),
-    Page = maps_get(page, Opts, 1),
+    Type = maps:get(type, Opts, "all"),
+    Sort = maps:get(sort, Opts, "full_name"),
+    Direction = maps:get(direction, Opts, "asc"),
+    Page = maps:get(page, Opts, 1),
     case User of
         undefined ->
             Url = ?GITHUB_API
@@ -421,7 +421,7 @@ make_url(repos, {User, Opts}) ->
             io_lib:format(Url, [User, Page])
     end;
 make_url(org_repos, {User, Opts}) ->
-    Page = maps_get(page, Opts, 1),
+    Page = maps:get(page, Opts, 1),
     Url = ?GITHUB_API ++ "/orgs/~s/repos?page=~p",
     io_lib:format(Url, [User, Page]);
 
@@ -490,9 +490,3 @@ to_str(Arg) when is_integer(Arg) ->
     integer_to_list(Arg);
 to_str(Arg) when is_list(Arg) ->
     Arg.
-
-maps_get(Key, Map, Default) ->
-    case maps:is_key(Key, Map) of
-        true -> maps:get(Key, Map);
-        false -> Default
-    end.
