@@ -399,7 +399,7 @@ make_url(teams_repos, {TeamId, RepoFullName}) ->
     Url = ?GITHUB_API ++ "/teams/~p/repos/~s",
     io_lib:format(Url, [TeamId, RepoFullName]);
 make_url(team_membership, {TeamId, Username}) ->
-    Url = ?GITHUB_API ++ "/teams/~p/membership/~s",
+    Url = ?GITHUB_API ++ "/teams/~p/memberships/~s",
     io_lib:format(Url, [TeamId, Username]);
 
 %% Repositories
