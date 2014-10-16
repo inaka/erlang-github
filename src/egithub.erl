@@ -281,7 +281,8 @@ team_membership(Cred, TeamId, Username) ->
     case api_call_json_result(Cred, Url) of
         {ok, #{<<"state">> := <<"active">>}} -> active;
         {ok, #{<<"state">> := <<"pending">>}} -> pending;
-        {error, {"404", _, _}} -> none
+        {error, {"404", _, _}} -> none;
+        {error, Reason} -> {error, Reason}
     end.
 
 %% Hooks
