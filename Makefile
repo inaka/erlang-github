@@ -12,3 +12,5 @@ include erlang.mk
 ERLC_OPTS += +'{parse_transform, lager_transform}'
 
 SHELL_OPTS= -s egithub -s sync
+
+CT_SUITES = egithub_json
