@@ -1,4 +1,4 @@
--module(egithub_example).
+-module(egithub_json_example).
 
 -behaviour(egithub_json).
 
