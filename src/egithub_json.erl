@@ -37,4 +37,4 @@ decode(Map) ->
 
 -spec json_module() -> atom().
 json_module() ->
-  application:get_env(json, egithub, egithub_jiffy).
+  application:get_env(egithub, json, egithub_jiffy).
