@@ -1,6 +1,6 @@
 %% @doc This module defines a behavior that needs to be implemented using a
 %%      specific JSON encoding/decoding library.
-%%      The module implementind the behavior that will be used is determined
+%%      The module implementing the behavior that will be used is determined
 %%      by this application's `json` configuration value.
 -module(egithub_json).
 
