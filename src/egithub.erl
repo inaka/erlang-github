@@ -98,7 +98,7 @@ oauth(Token) ->
 pull_req_files(Credentials, Repo, PR) ->
     Url = make_url({pull_req, files}, {Repo, PR}),
     {ok, Result} = auth_req(Credentials, Url),
-    Files = jiffy:decode(Result, [return_maps]),
+    Files = egithub_json:decode(Result),
     {ok, Files}.
 
 -spec pull_req_comment_line(credentials(), repository(), integer(),
@@ -112,7 +112,7 @@ pull_req_comment_line(Credentials, Repo, PR,
              <<"position">> => Line,
              <<"body">> => Text
             },
-    JsonBody = jiffy:encode(Body),
+    JsonBody = egithub_json:encode(Body),
     auth_req(Credentials, Url, post, JsonBody).
 
 -spec pull_req_comments(credentials(), repository(), integer()) ->
@@ -120,7 +120,7 @@ pull_req_comment_line(Credentials, Repo, PR,
 pull_req_comments(Cred, Repo, PR) ->
     Url = make_url({pull_req, comments}, {Repo, PR}),
     {ok, Result} = auth_req(Cred, Url),
-    Comments = jiffy:decode(Result, [return_maps]),
+    Comments = egithub_json:decode(Result),
     {ok, Comments}.
 
 %% Files
@@ -130,7 +130,7 @@ file_content(Cred, Repo, CommitId, Filename) ->
     Url = make_url(file_content, {Repo, CommitId, Filename}),
     case auth_req(Cred, Url) of
         {ok, Result} ->
-            JsonResult = jiffy:decode(Result, [return_maps]),
+            JsonResult = egithub_json:decode(Result),
             ContentBase64 = maps:get(<<"content">>, JsonResult),
             Content = base64:decode(ContentBase64),
             {ok, Content};
@@ -230,10 +230,10 @@ create_team(Cred, Org, Name, Permission, Repos) ->
     BodyMap = #{name => list_to_binary(Name),
                  permission => list_to_binary(Permission),
                  repo_names => list_to_binary(Repos)},
-    Body = jiffy:encode(BodyMap),
+    Body = egithub_json:encode(BodyMap),
     case auth_req(Cred, Url, post, Body) of
         {ok, Result} ->
-            JsonResult = jiffy:decode(Result, [return_maps]),
+            JsonResult = egithub_json:decode(Result),
             {ok, JsonResult};
         {error, {"422", _, _}} ->
             {ok, already_exists};
@@ -302,10 +302,10 @@ create_webhook(Cred, Repo, WebhookUrl, Events) ->
              <<"events">> => BinEvents,
              <<"config">> => #{<<"url">> => list_to_binary(WebhookUrl),
                                <<"content_type">> => <<"json">>}},
-    Body = jiffy:encode(Data),
+    Body = egithub_json:encode(Data),
     case auth_req(Cred, Url, post, Body) of
         {ok, Result} ->
-            JsonResult = jiffy:decode(Result, [return_maps]),
+            JsonResult = egithub_json:decode(Result),
             {ok, JsonResult};
         {error, Reason} ->
             {error, Reason}
@@ -330,7 +330,7 @@ collaborators(Cred, Repo) ->
     Url = make_url(collaborators, {Repo}),
     case auth_req(Cred, Url) of
         {ok, Result} ->
-            JsonResult = jiffy:decode(Result, [return_maps]),
+            JsonResult = egithub_json:decode(Result),
             {ok, JsonResult};
         {error, Reason} ->
             {error, Reason}
@@ -477,7 +477,7 @@ authorization({oauth, Token}, Options, Headers0) ->
 api_call_json_result(Cred, Url) ->
     case auth_req(Cred, Url) of
         {ok, Result} ->
-            JsonResult = jiffy:decode(Result, [return_maps]),
+            JsonResult = egithub_json:decode(Result),
             {ok, JsonResult};
         {error, Reason} ->
             {error, Reason}
