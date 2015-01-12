@@ -49,7 +49,7 @@ event(Module, Cred, <<"pull_request">>,
       #{<<"number">> := PR, <<"repository">> := Repository}) ->
   Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
   {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
-  case Module:handle_pull_request(Cred, Repo, GithubFiles) of
+  case Module:handle_pull_request(Cred, Repository, GithubFiles) of
     {ok, Messages} ->
       {ok, Comments} = egithub:pull_req_comments(Cred, Repo, PR),
       write_comments(Cred, Repo, PR, Comments, Messages);
