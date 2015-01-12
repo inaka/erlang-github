@@ -17,9 +17,10 @@
                      text      => binary()
                     }.
 -type file() :: map().
--export_type([message/0, file/0]).
+-type repository() :: map().
+-export_type([repository/0, message/0, file/0]).
 
--callback handle_pull_request(egithub:credentials(), string(), [map()]) ->
+-callback handle_pull_request(egithub:credentials(), repository(), [file()]) ->
   {ok, [message()]} | {error, term()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
