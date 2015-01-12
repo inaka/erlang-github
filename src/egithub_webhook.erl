@@ -11,16 +11,16 @@
 %%% Callbacks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
--type messge() :: #{commit_id => string(),
-                    path      => binary(),
-                    position  => pos_integer(),
-                    text      => binary()
+-type message() :: #{commit_id => string(),
+                     path      => binary(),
+                     position  => pos_integer(),
+                     text      => binary()
                     }.
 -type file() :: map().
--export_type([messge/0, file/0]).
+-export_type([message/0, file/0]).
 
 -callback handle_pull_request(egithub:credentials(), string(), [map()]) ->
-            {ok, [messge()]} | {error, term()}.
+  {ok, [message()]} | {error, term()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Public API
