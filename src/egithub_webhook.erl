@@ -17,10 +17,10 @@
                      text      => binary()
                     }.
 -type file() :: map().
--type repository() :: map().
--export_type([repository/0, message/0, file/0]).
+-type req_data() :: map().
+-export_type([req_data/0, message/0, file/0]).
 
--callback handle_pull_request(egithub:credentials(), repository(), [file()]) ->
+-callback handle_pull_request(egithub:credentials(), req_data(), [file()]) ->
   {ok, [message()]} | {error, term()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -47,10 +47,10 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
 -spec event(atom(), egithub:credentials(), event(), map()) ->
         ok | {error, term()}.
 event(Module, Cred, <<"pull_request">>,
-      #{<<"number">> := PR, <<"repository">> := Repository}) ->
+      #{<<"number">> := PR, <<"repository">> := Repository} = Data) ->
   Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
   {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
-  case Module:handle_pull_request(Cred, Repository, GithubFiles) of
+  case Module:handle_pull_request(Cred, Data, GithubFiles) of
     {ok, Messages} ->
       {ok, Comments} = egithub:pull_req_comments(Cred, Repo, PR),
       write_comments(Cred, Repo, PR, Comments, Messages);
