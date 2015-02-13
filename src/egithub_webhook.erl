@@ -52,10 +52,12 @@ event(Module, Cred, <<"pull_request">>,
   {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
   case Module:handle_pull_request(Cred, Data, GithubFiles) of
     {ok, Messages} ->
-      {ok, Comments} = egithub:pull_req_comments(Cred, Repo, PR),
-      write_comments(Cred, Repo, PR, Comments, Messages);
-    {error, Reason} ->
-      {error, Reason}
+          {ok, LineComments} = egithub:pull_req_comments(Cred, Repo, PR),
+          {ok, IssueComments} = egithub:issue_comments(Cred, Repo, PR),
+          Comments = LineComments ++ IssueComments,
+          write_comments(Cred, Repo, PR, Comments, Messages);
+      {error, Reason} ->
+          {error, Reason}
   end;
 event(_Config, _Cred, <<"ping">>, _Data) ->
   ok;
@@ -73,30 +75,57 @@ write_comments(Cred, Repo, PR, Comments, Messages) ->
           position  := Position,
           text      := Text
          }) ->
-      write_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments)
+            write_line_comment(Cred, Repo, PR, CommitId,
+                               Path, Position, Text, Comments);
+       (#{text := Text,
+          position := 0
+         }) ->
+            write_issue_comment(Cred, Repo, PR, Text, Comments)
     end,
   lists:foreach(Fun, Messages).
 
-write_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
-  case comment_exists(Comments, Path, Position, Text) of
-    exists ->
-      Args = [Text, Path, Position],
-      lager:info("Comment '~p' for ~p on position ~p is already there", Args);
-    not_exists ->
-      {ok, _} =
-          egithub:pull_req_comment_line(
-            Cred, Repo, PR, CommitId, Path, Position, Text
-          )
-  end.
+write_issue_comment(Cred, Repo, PR, Text, Comments) ->
+    case issue_comment_exists(Comments, Text) of
+        exists ->
+            Args = [Text, PR],
+            lager:info("Comment '~s' for issue ~p is already there", Args);
+        not_exists ->
+            {ok, _} = egithub:issue_comment(Cred, Repo, PR, Text)
+    end.
 
-comment_exists(Comments, Path, Position, Body) ->
-  MatchingComments =
-    [Comment
-     || #{<<"path">>      := CPath,
-          <<"position">>  := CPosition,
-          <<"body">>      := CBody} = Comment <- Comments,
-        CPath == Path, CPosition == Position, CBody == Body],
-  case MatchingComments of
-    [] -> not_exists;
-    [_|_] -> exists
-  end.
+write_line_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
+    case line_comment_exists(Comments, Path, Position, Text) of
+        exists ->
+            Args = [Text, Path, Position],
+            lager:info("Comment '~s' for '~s' on position ~p is already there", Args);
+        not_exists ->
+            {ok, _} =
+                egithub:pull_req_comment_line(
+                  Cred, Repo, PR, CommitId, Path, Position, Text
+                 )
+    end.
+
+issue_comment_exists(Comments, Body) ->
+    MatchingComments =
+        [Comment
+         || #{<<"issue_url">> := _,
+              <<"body">>      := CBody} = Comment <- Comments,
+            CBody == Body],
+
+    case MatchingComments of
+        [] -> not_exists;
+        [_|_] -> exists
+    end.
+
+line_comment_exists(Comments, Path, Position, Body) ->
+    MatchingComments =
+        [Comment
+         || #{<<"path">>      := CPath,
+              <<"position">>  := CPosition,
+              <<"body">>      := CBody} = Comment <- Comments,
+            CPath == Path, CPosition == Position, CBody == Body],
+
+    case MatchingComments of
+        [] -> not_exists;
+        [_|_] -> exists
+    end.

@@ -104,7 +104,7 @@ pull_req_files(Credentials, Repo, PR) ->
     {ok, Files}.
 
 -spec pull_req_comment_line(credentials(), repository(), integer(),
-                            string(), string(), integer(), string()) ->
+                            string(), binary(), integer(), binary()) ->
     result().
 pull_req_comment_line(Credentials, Repo, PR,
                       CommitId, Filename, Line, Text) ->
@@ -127,11 +127,11 @@ pull_req_comments(Cred, Repo, PR) ->
 
 %% Issues
 
--spec issue_comment(credentials(), repository(), integer(), string()) ->
-    result().
+-spec issue_comment(credentials(), repository(), integer(), binary()) ->
+                           result().
 issue_comment(Cred, Repo, PR, Text) ->
     Url = make_url({issue, comments}, {Repo, PR}),
-    Body = #{<<"body">> => list_to_binary(Text)},
+    Body = #{<<"body">> => Text},
     JsonBody = egithub_json:encode(Body),
     auth_req(Cred, Url, post, JsonBody).
 
