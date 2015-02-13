@@ -97,7 +97,8 @@ write_line_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
     case line_comment_exists(Comments, Path, Position, Text) of
         exists ->
             Args = [Text, Path, Position],
-            lager:info("Comment '~s' for '~s' on position ~p is already there", Args);
+            lager:info("Comment '~s' for '~s' on position ~p is already there",
+                       Args);
         not_exists ->
             {ok, _} =
                 egithub:pull_req_comment_line(
