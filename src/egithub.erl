@@ -15,6 +15,8 @@
          pull_req_files/3,
          pull_req_comment_line/7,
          pull_req_comments/3,
+         issue_comment/4,
+         issue_comments/3,
          %% Users
          user/1,
          user/2,
@@ -119,6 +121,24 @@ pull_req_comment_line(Credentials, Repo, PR,
     result().
 pull_req_comments(Cred, Repo, PR) ->
     Url = make_url({pull_req, comments}, {Repo, PR}),
+    {ok, Result} = auth_req(Cred, Url),
+    Comments = egithub_json:decode(Result),
+    {ok, Comments}.
+
+%% Issues
+
+-spec issue_comment(credentials(), repository(), integer(), string()) ->
+    result().
+issue_comment(Cred, Repo, PR, Text) ->
+    Url = make_url({issue, comments}, {Repo, PR}),
+    Body = #{<<"body">> => list_to_binary(Text)},
+    JsonBody = egithub_json:encode(Body),
+    auth_req(Cred, Url, post, JsonBody).
+
+-spec issue_comments(credentials(), repository(), integer()) ->
+    result().
+issue_comments(Cred, Repo, PR) ->
+    Url = make_url({issue, comments}, {Repo, PR}),
     {ok, Result} = auth_req(Cred, Url),
     Comments = egithub_json:decode(Result),
     {ok, Comments}.
@@ -366,6 +386,12 @@ remove_collaborator(Cred, Repo, Collaborator) ->
 make_url({pull_req, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = ?GITHUB_API ++ "/repos/~s/pulls/~p/" ++ SubentityStr,
+    io_lib:format(Url, [Repo, PR]);
+
+%% Issues
+make_url({issue, Subentity}, {Repo, PR}) ->
+    SubentityStr = to_str(Subentity),
+    Url = ?GITHUB_API ++ "/repos/~s/issues/~p/" ++ SubentityStr,
     io_lib:format(Url, [Repo, PR]);
 
 %% Files
