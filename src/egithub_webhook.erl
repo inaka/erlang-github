@@ -69,20 +69,21 @@ event(_Config, _Cred, Event, _Data) ->
 
 %% @doc Comment files that failed rules.
 write_comments(Cred, Repo, PR, Comments, Messages) ->
-  Fun =
-    fun(#{commit_id := CommitId,
-          path      := Path,
-          position  := Position,
-          text      := Text
-         }) ->
-            write_line_comment(Cred, Repo, PR, CommitId,
-                               Path, Position, Text, Comments);
-       (#{text := Text,
-          position := 0
-         }) ->
-            write_issue_comment(Cred, Repo, PR, Text, Comments)
-    end,
-  lists:foreach(Fun, Messages).
+    Fun =
+        fun
+            (#{text := Text,
+               position := 0
+              }) ->
+                write_issue_comment(Cred, Repo, PR, Text, Comments);
+            (#{commit_id := CommitId,
+               path      := Path,
+               position  := Position,
+               text      := Text
+              }) ->
+                write_line_comment(Cred, Repo, PR, CommitId,
+                                   Path, Position, Text, Comments)
+        end,
+    lists:foreach(Fun, Messages).
 
 write_issue_comment(Cred, Repo, PR, Text, Comments) ->
     case issue_comment_exists(Comments, Text) of
