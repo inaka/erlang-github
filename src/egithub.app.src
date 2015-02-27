@@ -4,6 +4,7 @@
    {description, "GitHub API client"},
    {vsn, "0.1.5"},
    {applications, [kernel, stdlib, ibrowse, ssl, jiffy, lager]},
+   {mod, {egithub, []}},
    {modules, []},
    {registered, []}
   ]
