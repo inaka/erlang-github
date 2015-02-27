@@ -14,8 +14,10 @@
          %% Pull Requests
          pull_req_files/3,
          pull_req_comment_line/7,
+         pull_req_comment_line/8,
          pull_req_comments/3,
          issue_comment/4,
+         issue_comment/5,
          issue_comments/3,
          %% Users
          user/1,
@@ -53,13 +55,16 @@
 
 -export_type([
               credentials/0,
-              repository/0
+              repository/0,
+              options/0,
+              result/0
              ]).
 
 -type credentials() ::
     {basic, Username :: string(), Password :: string()}
     | {oauth, Token :: string()}.
 -type repository() :: string(). %% "username/reponame"
+-type options() :: #{post_method => queue | run}.
 -type result() :: ok | {ok, any()} | {error, term()}.
 
 -define(GITHUB_API, "https://api.github.com").
@@ -108,6 +113,16 @@ pull_req_files(Credentials, Repo, PR) ->
     result().
 pull_req_comment_line(Credentials, Repo, PR,
                       CommitId, Filename, Line, Text) ->
+    pull_req_comment_line(Credentials, Repo, PR,
+                          CommitId, Filename, Line, Text,
+                          #{post_method => run}).
+
+-spec pull_req_comment_line(credentials(), repository(), integer(),
+                            string(), binary(), integer(), binary(),
+                            options()) ->
+    result().
+pull_req_comment_line(Credentials, Repo, PR,
+                      CommitId, Filename, Line, Text, Options) ->
     Url = make_url({pull_req, comments}, {Repo, PR}),
     Body = #{<<"commit_id">> => list_to_binary(CommitId),
              <<"path">> => Filename,
@@ -115,7 +130,12 @@ pull_req_comment_line(Credentials, Repo, PR,
              <<"body">> => Text
             },
     JsonBody = egithub_json:encode(Body),
-    egithub_req:run(Credentials, Url, post, JsonBody).
+    case Options of
+        #{post_method := run} ->
+            egithub_req:run(Credentials, Url, post, JsonBody);
+        #{post_method := queue} ->
+            egithub_req:queue(Credentials, Url, post, JsonBody)
+    end.
 
 -spec pull_req_comments(credentials(), repository(), integer()) ->
     result().
@@ -130,10 +150,21 @@ pull_req_comments(Cred, Repo, PR) ->
 -spec issue_comment(credentials(), repository(), integer(), binary()) ->
                            result().
 issue_comment(Cred, Repo, PR, Text) ->
+    issue_comment(Cred, Repo, PR, Text, #{post_method => run}).
+
+-spec issue_comment(credentials(), repository(), integer(), binary(),
+                    options()) ->
+   result().
+issue_comment(Cred, Repo, PR, Text, Options) ->
     Url = make_url({issue, comments}, {Repo, PR}),
     Body = #{<<"body">> => Text},
     JsonBody = egithub_json:encode(Body),
-    egithub_req:run(Cred, Url, post, JsonBody).
+    case Options of
+        #{post_method := run} ->
+            egithub_req:run(Cred, Url, post, JsonBody);
+        #{post_method := queue} ->
+            egithub_req:queue(Cred, Url, post, JsonBody)
+    end.
 
 -spec issue_comments(credentials(), repository(), integer()) ->
     result().

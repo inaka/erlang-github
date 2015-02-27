@@ -91,7 +91,9 @@ write_issue_comment(Cred, Repo, PR, Text, Comments) ->
             Args = [Text, PR],
             lager:info("Comment '~s' for issue ~p is already there", Args);
         not_exists ->
-            {ok, _} = egithub:issue_comment(Cred, Repo, PR, Text)
+            {ok, _} =
+                egithub:issue_comment(
+                    Cred, Repo, PR, Text, #{post_method => queue})
     end.
 
 write_line_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
@@ -103,7 +105,8 @@ write_line_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
         not_exists ->
             {ok, _} =
                 egithub:pull_req_comment_line(
-                  Cred, Repo, PR, CommitId, Path, Position, Text
+                  Cred, Repo, PR, CommitId, Path, Position, Text,
+                  #{post_method => queue}
                  )
     end.
 
