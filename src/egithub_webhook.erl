@@ -69,6 +69,9 @@ event(_Config, _Cred, Event, _Data) ->
 
 %% @doc Comment files that failed rules.
 write_comments(Cred, Repo, PR, Comments, Messages) ->
+    lager:debug(
+      "[Github WH] About to write ~p messages (there are already ~p comments)",
+      [length(Messages), length(Comments)]),
     Fun =
         fun
             (#{text := Text,
@@ -91,7 +94,8 @@ write_issue_comment(Cred, Repo, PR, Text, Comments) ->
             Args = [Text, PR],
             lager:info("Comment '~s' for issue ~p is already there", Args);
         not_exists ->
-            {ok, _} = egithub:issue_comment(Cred, Repo, PR, Text)
+            egithub:issue_comment(
+                Cred, Repo, PR, Text, #{post_method => queue})
     end.
 
 write_line_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
@@ -101,10 +105,10 @@ write_line_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
             lager:info("Comment '~s' for '~s' on position ~p is already there",
                        Args);
         not_exists ->
-            {ok, _} =
-                egithub:pull_req_comment_line(
-                  Cred, Repo, PR, CommitId, Path, Position, Text
-                 )
+            egithub:pull_req_comment_line(
+              Cred, Repo, PR, CommitId, Path, Position, Text,
+              #{post_method => queue}
+             )
     end.
 
 issue_comment_exists(Comments, Body) ->

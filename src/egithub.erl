@@ -14,8 +14,10 @@
          %% Pull Requests
          pull_req_files/3,
          pull_req_comment_line/7,
+         pull_req_comment_line/8,
          pull_req_comments/3,
          issue_comment/4,
+         issue_comment/5,
          issue_comments/3,
          %% Users
          user/1,
@@ -53,13 +55,16 @@
 
 -export_type([
               credentials/0,
-              repository/0
+              repository/0,
+              options/0,
+              result/0
              ]).
 
 -type credentials() ::
     {basic, Username :: string(), Password :: string()}
     | {oauth, Token :: string()}.
 -type repository() :: string(). %% "username/reponame"
+-type options() :: #{post_method => queue | run}.
 -type result() :: ok | {ok, any()} | {error, term()}.
 
 -define(GITHUB_API, "https://api.github.com").
@@ -77,7 +82,7 @@ start() ->
 -spec start(application:start_type(), term()) ->
     {ok, pid()} | {ok, pid(), term()} | {error, term()}.
 start(_StartType, _Arg) ->
-    {ok, self()}.
+    egithub_sup:start_link().
 
 -spec stop(term()) -> ok.
 stop(_State) ->
@@ -99,7 +104,7 @@ oauth(Token) ->
     result().
 pull_req_files(Credentials, Repo, PR) ->
     Url = make_url({pull_req, files}, {Repo, PR}),
-    {ok, Result} = auth_req(Credentials, Url),
+    {ok, Result} = egithub_req:run(Credentials, Url),
     Files = egithub_json:decode(Result),
     {ok, Files}.
 
@@ -108,6 +113,16 @@ pull_req_files(Credentials, Repo, PR) ->
     result().
 pull_req_comment_line(Credentials, Repo, PR,
                       CommitId, Filename, Line, Text) ->
+    pull_req_comment_line(Credentials, Repo, PR,
+                          CommitId, Filename, Line, Text,
+                          #{post_method => run}).
+
+-spec pull_req_comment_line(credentials(), repository(), integer(),
+                            string(), binary(), integer(), binary(),
+                            options()) ->
+    result().
+pull_req_comment_line(Credentials, Repo, PR,
+                      CommitId, Filename, Line, Text, Options) ->
     Url = make_url({pull_req, comments}, {Repo, PR}),
     Body = #{<<"commit_id">> => list_to_binary(CommitId),
              <<"path">> => Filename,
@@ -115,13 +130,18 @@ pull_req_comment_line(Credentials, Repo, PR,
              <<"body">> => Text
             },
     JsonBody = egithub_json:encode(Body),
-    auth_req(Credentials, Url, post, JsonBody).
+    case Options of
+        #{post_method := run} ->
+            egithub_req:run(Credentials, Url, post, JsonBody);
+        #{post_method := queue} ->
+            egithub_req:queue(Credentials, Url, post, JsonBody)
+    end.
 
 -spec pull_req_comments(credentials(), repository(), integer()) ->
     result().
 pull_req_comments(Cred, Repo, PR) ->
     Url = make_url({pull_req, comments}, {Repo, PR}),
-    {ok, Result} = auth_req(Cred, Url),
+    {ok, Result} = egithub_req:run(Cred, Url),
     Comments = egithub_json:decode(Result),
     {ok, Comments}.
 
@@ -130,16 +150,27 @@ pull_req_comments(Cred, Repo, PR) ->
 -spec issue_comment(credentials(), repository(), integer(), binary()) ->
                            result().
 issue_comment(Cred, Repo, PR, Text) ->
+    issue_comment(Cred, Repo, PR, Text, #{post_method => run}).
+
+-spec issue_comment(credentials(), repository(), integer(), binary(),
+                    options()) ->
+   result().
+issue_comment(Cred, Repo, PR, Text, Options) ->
     Url = make_url({issue, comments}, {Repo, PR}),
     Body = #{<<"body">> => Text},
     JsonBody = egithub_json:encode(Body),
-    auth_req(Cred, Url, post, JsonBody).
+    case Options of
+        #{post_method := run} ->
+            egithub_req:run(Cred, Url, post, JsonBody);
+        #{post_method := queue} ->
+            egithub_req:queue(Cred, Url, post, JsonBody)
+    end.
 
 -spec issue_comments(credentials(), repository(), integer()) ->
     result().
 issue_comments(Cred, Repo, PR) ->
     Url = make_url({issue, comments}, {Repo, PR}),
-    {ok, Result} = auth_req(Cred, Url),
+    {ok, Result} = egithub_req:run(Cred, Url),
     Comments = egithub_json:decode(Result),
     {ok, Comments}.
 
@@ -148,7 +179,7 @@ issue_comments(Cred, Repo, PR) ->
 -spec file_content(credentials(), repository(), string(), string()) -> result().
 file_content(Cred, Repo, CommitId, Filename) ->
     Url = make_url(file_content, {Repo, CommitId, Filename}),
-    case auth_req(Cred, Url) of
+    case egithub_req:run(Cred, Url) of
         {ok, Result} ->
             JsonResult = egithub_json:decode(Result),
             ContentBase64 = maps:get(<<"content">>, JsonResult),
@@ -251,7 +282,7 @@ create_team(Cred, Org, Name, Permission, Repos) ->
                  permission => list_to_binary(Permission),
                  repo_names => list_to_binary(Repos)},
     Body = egithub_json:encode(BodyMap),
-    case auth_req(Cred, Url, post, Body) of
+    case egithub_req:run(Cred, Url, post, Body) of
         {ok, Result} ->
             JsonResult = egithub_json:decode(Result),
             {ok, JsonResult};
@@ -265,7 +296,7 @@ create_team(Cred, Org, Name, Permission, Repos) ->
 add_team_repository(Cred, TeamId, RepoFullName) ->
     Url = make_url(teams_repos, {TeamId, RepoFullName}),
     Body = [],
-    case auth_req(Cred, Url, put, Body) of
+    case egithub_req:run(Cred, Url, put, Body) of
         {ok, _} ->
             ok;
         Error ->
@@ -276,7 +307,7 @@ add_team_repository(Cred, TeamId, RepoFullName) ->
 add_team_member(Cred, TeamId, Username) ->
     Url = make_url(teams, {TeamId, Username}),
     Body = [],
-    case auth_req(Cred, Url, put, Body) of
+    case egithub_req:run(Cred, Url, put, Body) of
         {ok, _} ->
             ok;
         Error ->
@@ -287,7 +318,7 @@ add_team_member(Cred, TeamId, Username) ->
 delete_team_member(Cred, TeamId, Username) ->
     Url = make_url(teams, {TeamId, Username}),
     Body = [],
-    case auth_req(Cred, Url, delete, Body) of
+    case egithub_req:run(Cred, Url, delete, Body) of
         {ok, _} ->
             ok;
         Error ->
@@ -323,7 +354,7 @@ create_webhook(Cred, Repo, WebhookUrl, Events) ->
              <<"config">> => #{<<"url">> => list_to_binary(WebhookUrl),
                                <<"content_type">> => <<"json">>}},
     Body = egithub_json:encode(Data),
-    case auth_req(Cred, Url, post, Body) of
+    case egithub_req:run(Cred, Url, post, Body) of
         {ok, Result} ->
             JsonResult = egithub_json:decode(Result),
             {ok, JsonResult};
@@ -336,7 +367,7 @@ delete_webhook(Cred, Repo, Id) ->
     IdStr = to_str(Id),
     Url = make_url(hooks, {Repo, IdStr}),
     Body = [],
-    case auth_req(Cred, Url, delete, Body) of
+    case egithub_req:run(Cred, Url, delete, Body) of
         {ok, _Result} ->
             ok;
         {error, Reason} ->
@@ -348,7 +379,7 @@ delete_webhook(Cred, Repo, Id) ->
 -spec collaborators(credentials(), repository()) -> result().
 collaborators(Cred, Repo) ->
     Url = make_url(collaborators, {Repo}),
-    case auth_req(Cred, Url) of
+    case egithub_req:run(Cred, Url) of
         {ok, Result} ->
             JsonResult = egithub_json:decode(Result),
             {ok, JsonResult};
@@ -360,7 +391,7 @@ collaborators(Cred, Repo) ->
 add_collaborator(Cred, Repo, Collaborator) ->
     Url = make_url(collaborators, {Repo, Collaborator}),
     Body = [],
-    case auth_req(Cred, Url, put, Body) of
+    case egithub_req:run(Cred, Url, put, Body) of
         {ok, _Result} ->
             ok;
         {error, Reason} ->
@@ -371,7 +402,7 @@ add_collaborator(Cred, Repo, Collaborator) ->
 remove_collaborator(Cred, Repo, Collaborator) ->
     Url = make_url(collaborators, {Repo, Collaborator}),
     Body = [],
-    case auth_req(Cred, Url, delete, Body) of
+    case egithub_req:run(Cred, Url, delete, Body) of
         {ok, _Result} ->
             ok;
         {error, Reason} ->
@@ -468,40 +499,8 @@ make_url(collaborators, {Repo, Username}) ->
     Url = ?GITHUB_API ++ "/repos/~s/collaborators/~s",
     io_lib:format(Url, [Repo, Username]).
 
--spec auth_req(credentials(), string()) -> string() | {error, term()}.
-auth_req(Credentials, Url) ->
-    auth_req(Credentials, Url, get, []).
-
--spec auth_req(credentials(), string(), ibrowse:method(), ibrowse:body()) ->
-    {ok, string()} | {error, term()}.
-auth_req(Cred, Url, Method, Body) ->
-    Options0 = [{ssl_options, [{depth, 0}]}],
-    Headers0 = [{"User-Agent", "Elvis-Webhook"}],
-    {Options, Headers} = authorization(Cred, Options0, Headers0),
-    lager:info("[Github API] ~s", [Url]),
-    case ibrowse:send_req(Url, Headers, Method, Body, Options) of
-        {ok, "200", _RespHeaders, RespBody} ->
-            {ok, RespBody};
-        {ok, "201", _RespHeaders, RespBody} ->
-            {ok, RespBody};
-        {ok, "204", _RespHeaders, RespBody} ->
-            {ok, RespBody};
-        {ok, "302", RespHeaders, _} ->
-            RedirectUrl = proplists:get_value("Location", RespHeaders),
-            auth_req(Cred, RedirectUrl, Method, Body);
-        {ok, Status, RespHeaders, RespBody} ->
-            {error, {Status, RespHeaders, RespBody}}
-        end.
-
-authorization({basic, Username, Password}, Options0, Headers) ->
-    Options = [{basic_auth, {Username, Password}} | Options0],
-    {Options, Headers};
-authorization({oauth, Token}, Options, Headers0) ->
-    Headers = [{"Authorization", "token " ++ Token} | Headers0],
-    {Options, Headers}.
-
 api_call_json_result(Cred, Url) ->
-    case auth_req(Cred, Url) of
+    case egithub_req:run(Cred, Url) of
         {ok, Result} ->
             JsonResult = egithub_json:decode(Result),
             {ok, JsonResult};
