@@ -44,7 +44,7 @@ run(Cred, Url, Method, Body) ->
   run(Url, Headers, Method, Body, Options).
 
 run(Url, Headers, Method, Body, Options) ->
-  lager:notice("[Github API] ~s", [Url]),
+  lager:info("[Github API] ~s", [Url]),
   case ibrowse:send_req(Url, Headers, Method, Body, Options) of
     {ok, "200", _RespHeaders, RespBody} ->
       {ok, RespBody};

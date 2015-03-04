@@ -56,7 +56,7 @@ handle_info(timeout, State) ->
   case ets:info(Table, size) of
     0 -> ok;
     Size ->
-      lager:notice("[Github API] ~p queued requests", [ets:info(Table, size)])
+      lager:info("[Github API] ~p queued requests", [ets:info(Table, size)])
   end,
   {noreply, NewState, NextDelay};
 handle_info(_Info, State) ->

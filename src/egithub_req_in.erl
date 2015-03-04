@@ -32,7 +32,7 @@ handle_call(Msg, _From, State) ->
 handle_cast(Request, State) ->
   #{table := Table} = State,
   true = ets:insert(Table, Request),
-  lager:notice("[Github API] ~p queued requests", [ets:info(Table, size)]),
+  lager:info("[Github API] ~p queued requests", [ets:info(Table, size)]),
   {noreply, State}.
 
 %% @private

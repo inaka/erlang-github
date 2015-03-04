@@ -69,7 +69,7 @@ event(_Config, _Cred, Event, _Data) ->
 
 %% @doc Comment files that failed rules.
 write_comments(Cred, Repo, PR, Comments, Messages) ->
-    lager:notice(
+    lager:debug(
       "[Github WH] About to write ~p messages (there are already ~p comments)",
       [length(Messages), length(Comments)]),
     Fun =
