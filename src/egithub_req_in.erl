@@ -31,7 +31,8 @@ handle_call(Msg, _From, State) ->
 -spec handle_cast(egithub_req:req(), state()) -> {noreply, state()}.
 handle_cast(Request, State) ->
   #{table := Table} = State,
-  ets:insert(Table, Request),
+  true = ets:insert(Table, Request),
+  lager:notice("[Github API] ~p queued requests", [ets:info(Table, size)]),
   {noreply, State}.
 
 %% @private

@@ -14,7 +14,7 @@ start_link() -> supervisor:start_link({local, ?MODULE}, ?MODULE, {}).
 
 -spec init(term()) -> term().
 init({}) ->
-  Table = ets:new(?MODULE, [set, named_table, public]),
+  Table = egithub_req:create_table(),
   {ok,
     { {one_for_one, 5, 10}
     , [ { egithub_req_in

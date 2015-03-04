@@ -39,7 +39,7 @@ handle_info(timeout, State) ->
       '$end_of_table' ->
         State#{delays => ?DELAY_MILLIS};
       Key ->
-        Request = ets:lookup(Table, Key),
+        [Request] = ets:lookup(Table, Key),
         case {process_request(Request), State} of
           {ok, State} ->
             true = ets:delete(Table, Key),
@@ -53,6 +53,11 @@ handle_info(timeout, State) ->
             State#{delays => ?DELAY_MILLIS}
         end
     end,
+  case ets:info(Table, size) of
+    0 -> ok;
+    Size ->
+      lager:notice("[Github API] ~p queued requests", [ets:info(Table, size)])
+  end,
   {noreply, NewState, NextDelay};
 handle_info(_Info, State) ->
   {noreply, State, ?DELAY_MILLIS}.
@@ -77,19 +82,9 @@ code_change(_OldVersion, State, _Extra) -> {ok, State}.
 
 -spec process_request(egithub_req:req()) -> ok | retry | error.
 process_request(Request) ->
-  #{ url      := Url
-   , headers  := Headers
-   , method   := Method
-   , body     := Body
-   , options  := Options
-   } = Request,
-  lager:info("[Github API] ~s", [Url]),
-  case ibrowse:send_req(Url, Headers, Method, Body, Options) of
-    {ok, [$2, _, _], _RespHeaders, _RespBody} -> ok;
-    {ok, "302", RespHeaders, _RespBody} ->
-      RedirectUrl = proplists:get_value("Location", RespHeaders),
-      process_request(Request#{url => RedirectUrl});
-    {ok, "403", RespHeaders, RespBody} ->
+  case egithub_req:run(Request) of
+    {ok, _RespBody} -> ok;
+    {error, {"403", RespHeaders, RespBody}} ->
       case lists:keyfind("X-RateLimit-Limit", 1, RespHeaders) of
         false ->
           lager:warning(
@@ -100,7 +95,7 @@ process_request(Request) ->
           lager:warning("[Github API] Rate limited: ~p", [RespHeaders]),
           retry
       end;
-    {ok, Status, RespHeaders, RespBody} ->
+    {error, {Status, RespHeaders, RespBody}} ->
       lager:warning(
         "[Github API] Error:~nRequest: ~p~nError: ~p~n",
         [Request, {Status, RespHeaders, RespBody}]),
