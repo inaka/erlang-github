@@ -7,12 +7,12 @@
         , create_table/0
         ]).
 
--record(req, { id = os:timestamp()  :: tuple()
-             , url                  :: iodata()
-             , headers              :: proplists:proplist()
-             , method               :: ibrowse:method()
-             , body                 :: ibrowse:body()
-             , options              :: proplists:proplist()
+-record(req, { id = erlang:now()  :: tuple()
+             , url                :: iodata()
+             , headers            :: proplists:proplist()
+             , method             :: ibrowse:method()
+             , body               :: ibrowse:body()
+             , options            :: proplists:proplist()
              }).
 -opaque req() :: #req{}.
 -export_type([req/0]).
