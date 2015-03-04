@@ -18,7 +18,7 @@
 -export_type([req/0]).
 
 -spec create_table() -> ets:tab_name().
-create_table() -> ets:new(?MODULE, [bag, named_table, public, {keypos, 2}]).
+create_table() -> ets:new(?MODULE, [set, named_table, public, {keypos, 2}]).
 
 -spec run(req()) -> {ok, string()} | {error, tuple()}.
 run(#req{} = Req) ->
