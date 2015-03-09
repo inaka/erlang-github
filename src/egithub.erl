@@ -29,6 +29,7 @@
          all_repos/3,
          orgs/1,
          orgs/2,
+         org_membership/2,
          org_repos/3,
          all_org_repos/3,
          %% Teams
@@ -203,14 +204,19 @@ user(Cred, Username) ->
 
 %% Orgs
 
--spec orgs(credentials()) -> string().
+-spec orgs(credentials()) -> result().
 orgs(Cred) ->
     orgs(Cred, undefined).
 
--spec orgs(credentials(), string()) -> string().
+-spec orgs(credentials(), string()) -> result().
 orgs(Cred, User) ->
     Url = make_url(orgs, {User}),
     api_call_json_result(Cred, Url).
+
+-spec org_membership(credentials(), string()) -> result().
+org_membership(Cred, OrgName) ->
+  Url = make_url({orgs, memberships}, {OrgName}),
+  api_call_json_result(Cred, Url).
 
 %% Repos
 
@@ -445,6 +451,9 @@ make_url(orgs, {undefined}) ->
 make_url(orgs, {User}) ->
     Url = ?GITHUB_API ++ "/users/~s/orgs",
     io_lib:format(Url, [User]);
+make_url({orgs, memberships}, {OrgName}) ->
+  Url = ?GITHUB_API ++ "/user/memberships/orgs/~s",
+  io_lib:format(Url, [OrgName]);
 
 %% Teams
 make_url(teams, {Org}) ->
