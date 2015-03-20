@@ -46,7 +46,12 @@
          %% Collaborators
          collaborators/2,
          add_collaborator/3,
-         remove_collaborator/3
+         remove_collaborator/3,
+         %% Statuses
+         create_status/7,
+         create_status/6,
+         statuses/3,
+         combined_status/3
         ]).
 
 %% Files
@@ -58,9 +63,11 @@
               credentials/0,
               repository/0,
               options/0,
-              result/0
+              result/0,
+              state/0
              ]).
 
+-type state() :: pending | success | error | failure.
 -type credentials() ::
     {basic, Username :: string(), Password :: string()}
     | {oauth, Token :: string()}.
@@ -415,9 +422,73 @@ remove_collaborator(Cred, Repo, Collaborator) ->
             {error, Reason}
     end.
 
+%% Statuses
+
+-spec create_status(
+    credentials(), repository(), string(), state(), string(), string()) ->
+    result().
+create_status(Cred, Repo, Sha, State, Description, Context) ->
+    Url = make_url(statuses, {Repo, Sha}),
+    Data = #{<<"state">>        => State,
+             <<"description">>  => list_to_binary(Description),
+             <<"context">>      => list_to_binary(Context)
+            },
+    Body = egithub_json:encode(Data),
+    case egithub_req:run(Cred, Url, post, Body) of
+        {ok, Result} ->
+            JsonResult = egithub_json:decode(Result),
+            {ok, JsonResult};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+-spec create_status(
+    credentials(), repository(), string(), state(), string(), string(),
+    string()) -> result().
+create_status(Cred, Repo, Sha, State, Description, Context, TargetUrl) ->
+    Url = make_url(new_status, {Repo, Sha}),
+    Data = #{<<"state">>        => State,
+             <<"description">>  => list_to_binary(Description),
+             <<"context">>      => list_to_binary(Context),
+             <<"target_url">>   => list_to_binary(TargetUrl)
+            },
+    Body = egithub_json:encode(Data),
+    case egithub_req:run(Cred, Url, post, Body) of
+        {ok, Result} ->
+            JsonResult = egithub_json:decode(Result),
+            {ok, JsonResult};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+-spec statuses(credentials(), repository(), string()) -> result().
+statuses(Cred, Repo, Ref) ->
+    Url = make_url(statuses, {Repo, Ref}),
+    api_call_json_result(Cred, Url).
+
+-spec combined_status(credentials(), repository(), string()) -> result().
+combined_status(Cred, Repo, Ref) ->
+    Url = make_url(status, {Repo, Ref}),
+    api_call_json_result(Cred, Url).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private Functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Create Status
+make_url(new_status, {Repo, Sha}) ->
+    Url = ?GITHUB_API ++ "/repos/~s/statuses/~s",
+    io_lib:format(Url, [Repo, Sha]);
+
+%% Statuses
+make_url(statuses, {Repo, Sha}) ->
+    Url = ?GITHUB_API ++ "/repos/~s/commits/~s/statuses",
+    io_lib:format(Url, [Repo, Sha]);
+
+%% Status
+make_url(status, {Repo, Sha}) ->
+    Url = ?GITHUB_API ++ "/repos/~s/commits/~s/status",
+    io_lib:format(Url, [Repo, Sha]);
 
 %% Pull Resquest
 make_url({pull_req, Subentity}, {Repo, PR}) ->
