@@ -39,7 +39,7 @@ run(Cred, Url) ->
   {ok, string()} | {error, term()}.
 run(Cred, Url, Method, Body) ->
   Options0 = [{ssl_options, [{depth, 0}]}],
-  Headers0 = [{"User-Agent", "Elvis-Webhook"}],
+  Headers0 = [{"User-Agent", "Egithub-Webhook"}],
   {Options, Headers} = authorization(Cred, Options0, Headers0),
   run(Url, Headers, Method, Body, Options).
 
@@ -67,7 +67,7 @@ run(Url, Headers, Method, Body, Options) ->
     ok.
 queue(Cred, Url, Method, Body) ->
   Options0 = [{ssl_options, [{depth, 0}]}],
-  Headers0 = [{"User-Agent", "Elvis-Webhook"}],
+  Headers0 = [{"User-Agent", "Egithub-Webhook"}],
   {Options, Headers} = authorization(Cred, Options0, Headers0),
   Request = #req{ url     = Url
                 , headers = Headers

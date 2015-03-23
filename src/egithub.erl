@@ -428,7 +428,7 @@ remove_collaborator(Cred, Repo, Collaborator) ->
     credentials(), repository(), string(), state(), string(), string()) ->
     result().
 create_status(Cred, Repo, Sha, State, Description, Context) ->
-    Url = make_url(statuses, {Repo, Sha}),
+    Url = make_url(new_status, {Repo, Sha}),
     Data = #{<<"state">>        => State,
              <<"description">>  => list_to_binary(Description),
              <<"context">>      => list_to_binary(Context)
