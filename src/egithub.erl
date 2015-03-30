@@ -22,6 +22,7 @@
          %% Users
          user/1,
          user/2,
+         user_emails/1,
          repo/2,
          repos/2,
          repos/3,
@@ -207,6 +208,11 @@ user(Cred) ->
 -spec user(credentials(), string()) -> result().
 user(Cred, Username) ->
     Url = make_url(user, {Username}),
+    api_call_json_result(Cred, Url).
+
+-spec user_emails(credentials()) -> result().
+user_emails(Cred) ->
+    Url = make_url(user_emails, {}),
     api_call_json_result(Cred, Url).
 
 %% Orgs
@@ -514,6 +520,9 @@ make_url(user, {}) ->
 make_url(user, {Username}) ->
     Url = ?GITHUB_API ++ "/users/~s",
     io_lib:format(Url, [Username]);
+make_url(user_emails, {}) ->
+    Url = ?GITHUB_API ++ "/user/emails",
+    io_lib:format(Url, []);
 
 %% Organizations
 make_url(orgs, {undefined}) ->
