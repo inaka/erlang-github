@@ -1,6 +1,6 @@
 -module(egithub_webhook).
 
--export([event/3]).
+-export([event/3, event/6]).
 
 -export_type([request/0]).
 
@@ -37,9 +37,63 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
       event(Module, Cred, EventName, EventData)
   end.
 
+-spec event(
+  atom(), egithub:credentials(), string(), string(), egithub:credentials(),
+  request()) -> ok | {error, term()}.
+event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
+  #{headers := Headers, body := Body} = Request,
+  case maps:get(<<"x-github-event">>, Headers, undefined) of
+    undefined ->
+      {error, missing_header};
+    EventName ->
+      EventData = jiffy:decode(Body, [return_maps]),
+      set_status(pending, StatusCred, ToolName, Context, EventData),
+      try event(Module, CommentsCred, EventName, EventData) of
+        ok ->
+          set_status(success, StatusCred, ToolName, Context, EventData),
+          ok;
+        {error, Error} ->
+          set_status({error, Error}, StatusCred, ToolName, Context, EventData),
+          {error, Error}
+      catch
+        _:Error ->
+          set_status(
+            {failure, Error}, StatusCred, ToolName, Context, EventData),
+          throw(Error)
+      end
+  end.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Private functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Statuses
+set_status(FullState, StatusCred, ToolName, Context, EventData) ->
+  #{ <<"repository">> := Repository
+   , <<"pull_request">> := #{<<"head">> := Head}
+   } = EventData,
+  Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
+  Sha = binary_to_list(maps:get(<<"sha">>, Head)),
+  Description = status_description(FullState, ToolName),
+  State = normalize_state(FullState),
+  egithub:create_status(StatusCred, Repo, Sha, State, Description, Context).
+
+status_description(pending, ToolName) ->
+  ToolName ++ " is checking your pull request";
+status_description(success, ToolName) ->
+  ToolName ++ " is satisfied with your pull request";
+status_description({error, Error}, ToolName) ->
+  IoData =
+    io_lib:format("~s is not happy with your PR: `~p`", [ToolName, Error]),
+  binary_to_list(iolist_to_binary(IoData));
+status_description({failure, Error}, ToolName) ->
+  IoData =
+    io_lib:format("~s failed while reviewing your PR: `~p`", [ToolName, Error]),
+  binary_to_list(iolist_to_binary(IoData)).
+
+normalize_state({State, _}) -> State;
+normalize_state(State) -> State.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Events
