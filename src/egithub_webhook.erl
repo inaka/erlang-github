@@ -34,7 +34,7 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
       {error, missing_header};
     <<"ping">> -> ok;
     <<"pull_request">> ->
-      EventData = jiffy:decode(Body, [return_maps]),
+      EventData = egithub_json:decode(Body),
       case handle_pull_request(Module, Cred, EventData) of
         clean -> ok;
         with_warnings -> ok;
@@ -53,7 +53,7 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
       {error, missing_header};
     <<"ping">> -> ok;
     <<"pull_request">> ->
-      EventData = jiffy:decode(Body, [return_maps]),
+      EventData = egithub_json:decode(Body),
       set_status(pending, StatusCred, ToolName, Context, EventData),
       try handle_pull_request(Module, CommentsCred, EventData) of
         clean ->
