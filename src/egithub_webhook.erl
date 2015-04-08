@@ -49,11 +49,14 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
       EventData = jiffy:decode(Body, [return_maps]),
       set_status(pending, StatusCred, ToolName, Context, EventData),
       try event(Module, CommentsCred, EventName, EventData) of
-        ok ->
+        clean ->
           set_status(success, StatusCred, ToolName, Context, EventData),
           ok;
+        with_warnings ->
+          set_status(error, StatusCred, ToolName, Context, EventData),
+          ok;
         {error, Error} ->
-          set_status({error, Error}, StatusCred, ToolName, Context, EventData),
+          set_status({failure, Error}, StatusCred, ToolName, Context, EventData),
           {error, Error}
       catch
         _:Error ->
@@ -77,15 +80,20 @@ set_status(FullState, StatusCred, ToolName, Context, EventData) ->
   Sha = binary_to_list(maps:get(<<"sha">>, Head)),
   Description = status_description(FullState, ToolName),
   State = normalize_state(FullState),
+  lager:debug(
+    "[Github WH] About to set ~s status in ~s to ~p: ~p",
+    [Context, Repo, State, Description]),
   egithub:create_status(StatusCred, Repo, Sha, State, Description, Context).
 
 status_description(pending, ToolName) ->
   ToolName ++ " is checking your pull request";
 status_description(success, ToolName) ->
   ToolName ++ " is satisfied with your pull request";
-status_description({error, Error}, ToolName) ->
+status_description(error, ToolName) ->
   IoData =
-    io_lib:format("~s is not happy with your PR: `~p`", [ToolName, Error]),
+    io_lib:format(
+      "~s is not happy with your PR, warnings were emitted",
+      [ToolName]),
   binary_to_list(iolist_to_binary(IoData));
 status_description({failure, Error}, ToolName) ->
   IoData =
@@ -99,19 +107,20 @@ normalize_state(State) -> State.
 %%% Events
 
 -spec event(atom(), egithub:credentials(), event(), map()) ->
-        ok | {error, term()}.
+        clean | with_warnings | {error, term()}.
 event(Module, Cred, <<"pull_request">>,
       #{<<"number">> := PR, <<"repository">> := Repository} = Data) ->
   Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
   {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
   case Module:handle_pull_request(Cred, Data, GithubFiles) of
+    {ok, []} -> clean;
     {ok, Messages} ->
-          {ok, LineComments} = egithub:pull_req_comments(Cred, Repo, PR),
-          {ok, IssueComments} = egithub:issue_comments(Cred, Repo, PR),
-          Comments = LineComments ++ IssueComments,
-          write_comments(Cred, Repo, PR, Comments, Messages);
-      {error, Reason} ->
-          {error, Reason}
+      {ok, LineComments} = egithub:pull_req_comments(Cred, Repo, PR),
+      {ok, IssueComments} = egithub:issue_comments(Cred, Repo, PR),
+      Comments = LineComments ++ IssueComments,
+      write_comments(Cred, Repo, PR, Comments, Messages),
+      with_warnings;
+    {error, Reason} -> {error, Reason}
   end;
 event(_Config, _Cred, <<"ping">>, _Data) ->
   ok;
