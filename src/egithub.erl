@@ -74,7 +74,7 @@
     | {oauth, Token :: string()}.
 -type repository() :: string(). %% "username/reponame"
 -type options() :: #{post_method => queue | run}.
--type result() :: ok | {ok, any()} | {error, term()}.
+-type result() :: ok | {ok, term()} | {error, term()}.
 
 -define(GITHUB_API, "https://api.github.com").
 
@@ -82,9 +82,8 @@
 %% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
--spec start() -> ok.
-start() ->
-    application:ensure_all_started(egithub).
+-spec start() -> {ok, [atom()]}.
+start() -> application:ensure_all_started(egithub).
 
 %% Application Behavior
 

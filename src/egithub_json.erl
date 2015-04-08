@@ -14,19 +14,23 @@
 %% Behavior definition
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
--callback encode(map()) -> binary().
--callback decode(binary()) -> map().
+-type json() ::
+  binary() | number() | null | boolean() |
+  #{binary()|atom() => json()} | [json()].
+
+-callback encode(json()) -> binary().
+-callback decode(iodata()) -> json().
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% API functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
--spec encode(map()) -> binary().
+-spec encode(json()) -> binary().
 encode(Map) ->
   Module = json_module(),
   Module:encode(Map).
 
--spec decode(map()) -> binary().
+-spec decode(iodata()) -> json().
 decode(Map) ->
   Module = json_module(),
   Module:decode(Map).
