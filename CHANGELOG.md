@@ -10,6 +10,8 @@
 
 **Merged pull requests:**
 
+- Version Bump [\#39](https://github.com/inaka/erlang-github/pull/39) ([elbrujohalcon](https://github.com/elbrujohalcon))
+
 - Add status support to egithub\_webhook [\#38](https://github.com/inaka/erlang-github/pull/38) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 - \[Close \#34\] add function to get user email [\#37](https://github.com/inaka/erlang-github/pull/37) ([Euen](https://github.com/Euen))
