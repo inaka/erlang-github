@@ -32,9 +32,15 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
   case maps:get(<<"x-github-event">>, Headers, undefined) of
     undefined ->
       {error, missing_header};
-    EventName ->
+    <<"ping">> -> ok;
+    <<"pull_request">> ->
       EventData = jiffy:decode(Body, [return_maps]),
-      event(Module, Cred, EventName, EventData)
+      case handle_pull_request(Module, Cred, EventData) of
+        clean -> ok;
+        with_warnings -> ok;
+        {error, Error} -> {error, Error}
+      end;
+    EventName -> {error, <<"Unknown event: ", EventName/binary>>}
   end.
 
 -spec event(
@@ -45,10 +51,11 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
   case maps:get(<<"x-github-event">>, Headers, undefined) of
     undefined ->
       {error, missing_header};
-    EventName ->
+    <<"ping">> -> ok;
+    <<"pull_request">> ->
       EventData = jiffy:decode(Body, [return_maps]),
       set_status(pending, StatusCred, ToolName, Context, EventData),
-      try event(Module, CommentsCred, EventName, EventData) of
+      try handle_pull_request(Module, CommentsCred, EventData) of
         clean ->
           set_status(success, StatusCred, ToolName, Context, EventData),
           ok;
@@ -56,14 +63,16 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
           set_status(error, StatusCred, ToolName, Context, EventData),
           ok;
         {error, Error} ->
-          set_status({failure, Error}, StatusCred, ToolName, Context, EventData),
+          set_status(
+            {failure, Error}, StatusCred, ToolName, Context, EventData),
           {error, Error}
       catch
         _:Error ->
           set_status(
             {failure, Error}, StatusCred, ToolName, Context, EventData),
           throw(Error)
-      end
+      end;
+    EventName -> {error, <<"Unknown event: ", EventName/binary>>}
   end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -106,9 +115,7 @@ normalize_state(State) -> State.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Events
 
--spec event(atom(), egithub:credentials(), event(), map()) ->
-        clean | with_warnings | {error, term()}.
-event(Module, Cred, <<"pull_request">>,
+handle_pull_request(Module, Cred,
       #{<<"number">> := PR, <<"repository">> := Repository} = Data) ->
   Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
   {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
@@ -121,80 +128,73 @@ event(Module, Cred, <<"pull_request">>,
       write_comments(Cred, Repo, PR, Comments, Messages),
       with_warnings;
     {error, Reason} -> {error, Reason}
-  end;
-event(_Config, _Cred, <<"ping">>, _Data) ->
-  ok;
-event(_Config, _Cred, Event, _Data) ->
-  {error, io_lib:format("Nothing to do for event: ~p.~n", [Event])}.
+  end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Helper functions
 
 %% @doc Comment files that failed rules.
+-spec write_comments(
+    etighub:credentials(), string(), map(), [map()], [message()]) -> ok.
 write_comments(Cred, Repo, PR, Comments, Messages) ->
-    lager:debug(
-      "[Github WH] About to write ~p messages (there are already ~p comments)",
-      [length(Messages), length(Comments)]),
-    Fun =
-        fun
-            (#{text := Text,
-               position := 0
-              }) ->
-                write_issue_comment(Cred, Repo, PR, Text, Comments);
-            (#{commit_id := CommitId,
-               path      := Path,
-               position  := Position,
-               text      := Text
-              }) ->
-                write_line_comment(Cred, Repo, PR, CommitId,
-                                   Path, Position, Text, Comments)
-        end,
-    lists:foreach(Fun, Messages).
+  lager:debug(
+    "[Github WH] About to write ~p messages (there are already ~p comments)",
+    [length(Messages), length(Comments)]),
+  Fun =
+    fun (#{text := Text, position := 0}) ->
+          write_issue_comment(Cred, Repo, PR, Text, Comments);
+        (#{commit_id := CommitId,
+           path      := Path,
+           position  := Position,
+           text      := Text
+          }) ->
+          write_line_comment(Cred, Repo, PR, CommitId,
+                             Path, Position, Text, Comments)
+    end,
+  lists:foreach(Fun, Messages).
 
 write_issue_comment(Cred, Repo, PR, Text, Comments) ->
-    case issue_comment_exists(Comments, Text) of
-        exists ->
-            Args = [Text, PR],
-            lager:info("Comment '~s' for issue ~p is already there", Args);
-        not_exists ->
-            egithub:issue_comment(
-                Cred, Repo, PR, Text, #{post_method => queue})
-    end.
+  case issue_comment_exists(Comments, Text) of
+    exists ->
+      lager:info("Comment '~s' for issue ~p is already there", [Text, PR]);
+    not_exists ->
+      egithub:issue_comment(Cred, Repo, PR, Text, #{post_method => queue})
+  end.
 
 write_line_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
-    case line_comment_exists(Comments, Path, Position, Text) of
-        exists ->
-            Args = [Text, Path, Position],
-            lager:info("Comment '~s' for '~s' on position ~p is already there",
-                       Args);
-        not_exists ->
-            egithub:pull_req_comment_line(
-              Cred, Repo, PR, CommitId, Path, Position, Text,
-              #{post_method => queue}
-             )
-    end.
+  case line_comment_exists(Comments, Path, Position, Text) of
+    exists ->
+      Args = [Text, Path, Position],
+      lager:info("Comment '~s' for '~s' on position ~p is already there",
+                 Args);
+    not_exists ->
+      egithub:pull_req_comment_line(
+        Cred, Repo, PR, CommitId, Path, Position, Text,
+        #{post_method => queue}
+       )
+  end.
 
 issue_comment_exists(Comments, Body) ->
-    MatchingComments =
-        [Comment
-         || #{<<"issue_url">> := _,
-              <<"body">>      := CBody} = Comment <- Comments,
-            CBody == Body],
+  MatchingComments =
+    [Comment
+     || #{<<"issue_url">> := _,
+          <<"body">>      := CBody} = Comment <- Comments,
+        CBody == Body],
 
-    case MatchingComments of
-        [] -> not_exists;
-        [_|_] -> exists
-    end.
+  case MatchingComments of
+    [] -> not_exists;
+    [_|_] -> exists
+  end.
 
 line_comment_exists(Comments, Path, Position, Body) ->
-    MatchingComments =
-        [Comment
-         || #{<<"path">>      := CPath,
-              <<"position">>  := CPosition,
-              <<"body">>      := CBody} = Comment <- Comments,
-            CPath == Path, CPosition == Position, CBody == Body],
+  MatchingComments =
+    [Comment
+     || #{<<"path">>      := CPath,
+          <<"position">>  := CPosition,
+          <<"body">>      := CBody} = Comment <- Comments,
+        CPath == Path, CPosition == Position, CBody == Body],
 
-    case MatchingComments of
-        [] -> not_exists;
-        [_|_] -> exists
-    end.
+  case MatchingComments of
+    [] -> not_exists;
+    [_|_] -> exists
+  end.

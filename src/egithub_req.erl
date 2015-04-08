@@ -14,7 +14,7 @@
              , body               :: ibrowse:body()
              , options            :: proplists:proplist()
              }).
--opaque req() :: #req{}.
+-type req() :: #req{}.
 -export_type([req/0]).
 
 -spec create_table() -> ets:tab_name().
