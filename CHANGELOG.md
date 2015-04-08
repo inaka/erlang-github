@@ -1,5 +1,19 @@
 # Change Log
 
+## [Unreleased](https://github.com/inaka/erlang-github/tree/HEAD)
+
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.11...HEAD)
+
+**Closed issues:**
+
+- Update CHANGELOG.md [\#36](https://github.com/inaka/erlang-github/issues/36)
+
+**Merged pull requests:**
+
+- Add status support to egithub\_webhook [\#38](https://github.com/inaka/erlang-github/pull/38) ([elbrujohalcon](https://github.com/elbrujohalcon))
+
+- \[Close \#34\] add function to get user email [\#37](https://github.com/inaka/erlang-github/pull/37) ([Euen](https://github.com/Euen))
+
 ## [0.1.11](https://github.com/inaka/erlang-github/tree/0.1.11) (2015-03-30)
 
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.10...0.1.11)
