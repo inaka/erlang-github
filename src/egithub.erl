@@ -77,6 +77,7 @@
 -type result() :: ok | {ok, term()} | {error, term()}.
 
 -define(GITHUB_API, "https://api.github.com").
+-define(MAX_DESCRIPTION_LENGTH, 140).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API
@@ -485,11 +486,11 @@ combined_status(Cred, Repo, Ref) ->
 %doc The message submitted is longer that the maximum length of 140 characters
 -spec format_description(string()) -> string().
 format_description(Description) ->
-  MaxLengthDescrip = 140,
   case length(Description) of
-    Size when Size >= MaxLengthDescrip -> 
-      string:sub_string(Description, 1, 137) ++ "..."; %% to be continued.
-    Size when Size < MaxLengthDescrip -> Description
+    Size when Size >= ?MAX_DESCRIPTION_LENGTH -> 
+      %% to be continued.
+      string:sub_string(Description, 1, ?MAX_DESCRIPTION_LENGTH - 3) ++ "..."; 
+    Size when Size < ?MAX_DESCRIPTION_LENGTH -> Description
   end.
 
 %% Create Status
