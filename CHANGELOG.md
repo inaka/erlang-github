@@ -1,14 +1,30 @@
 # Change Log
 
-## [Unreleased](https://github.com/inaka/erlang-github/tree/HEAD)
+## [0.1.13](https://github.com/inaka/erlang-github/tree/0.1.13) (2015-04-23)
 
-[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.11...HEAD)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.12...0.1.13)
+
+**Closed issues:**
+
+- Restrict github status api descriptions to 140 characters [\#42](https://github.com/inaka/erlang-github/issues/42)
+
+- Update dependencies [\#41](https://github.com/inaka/erlang-github/issues/41)
+
+**Merged pull requests:**
+
+- \[\#42\] Add fix for error 422 \[The message submitted is longer that the ma... [\#43](https://github.com/inaka/erlang-github/pull/43) ([davecaos](https://github.com/davecaos))
+
+## [0.1.12](https://github.com/inaka/erlang-github/tree/0.1.12) (2015-04-08)
+
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.11...0.1.12)
 
 **Closed issues:**
 
 - Update CHANGELOG.md [\#36](https://github.com/inaka/erlang-github/issues/36)
 
 **Merged pull requests:**
+
+- REAL Version Bump [\#40](https://github.com/inaka/erlang-github/pull/40) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 - Version Bump [\#39](https://github.com/inaka/erlang-github/pull/39) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
