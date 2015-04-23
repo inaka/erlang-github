@@ -77,6 +77,7 @@
 -type result() :: ok | {ok, term()} | {error, term()}.
 
 -define(GITHUB_API, "https://api.github.com").
+-define(MAX_DESCRIPTION_LENGTH, 140).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API
@@ -434,8 +435,9 @@ remove_collaborator(Cred, Repo, Collaborator) ->
     result().
 create_status(Cred, Repo, Sha, State, Description, Context) ->
     Url = make_url(new_status, {Repo, Sha}),
+    FormatDescription = format_description(Description),
     Data = #{<<"state">>        => State,
-             <<"description">>  => list_to_binary(Description),
+             <<"description">>  => list_to_binary(FormatDescription),
              <<"context">>      => list_to_binary(Context)
             },
     Body = egithub_json:encode(Data),
@@ -479,6 +481,17 @@ combined_status(Cred, Repo, Ref) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private Functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%doc format_description format the description to avoid error 422
+%doc The message submitted is longer that the maximum length of 140 characters
+-spec format_description(string()) -> string().
+format_description(Description) ->
+  case length(Description) of
+    Size when Size >= ?MAX_DESCRIPTION_LENGTH -> 
+      %% to be continued.
+      string:sub_string(Description, 1, ?MAX_DESCRIPTION_LENGTH - 3) ++ "..."; 
+    Size when Size < ?MAX_DESCRIPTION_LENGTH -> Description
+  end.
 
 %% Create Status
 make_url(new_status, {Repo, Sha}) ->
