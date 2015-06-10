@@ -71,7 +71,12 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
           lager:warning(
             "event:Error ~p Module: ~p ToolName: ~p "
             ++ "Context: ~p EventData: ~p get_stacktrace: ~p",
-            [Error, Module, ToolName, Context, EventData, erlang:get_stacktrace()]),
+            [Error
+            , Module
+            , ToolName
+            , Context
+            , EventData
+            , erlang:get_stacktrace()]),
           set_status(
             {failure, Error}, StatusCred, ToolName, Context, EventData),
           throw(Error)
