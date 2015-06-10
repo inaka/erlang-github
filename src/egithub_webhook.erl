@@ -70,7 +70,7 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
         _:Error ->
           lager:warning(
             "event:Error ~p Module: ~p ToolName: ~p "
-            ++ "Context: ~p EventData: ~p get_stacktrace: ~p",
+            "Context: ~p EventData: ~p get_stacktrace: ~p",
             [Error
             , Module
             , ToolName
