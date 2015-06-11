@@ -1,5 +1,21 @@
 # Change Log
 
+## [0.1.14](https://github.com/inaka/erlang-github/tree/HEAD)
+
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.13...HEAD)
+
+**Closed issues:**
+
+- Set stack erlang:get\_stacktrace\(\) to search error in events [\#46](https://github.com/inaka/erlang-github/issues/46)
+
+**Merged pull requests:**
+
+- \[\#46\] Add erlang:get\_stacktrace\(\) to search errors in event\(\) call [\#47](https://github.com/inaka/erlang-github/pull/47) ([davecaos](https://github.com/davecaos))
+
+- Update LICENSE [\#45](https://github.com/inaka/erlang-github/pull/45) ([andresinaka](https://github.com/andresinaka))
+
+- \[\#42\] Updated change log [\#44](https://github.com/inaka/erlang-github/pull/44) ([davecaos](https://github.com/davecaos))
+
 ## [0.1.13](https://github.com/inaka/erlang-github/tree/0.1.13) (2015-04-23)
 
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.12...0.1.13)
