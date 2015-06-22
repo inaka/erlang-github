@@ -19,6 +19,10 @@
          issue_comment/4,
          issue_comment/5,
          issue_comments/3,
+         %% Issues
+         create_issue/6,
+         create_issue/7,
+         create_issue/8,
          %% Users
          user/1,
          user/2,
@@ -155,6 +159,34 @@ pull_req_comments(Cred, Repo, PR) ->
     {ok, Comments}.
 
 %% Issues
+-spec create_issue(credentials(), repository(), binary(), binary(), binary(),
+                   list(binary())) -> result().
+create_issue(Cred, Repo, Title, Text, Assignee, Labels) ->
+    create_issue(Cred, Repo, Title, Text, Assignee, 1, Labels,
+                 #{post_method => run}).
+
+-spec create_issue(credentials(), repository(), binary(), binary(), binary(),
+                   pos_integer(), list(binary())) -> result().
+create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels) ->
+    create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels,
+                 #{post_method => run}).
+-spec create_issue(credentials(), repository(), binary(), binary(), binary(),
+                   pos_integer(), list(binary()), options()) -> result().
+create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels, Options) ->
+    Url = make_url(issue, Repo),
+    Body = #{<<"title">> => Title,
+             <<"body">>  => Text,
+             <<"assignee">> => Assignee,
+             <<"milestone">> => Milestone,
+             <<"labels">> => Labels
+            },
+    JsonBody = egithub_json:encode(Body),
+    case Options of
+        #{post_method := run} ->
+            egithub_req:run(Cred, Url, post, JsonBody);
+        #{post_method := queue} ->
+            egithub_req:queue(Cred, Url, post, JsonBody)
+    end.
 
 -spec issue_comment(credentials(), repository(), integer(), binary()) ->
                            result().
@@ -487,9 +519,9 @@ combined_status(Cred, Repo, Ref) ->
 -spec format_description(string()) -> string().
 format_description(Description) ->
   case length(Description) of
-    Size when Size >= ?MAX_DESCRIPTION_LENGTH -> 
+    Size when Size >= ?MAX_DESCRIPTION_LENGTH ->
       %% to be continued.
-      string:sub_string(Description, 1, ?MAX_DESCRIPTION_LENGTH - 3) ++ "..."; 
+      string:sub_string(Description, 1, ?MAX_DESCRIPTION_LENGTH - 3) ++ "...";
     Size when Size < ?MAX_DESCRIPTION_LENGTH -> Description
   end.
 
@@ -515,6 +547,8 @@ make_url({pull_req, Subentity}, {Repo, PR}) ->
     io_lib:format(Url, [Repo, PR]);
 
 %% Issues
+make_url(issue, Repo) ->
+    io_lib:format(?GITHUB_API ++ "/repos/~s/issues/", [Repo]);
 make_url({issue, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = ?GITHUB_API ++ "/repos/~s/issues/~p/" ++ SubentityStr,
