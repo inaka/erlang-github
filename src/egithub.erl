@@ -548,7 +548,7 @@ make_url({pull_req, Subentity}, {Repo, PR}) ->
 
 %% Issues
 make_url(issue, Repo) ->
-    io_lib:format(?GITHUB_API ++ "/repos/~s/issues/", [Repo]);
+    io_lib:format(?GITHUB_API ++ "/repos/~s/issues", [Repo]);
 make_url({issue, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = ?GITHUB_API ++ "/repos/~s/issues/~p/" ++ SubentityStr,
