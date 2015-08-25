@@ -90,6 +90,12 @@ egithub:issue_comment(Cred, Repo, Issue, Comment, Options).
 
 This would create a comment with the text `Hello` for the issue `username/repo#1`.
 
+API Documentation
+=====
+
+There is an automatically generated API documentation page in this project's GitHub page
+[here](http://inaka.github.io/erlang-github/).
+
 Contact Us
 ==========
 For **questions** or **general comments** regarding the use of this library, please use our public
