@@ -1,3 +1,4 @@
+%% @hidden
 -module(egithub_sup).
 
 -behavior(supervisor).

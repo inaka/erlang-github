@@ -1,3 +1,4 @@
+%% @hidden
 -module(egithub_req).
 
 -export([ run/1

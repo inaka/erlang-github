@@ -22,3 +22,6 @@ SHELL_OPTS= -name ${PROJECT}@`hostname` -s egithub -s sync
 
 CT_OPTS = -cover test/egithub.coverspec
 CT_SUITES = egithub_json
+
+erldocs:
+	erldocs -o docs/ .

@@ -1,14 +1,32 @@
 # Change Log
 
-## [0.1.14](https://github.com/inaka/erlang-github/tree/HEAD)
+## [0.1.15](https://github.com/inaka/erlang-github/tree/HEAD)
 
-[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.13...HEAD)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.14...HEAD)
+
+**Closed issues:**
+
+- Remove Jiffy dependency from egithub.app.src source file [\#51](https://github.com/inaka/erlang-github/issues/51)
+
+- Version Bump 0.1.14 [\#48](https://github.com/inaka/erlang-github/issues/48)
+
+**Merged pull requests:**
+
+- \[\#51\] Removing jiffy from egithub.app.src [\#52](https://github.com/inaka/erlang-github/pull/52) ([davecaos](https://github.com/davecaos))
+
+- Updated license [\#50](https://github.com/inaka/erlang-github/pull/50) ([spike886](https://github.com/spike886))
+
+## [0.1.14](https://github.com/inaka/erlang-github/tree/0.1.14) (2015-06-11)
+
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.13...0.1.14)
 
 **Closed issues:**
 
 - Set stack erlang:get\_stacktrace\(\) to search error in events [\#46](https://github.com/inaka/erlang-github/issues/46)
 
 **Merged pull requests:**
+
+- \[\#48\] Version bump 0.1.14 [\#49](https://github.com/inaka/erlang-github/pull/49) ([davecaos](https://github.com/davecaos))
 
 - \[\#46\] Add erlang:get\_stacktrace\(\) to search errors in event\(\) call [\#47](https://github.com/inaka/erlang-github/pull/47) ([davecaos](https://github.com/davecaos))
 

@@ -1,3 +1,4 @@
+%% @hidden
 -module(egithub_req_in).
 
 -behavior(gen_server).

@@ -1,3 +1,6 @@
+%% @doc Main module that implements the functions to interact with the GitHub's
+%%      API.
+%% @end
 -module(egithub).
 -behavior(application).
 
@@ -83,32 +86,46 @@
 %% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% @hidden
 -spec start() -> {ok, [atom()]}.
 start() -> application:ensure_all_started(egithub).
 
 %% Application Behavior
 
+%% @hidden
 -spec start(application:start_type(), term()) ->
     {ok, pid()} | {ok, pid(), term()} | {error, term()}.
 start(_StartType, _Arg) ->
     egithub_sup:start_link().
 
+%% @hidden
 -spec stop(term()) -> ok.
 stop(_State) ->
     ok.
 
 %% Credentials
 
+%% @doc Takes a username and a password. Returns a value that can be used
+%%      for basic authentication.
+%% @end
 -spec basic_auth(string(), string()) -> egithub:credentials().
 basic_auth(User, Password) ->
     {basic, User, Password}.
 
+%% @doc Takes a valid OAuth token. Returns a value that can be used
+%%      for OAuth authentication.
+%% @end
 -spec oauth(binary()) -> egithub:credentials().
 oauth(Token) ->
     {oauth, Token}.
 
 %% Pull Requests
 
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame" and the pull request number. Returns
+%%      <code>{ok, Files}</code> where <code>Files</code> is the decoded
+%%      JSON representation of GitHub's response.
+%% @end
 -spec pull_req_files(credentials(), repository(), integer()) ->
     result().
 pull_req_files(Credentials, Repo, PR) ->
@@ -487,9 +504,9 @@ combined_status(Cred, Repo, Ref) ->
 -spec format_description(string()) -> string().
 format_description(Description) ->
   case length(Description) of
-    Size when Size >= ?MAX_DESCRIPTION_LENGTH -> 
+    Size when Size >= ?MAX_DESCRIPTION_LENGTH ->
       %% to be continued.
-      string:sub_string(Description, 1, ?MAX_DESCRIPTION_LENGTH - 3) ++ "..."; 
+      string:sub_string(Description, 1, ?MAX_DESCRIPTION_LENGTH - 3) ++ "...";
     Size when Size < ?MAX_DESCRIPTION_LENGTH -> Description
   end.
 
