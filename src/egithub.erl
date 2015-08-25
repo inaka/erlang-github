@@ -122,9 +122,9 @@ oauth(Token) ->
 %% Pull Requests
 
 %% @doc Takes valid credentials, a string representing a repository (i.e
-%%      "username/reponame" and the pull request number. Returns
-%%      <code>{ok, Files}</code> where <code>Files</code> is the decoded
-%%      JSON representation of GitHub's response.
+%%      "username/reponame" and the pull request number.
+%%      Returns <code>{ok, Files}</code> where <code>Files</code> is the
+%%      decoded JSON representation of GitHub's response.
 %% @end
 -spec pull_req_files(credentials(), repository(), integer()) ->
     result().
@@ -134,6 +134,9 @@ pull_req_files(Credentials, Repo, PR) ->
     Files = egithub_json:decode(Result),
     {ok, Files}.
 
+%% @equiv pull_req_comment_line(Credentials, Repo, PR, CommitId, Filename,
+%%                              Line, Text, #{post_method => run})
+%% @end
 -spec pull_req_comment_line(credentials(), repository(), integer(),
                             string(), binary(), integer(), binary()) ->
     result().
@@ -143,6 +146,12 @@ pull_req_comment_line(Credentials, Repo, PR,
                           CommitId, Filename, Line, Text,
                           #{post_method => run}).
 
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame", the pull request number, the commit SHA, the
+%%      relative path to the repository's file, the line where the comment
+%%      shuold be added, the comment's text and some options.
+%%      Returns <code>ok</code> if everything goes well.
+%% @end
 -spec pull_req_comment_line(credentials(), repository(), integer(),
                             string(), binary(), integer(), binary(),
                             options()) ->
@@ -163,6 +172,11 @@ pull_req_comment_line(Credentials, Repo, PR,
             egithub_req:queue(Credentials, Url, post, JsonBody)
     end.
 
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame" and the pull request number.
+%%      Returns <code>{ok, Comments}</code> where <code>Comments</code> is the
+%%      decoded JSON representation of GitHub's response.
+%% @end
 -spec pull_req_comments(credentials(), repository(), integer()) ->
     result().
 pull_req_comments(Cred, Repo, PR) ->
@@ -173,11 +187,18 @@ pull_req_comments(Cred, Repo, PR) ->
 
 %% Issues
 
+%% @equiv issue_comment(Cred, Repo, PR, Text, #{post_method => run})
 -spec issue_comment(credentials(), repository(), integer(), binary()) ->
-                           result().
+    result().
 issue_comment(Cred, Repo, PR, Text) ->
     issue_comment(Cred, Repo, PR, Text, #{post_method => run}).
 
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame", the issue number, the comment's text and some
+%%      options.
+%%      Returns <code>{ok, RespBody}</code> if everything goes well, where
+%%      <code>RespBody</code> is the plain text body returned by GitHub.
+%% @end
 -spec issue_comment(credentials(), repository(), integer(), binary(),
                     options()) ->
    result().
@@ -192,6 +213,11 @@ issue_comment(Cred, Repo, PR, Text, Options) ->
             egithub_req:queue(Cred, Url, post, JsonBody)
     end.
 
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame" and the issue number.
+%%      Returns <code>{ok, Comments}</code> where <code>Comments</code> is the
+%%      decoded JSON representation of GitHub's response.
+%% @end
 -spec issue_comments(credentials(), repository(), integer()) ->
     result().
 issue_comments(Cred, Repo, PR) ->
@@ -202,6 +228,7 @@ issue_comments(Cred, Repo, PR) ->
 
 %% Files
 
+%% @doc Fetches the contents of a file for a given repository and commit SHA.
 -spec file_content(credentials(), repository(), string(), string()) -> result().
 file_content(Cred, Repo, CommitId, Filename) ->
     Url = make_url(file_content, {Repo, CommitId, Filename}),
@@ -217,16 +244,25 @@ file_content(Cred, Repo, CommitId, Filename) ->
 
 %% Users
 
+%% @doc Get the information for the user associated with the provided
+%%      credentials.
+%% @end
 -spec user(credentials()) -> result().
 user(Cred) ->
     Url = make_url(user, {}),
     api_call_json_result(Cred, Url).
 
+%% @doc Get the information for the user associated with the provided
+%%      <code>Username</code>.
+%% @end
 -spec user(credentials(), string()) -> result().
 user(Cred, Username) ->
     Url = make_url(user, {Username}),
     api_call_json_result(Cred, Url).
 
+%% @doc Get the emails registered for the user associated with the provided
+%%      credentials.
+%% @end
 -spec user_emails(credentials()) -> result().
 user_emails(Cred) ->
     Url = make_url(user_emails, {}),
@@ -234,15 +270,24 @@ user_emails(Cred) ->
 
 %% Orgs
 
+%% @doc Get the organizations for the user associated with the provided
+%%      credentials.
+%% @end
 -spec orgs(credentials()) -> result().
 orgs(Cred) ->
     orgs(Cred, undefined).
 
+%% @doc Get the organizations for the user associated with the provided
+%%      <code>Username</code>.
+%% @end
 -spec orgs(credentials(), string()) -> result().
 orgs(Cred, User) ->
     Url = make_url(orgs, {User}),
     api_call_json_result(Cred, Url).
 
+%% @doc Check if the user associated with the provided credentials is a
+%%      member of <code>OrgName</code>.
+%% @end
 -spec org_membership(credentials(), string()) -> result().
 org_membership(Cred, OrgName) ->
   Url = make_url({orgs, memberships}, {OrgName}),
@@ -250,15 +295,28 @@ org_membership(Cred, OrgName) ->
 
 %% Repos
 
+%% @doc Get the repository information of <code>RepoFullName</code>
+%%      (i.e. "username/reponame").
+%% @end
 -spec repo(credentials(), string()) -> result().
 repo(Cred, RepoFullName) ->
     Url = make_url(repo, {RepoFullName}),
     api_call_json_result(Cred, Url).
 
+%% @equiv repos(Cred, undefined, Opts)
 -spec repos(credentials(), map()) -> result().
 repos(Cred, Opts) ->
     repos(Cred, undefined, Opts).
 
+%% @doc Get all the repositories associated with the user provided
+%%      taking into account the options supplied. If the <code>User</code>
+%%      is <code>undefined</code> then the user associated with the credentials
+%%      is the one taken into account.
+%%      The options available depend on the GitHub API specs.
+%%      Check
+%%      <a href="https://developer.github.com/v3/repos/#parameters">here</a>
+%%      for more information.
+%% @end
 -spec repos(credentials(), string(), map()) -> result().
 repos(Cred, User, Opts) ->
     Url = make_url(repos, {User, Opts}),
