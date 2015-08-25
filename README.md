@@ -36,6 +36,28 @@ Cred = egithub:basic_auth("username", "password"),
 {ok, UserInfo} = egithub:user(Cred).
 ```
 
+## Webhooks
+
+This library provides the basic functionality over which you can implement your own GitHub
+webhook service. The webhook events that are currently supported are only `ping` and
+`pull_request`. These two allow you to process the contents in a PR and write comments to
+it.
+
+To accomplish this you need to implement the `egithub_webhook` behavior, which requires a
+single `handle_pull_request/3` callback. This function receives the GitHub's credentials
+the PR data and the associated files.
+
+After you process the information according to what your webhook is supposed to do, if
+successful the function must return the  tuple `{ok, [message()]}`, where `message()` is a
+map with information regarding the comment (e.g. `commit_id`, `path`, etc).
+
+To start the whole webhook flow once you receive the request from GitHub on your endpoint
+you can call either `egithub_webhook:event/3` or `egithub_webhook:event/6`. The function
+with arity 3 will just create the comments returned by your implementation. The second
+function will also make calls to the [Statuses
+API](https://developer.github.com/v3/repos/statuses/) and will report on the current
+status of the webhook.
+
 ## GitHub's Rate Limits
 
 If you use the GitHub API to create a lot of entities in a short interval, at a certain
