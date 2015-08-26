@@ -1,10 +1,17 @@
+%% @doc Implements the code to handle GitHub's webhook events. All callbacks
+%%      defined map to a specific GitHub event, for example the
+%%      <code>handle_pull_request</code> callback is used for pull_request
+%%      events.
+%%      It also offers the option of reporting the progress of your webhook
+%%      handler through the Statused API functions, by using the
+%%      <code>event/6</code> function.
+%% @end
 -module(egithub_webhook).
 
 -export([event/3, event/6]).
 
 -export_type([request/0]).
 
--type event() :: pull_request.
 -type request() :: #{headers => map(), body => map()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,6 +34,9 @@
 %%% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% @doc Should be called from the endpoint that handles the GitHub's request
+%%      for the webhook.
+%% @end
 -spec event(atom(), egithub:credentials(), request()) -> ok | {error, term()}.
 event(Module, Cred, #{headers := Headers, body := Body}) ->
   case maps:get(<<"x-github-event">>, Headers, undefined) of
@@ -43,6 +53,13 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
     EventName -> {error, <<"Unknown event: ", EventName/binary>>}
   end.
 
+%% @doc Should be called from the endpoint that handles the GitHub's request
+%%      for the webhook.
+%%
+%%      The credentials provided in the <code>StatusCred</code> argument need
+%%      to have the appropiate permissions to be able to change the
+%%      repository's status.
+%% @end
 -spec event(
   atom(), egithub:credentials(), string(), string(), egithub:credentials(),
   request()) -> ok | {error, term()}.

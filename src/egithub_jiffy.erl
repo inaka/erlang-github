@@ -1,3 +1,5 @@
+%% @doc Implementation jiffy module for <code>egithub_json</code> behavior.
+%% @hidden
 -module(egithub_jiffy).
 
 -behaviour(egithub_json).

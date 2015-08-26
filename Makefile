@@ -16,9 +16,14 @@ ERLC_OPTS += +warn_unused_vars +warn_export_all +warn_shadow_vars +warn_unused_i
 ERLC_OPTS += +warn_bif_clash +warn_unused_record +warn_deprecated_function +warn_obsolete_guard +strict_validation
 ERLC_OPTS += +warn_export_vars +warn_exported_vars +warn_missing_spec +warn_untyped_record +debug_info
 
+COMPILE_FIRST += egithub_json
+
 include erlang.mk
 
 SHELL_OPTS= -name ${PROJECT}@`hostname` -s egithub -s sync
 
 CT_OPTS = -cover test/egithub.coverspec
 CT_SUITES = egithub_json
+
+erldocs:
+	erldocs -o docs/ .
