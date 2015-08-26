@@ -8,12 +8,12 @@
         , create_table/0
         ]).
 
--record(req, { id = erlang:now()  :: tuple()
-             , url                :: iodata()
-             , headers            :: proplists:proplist()
-             , method             :: ibrowse:method()
-             , body               :: ibrowse:body()
-             , options            :: proplists:proplist()
+-record(req, { id = unique_id()  :: tuple()
+             , url               :: iodata()
+             , headers           :: proplists:proplist()
+             , method            :: ibrowse:method()
+             , body              :: ibrowse:body()
+             , options           :: proplists:proplist()
              }).
 -type req() :: #req{}.
 -export_type([req/0]).
@@ -84,3 +84,9 @@ authorization({basic, Username, Password}, Options0, Headers) ->
 authorization({oauth, Token}, Options, Headers0) ->
     Headers = [{"Authorization", "token " ++ Token} | Headers0],
     {Options, Headers}.
+
+unique_id() ->
+  case erlang:function_exported(erlang, unique_integer, 1) of
+    true -> erlang:unique_integer();
+    false -> erlang:now()
+  end.
