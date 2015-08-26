@@ -12,7 +12,6 @@
 
 -export_type([request/0]).
 
--type event() :: pull_request.
 -type request() :: #{headers => map(), body => map()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

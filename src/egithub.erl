@@ -308,10 +308,10 @@ repo(Cred, RepoFullName) ->
 repos(Cred, Opts) ->
     repos(Cred, undefined, Opts).
 
-%% @doc Get all the repositories associated with the user provided
+%% @doc Get the repositories associated with the user provided
 %%      taking into account the options supplied. If the <code>User</code>
-%%      is <code>undefined</code> then the user associated with the credentials
-%%      is the one taken into account.
+%%      is <code>undefined</code> then the user taken into account is
+%%      the one with the credentials.
 %%      The options available depend on the GitHub API specs.
 %%      Check
 %%      <a href="https://developer.github.com/v3/repos/#parameters">here</a>
@@ -322,10 +322,16 @@ repos(Cred, User, Opts) ->
     Url = make_url(repos, {User, Opts}),
     api_call_json_result(Cred, Url).
 
+%% @doc Same as repos/2 but if there are a lot of repos that need to be paged
+%%      handles the paging, asking for all pages until it gets an empty page.
+%% @end
 -spec all_repos(credentials(), map()) -> result().
 all_repos(Cred, Opts) ->
     all_repos(Cred, undefined, Opts#{page => 1}, []).
 
+%% @doc Same as repos/3 but if there are a lot of repos that need to be paged
+%%      handles the paging, asking for all pages until it gets an empty page.
+%% @end
 -spec all_repos(credentials(), string(), map()) -> result().
 all_repos(Cred, User, Opts) ->
     all_repos(Cred, User, Opts#{page => 1}, []).
@@ -340,11 +346,13 @@ all_repos(Cred, User, Opts = #{page := Page}, Results) ->
             {error, Reason}
     end.
 
+%% @doc Same as repos/3 but for an organization.
 -spec org_repos(credentials(), string(), map()) -> result().
 org_repos(Cred, Org, Opts) ->
     Url = make_url(org_repos, {Org, Opts}),
     api_call_json_result(Cred, Url).
 
+%% @doc Same as all_repos/3 but for an organization.
 -spec all_org_repos(credentials(), string(), map()) -> result().
 all_org_repos(Cred, Org, Opts) ->
     all_org_repos(Cred, Org, Opts#{page => 1}, []).
@@ -363,11 +371,13 @@ all_org_repos(Cred, Org, Opts = #{page := Page}, Results) ->
 
 %% Teams
 
+%% @doc Gets all the teams from an organization.
 -spec teams(credentials(), string()) -> result().
 teams(Cred, Org) ->
     Url = make_url(teams, {Org}),
     api_call_json_result(Cred, Url).
 
+%% @doc Creates a team in an organization.
 -spec create_team(credentials(), string(), string(), string(), [string()]) ->
     result().
 create_team(Cred, Org, Name, Permission, Repos) ->
@@ -386,6 +396,7 @@ create_team(Cred, Org, Name, Permission, Repos) ->
             Other
     end.
 
+%% @doc Add a repository to a team.
 -spec add_team_repository(credentials(), integer(), string()) -> result().
 add_team_repository(Cred, TeamId, RepoFullName) ->
     Url = make_url(teams_repos, {TeamId, RepoFullName}),
@@ -397,6 +408,7 @@ add_team_repository(Cred, TeamId, RepoFullName) ->
             Error
     end.
 
+%% @doc Add a member to a team.
 -spec add_team_member(credentials(), integer(), string()) -> result().
 add_team_member(Cred, TeamId, Username) ->
     Url = make_url(teams, {TeamId, Username}),
@@ -408,6 +420,7 @@ add_team_member(Cred, TeamId, Username) ->
             Error
     end.
 
+%% @doc Delete a member from a team.
 -spec delete_team_member(credentials(), integer(), string()) -> result().
 delete_team_member(Cred, TeamId, Username) ->
     Url = make_url(teams, {TeamId, Username}),
@@ -419,6 +432,7 @@ delete_team_member(Cred, TeamId, Username) ->
             Error
     end.
 
+%% @doc Check the membership of a user in a team.
 -spec team_membership(credentials(), integer(), string()) ->
     active | pending | none.
 team_membership(Cred, TeamId, Username) ->
@@ -432,11 +446,13 @@ team_membership(Cred, TeamId, Username) ->
 
 %% Hooks
 
+%% @doc Get all hooks for a repository.
 -spec hooks(credentials(), repository()) -> result().
 hooks(Cred, Repo) ->
     Url = make_url(hooks, {Repo}),
     api_call_json_result(Cred, Url).
 
+%% @doc Create a webhook in a repository.
 -spec create_webhook(credentials(), repository(), string(), [string()]) ->
     result().
 create_webhook(Cred, Repo, WebhookUrl, Events) ->
@@ -456,6 +472,7 @@ create_webhook(Cred, Repo, WebhookUrl, Events) ->
             {error, Reason}
     end.
 
+%% @doc Delete a webhook from a repository.
 -spec delete_webhook(credentials(), repository(), string()) -> result().
 delete_webhook(Cred, Repo, Id) ->
     IdStr = to_str(Id),
@@ -470,6 +487,7 @@ delete_webhook(Cred, Repo, Id) ->
 
 %% Collaborators
 
+%% @doc Get all collaborators in a repository.
 -spec collaborators(credentials(), repository()) -> result().
 collaborators(Cred, Repo) ->
     Url = make_url(collaborators, {Repo}),
@@ -481,6 +499,7 @@ collaborators(Cred, Repo) ->
             {error, Reason}
     end.
 
+%% @doc Add a collaborator to a repository.
 -spec add_collaborator(credentials(), repository(), string()) -> result().
 add_collaborator(Cred, Repo, Collaborator) ->
     Url = make_url(collaborators, {Repo, Collaborator}),
@@ -492,6 +511,7 @@ add_collaborator(Cred, Repo, Collaborator) ->
             {error, Reason}
     end.
 
+%% @doc Remove a collaborator from a repository.
 -spec remove_collaborator(credentials(), repository(), string()) -> result().
 remove_collaborator(Cred, Repo, Collaborator) ->
     Url = make_url(collaborators, {Repo, Collaborator}),
@@ -505,17 +525,29 @@ remove_collaborator(Cred, Repo, Collaborator) ->
 
 %% Statuses
 
+%% @equiv create_status(Cred, Repo, Sha, State, Description, Context, undefined)
 -spec create_status(
     credentials(), repository(), string(), state(), string(), string()) ->
     result().
 create_status(Cred, Repo, Sha, State, Description, Context) ->
+    create_status(Cred, Repo, Sha, State, Description, Context, undefined).
+
+%% @doc Create a new status for the provided <code>SHA</code>.
+-spec create_status(
+    credentials(), repository(), string(), state(), string(), string(),
+    string() | undefined) -> result().
+create_status(Cred, Repo, Sha, State, Description, Context, TargetUrl) ->
     Url = make_url(new_status, {Repo, Sha}),
     FormatDescription = format_description(Description),
     Data = #{<<"state">>        => State,
              <<"description">>  => list_to_binary(FormatDescription),
              <<"context">>      => list_to_binary(Context)
             },
-    Body = egithub_json:encode(Data),
+    Data1 = case TargetUrl of
+                undefined -> Data;
+                _ -> Data#{<<"target_url">> => list_to_binary(TargetUrl)}
+            end,
+    Body = egithub_json:encode(Data1),
     case egithub_req:run(Cred, Url, post, Body) of
         {ok, Result} ->
             JsonResult = egithub_json:decode(Result),
@@ -524,30 +556,15 @@ create_status(Cred, Repo, Sha, State, Description, Context) ->
             {error, Reason}
     end.
 
--spec create_status(
-    credentials(), repository(), string(), state(), string(), string(),
-    string()) -> result().
-create_status(Cred, Repo, Sha, State, Description, Context, TargetUrl) ->
-    Url = make_url(new_status, {Repo, Sha}),
-    Data = #{<<"state">>        => State,
-             <<"description">>  => list_to_binary(Description),
-             <<"context">>      => list_to_binary(Context),
-             <<"target_url">>   => list_to_binary(TargetUrl)
-            },
-    Body = egithub_json:encode(Data),
-    case egithub_req:run(Cred, Url, post, Body) of
-        {ok, Result} ->
-            JsonResult = egithub_json:decode(Result),
-            {ok, JsonResult};
-        {error, Reason} ->
-            {error, Reason}
-    end.
-
+%% @doc Get all statuses for the provided repository and <code>SHA</code>.
 -spec statuses(credentials(), repository(), string()) -> result().
 statuses(Cred, Repo, Ref) ->
     Url = make_url(statuses, {Repo, Ref}),
     api_call_json_result(Cred, Url).
 
+%% @doc Get a result with the combined values of all statuses for the
+%%      provided repository and <code>SHA</code>.
+%% @end
 -spec combined_status(credentials(), repository(), string()) -> result().
 combined_status(Cred, Repo, Ref) ->
     Url = make_url(status, {Repo, Ref}),
@@ -557,8 +574,8 @@ combined_status(Cred, Repo, Ref) ->
 %% Private Functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%doc format_description format the description to avoid error 422
-%doc The message submitted is longer that the maximum length of 140 characters
+%% @doc format_description format the description to avoid error 422
+%% The message submitted is longer that the maximum length of 140 characters
 -spec format_description(string()) -> string().
 format_description(Description) ->
   case length(Description) of
