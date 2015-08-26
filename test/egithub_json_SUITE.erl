@@ -44,9 +44,15 @@ end_per_suite(_Config) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 encode_callback(_Config) ->
+  application:unset_env(egithub, json),
+  <<"{}">> = egithub_json:encode(#{}),
+
   application:set_env(egithub, json, egithub_json_example),
   1 = egithub_json:encode(#{}).
 
 decode_callback(_Config) ->
+  application:unset_env(egithub, json),
+  #{} = egithub_json:decode(<<"{}">>),
+
   application:set_env(egithub, json, egithub_json_example),
   2 = egithub_json:decode(#{}).
