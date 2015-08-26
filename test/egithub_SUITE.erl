@@ -7,7 +7,9 @@
         ]).
 
 -export([
-         pull_req/1,
+         pull_reqs/1,
+         issues/1,
+         files/1,
          users/1,
          orgs/1,
          repos/1
@@ -47,26 +49,90 @@ end_per_suite(_Config) ->
 %% Test cases
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-pull_req(_Config) ->
+pull_reqs(_Config) ->
   Credentials = github_credentials(),
 
   meck:new(ibrowse, [passthrough]),
   try
-    UserFun = match_fun("https://api.github.com/repos/"
-                        "user/repo/pulls/1/files",
-                        get),
-    meck:expect(ibrowse, send_req, UserFun),
+    PRFilesFun = match_fun("https://api.github.com/repos/"
+                           "user/repo/pulls/1/files",
+                           get),
+    meck:expect(ibrowse, send_req, PRFilesFun),
     {ok, _} = egithub:pull_req_files(Credentials, "user/repo", 1),
 
-    UserFun = match_fun("https://api.github.com/users/gadgetci", get),
-    meck:expect(ibrowse, send_req, GadgetCIFun),
-    {ok, _} = egithub:user(Credentials, "gadgetci"),
+    PRCommentLineFun = match_fun("https://api.github.com/repos/"
+                                 "user/repo/pulls/1/comments",
+                                 post),
+    meck:expect(ibrowse, send_req, PRCommentLineFun),
+    {ok, _} = egithub:pull_req_comment_line(Credentials, "user/repo", 1,
+                                            "SHA", "file-path",
+                                            5, "comment text"),
 
-    EmailsFun = fun("https://api.github.com/user/emails", _, get, _, _) ->
-                    {ok, "200", [], <<"[]">>}
-                end,
-    meck:expect(ibrowse, send_req, EmailsFun),
-    {ok, _} = egithub:user_emails(Credentials)
+    Self = self(),
+    PRCommentLineQueueFun = fun(_, _, _, _, _) ->
+                                Self ! ok,
+                                {ok, "200", [], <<"[]">>}
+                            end,
+    meck:expect(ibrowse, send_req, PRCommentLineQueueFun),
+    ok = egithub:pull_req_comment_line(Credentials, "user/repo", 1,
+                                       "SHA", "file-path",
+                                       5, "comment text",
+                                       #{post_method => queue}),
+    ok = receive ok -> ok after 5000 -> timeout end,
+
+    PRCommentsFun = match_fun("https://api.github.com/repos/"
+                              "user/repo/pulls/1/comments",
+                              get),
+    meck:expect(ibrowse, send_req, PRCommentsFun),
+    {ok, _} = egithub:pull_req_comments(Credentials, "user/repo", 1)
+  after
+    meck:unload(ibrowse)
+  end.
+
+issues(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(ibrowse, [passthrough]),
+  try
+    IssueCommentFun = match_fun("https://api.github.com/repos/"
+                                "user/repo/issues/1/comments",
+                                post),
+    meck:expect(ibrowse, send_req, IssueCommentFun),
+    {ok, _} = egithub:issue_comment(Credentials, "user/repo", 1, "txt"),
+
+    Self = self(),
+    IssueCommentQueueFun = fun(Url, _, post, _, _) ->
+                               "https://api.github.com/repos/"
+                                 "user/repo/issues/1/comments" =
+                                 lists:flatten(Url),
+                               Self ! ok,
+                               {ok, "200", [], <<"[]">>}
+                           end,
+    meck:expect(ibrowse, send_req, IssueCommentQueueFun),
+    ok = egithub:issue_comment(Credentials, "user/repo", 1,
+                               "txt", #{post_method => queue}),
+    ok = receive ok -> ok after 5000 -> timeout end,
+
+    IssueCommentsFun = match_fun("https://api.github.com/repos/"
+                                "user/repo/issues/1/comments",
+                                 get),
+    meck:expect(ibrowse, send_req, IssueCommentsFun),
+    {ok, _} = egithub:issue_comments(Credentials, "user/repo", 1)
+  after
+    meck:unload(ibrowse)
+  end.
+
+files(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(ibrowse, [passthrough]),
+  try
+    FileContentFun = match_fun("https://api.github.com/repos/"
+                               "user/repo/contents/file?ref=SHA",
+                               get,
+                               <<"{\"content\" : \"\"}">>),
+    meck:expect(ibrowse, send_req, FileContentFun),
+    {ok, _} = egithub:file_content(Credentials, "user/repo", "SHA", "file")
   after
     meck:unload(ibrowse)
   end.
@@ -196,6 +262,10 @@ repos(_Config) ->
     meck:unload(ibrowse)
   end.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Helper
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 -spec github_credentials() -> {string(), string()}.
 github_credentials() ->
   Username = application:get_env(egithub, github_username, undefined),
@@ -208,8 +278,11 @@ github_credentials() ->
   end.
 
 match_fun(Url, Method) ->
+  match_fun(Url, Method, <<"[]">>).
+
+match_fun(Url, Method, ReturnBody) ->
   fun(UrlParam, _, MethodParam, _, _) ->
       Url = lists:flatten(UrlParam),
       Method = MethodParam,
-      {ok, "200", [], <<"[]">>}
+      {ok, "200", [], ReturnBody}
   end.
