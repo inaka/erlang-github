@@ -96,11 +96,24 @@ API Documentation
 There is an automatically generated API documentation page in this project's GitHub page
 [here](http://inaka.github.io/erlang-github/).
 
+Example
+=====
+
+For an example on how to use this library you can check out
+[this](https://github.com/inaka/inaka.github.io/tree/dev/script) little Erlang application
+used to pull a JSON with all of Inaka's repositories in GitHub.
+
+There is also a lot of code that calls the functions in `egithub` in the module
+[`egithub_webhook`](https://github.com/inaka/erlang-github/blob/master/src/egithub_webhook.erl).
+
 Contact Us
 ==========
-For **questions** or **general comments** regarding the use of this library, please use our public
-[hipchat room](https://www.hipchat.com/gpBpW3SsT).
+For **questions** or **general comments** regarding the use of this library, please use
+our public [hipchat room](https://www.hipchat.com/gpBpW3SsT).
 
-If you find any **bugs** or have a **problem** while using this library, please [open an issue](https://github.com/inaka/erlang-github/issues/new) in this repo (or a pull request :)).
+If you find any **bugs** or have a **problem** while using this library, please [open an
+issue](https://github.com/inaka/erlang-github/issues/new) in this repo (or a pull request
+:)).
 
-And you can check all of our open-source projects at [inaka.github.io](http://inaka.github.io)
+And you can check all of our open-source projects at
+[inaka.github.io](http://inaka.github.io)
