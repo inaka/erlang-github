@@ -12,7 +12,8 @@
          files/1,
          users/1,
          orgs/1,
-         repos/1
+         repos/1,
+         teams/1
         ]).
 
 -define(EXCLUDED_FUNS,
@@ -258,6 +259,47 @@ repos(_Config) ->
       end,
     meck:expect(ibrowse, send_req, AllOrgReposErrorFun),
     {error, _} = egithub:all_org_repos(Credentials, "some-org", #{})
+  after
+    meck:unload(ibrowse)
+  end.
+
+teams(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(ibrowse, [passthrough]),
+  try
+    TeamsFun = match_fun("https://api.github.com/orgs/some-org/teams", get),
+    meck:expect(ibrowse, send_req, TeamsFun),
+    {ok, _} = egithub:teams(Credentials, "some-org"),
+
+    CreateTeamFun = match_fun("https://api.github.com/"
+                              "orgs/some-org/teams", post),
+    meck:expect(ibrowse, send_req, CreateTeamFun),
+    {ok, _} = egithub:create_team(Credentials, "some-org", "Team", "", []),
+
+    AddTeamRepoFun = match_fun("https://api.github.com/teams/1/repos/user/repo",
+                               put),
+    meck:expect(ibrowse, send_req, AddTeamRepoFun),
+    ok = egithub:add_team_repository(Credentials, 1, "user/repo"),
+
+    AddTeamMemberFun = match_fun("https://api.github.com/"
+                                 "teams/1/members/gadgetci",
+                                 put),
+    meck:expect(ibrowse, send_req, AddTeamMemberFun),
+    ok = egithub:add_team_member(Credentials, 1, "gadgetci"),
+
+    DeleteTeamMemberFun = match_fun("https://api.github.com/"
+                                    "teams/1/members/gadgetci",
+                                    delete),
+    meck:expect(ibrowse, send_req, DeleteTeamMemberFun),
+    ok = egithub:delete_team_member(Credentials, 1, "gadgetci"),
+
+    TeamMembershipFun = match_fun("https://api.github.com/"
+                                  "teams/1/memberships/gadgetci",
+                                  get,
+                                  <<"{\"state\" : \"pending\"}">>),
+    meck:expect(ibrowse, send_req, TeamMembershipFun),
+    pending = egithub:team_membership(Credentials, 1, "gadgetci")
   after
     meck:unload(ibrowse)
   end.
