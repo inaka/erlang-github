@@ -14,7 +14,9 @@
          orgs/1,
          repos/1,
          teams/1,
-         hooks/1
+         hooks/1,
+         collaborators/1,
+         statuses/1
         ]).
 
 -define(EXCLUDED_FUNS,
@@ -329,6 +331,66 @@ hooks(_Config) ->
   after
     meck:unload(ibrowse)
   end.
+
+collaborators(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(ibrowse, [passthrough]),
+  try
+    CollaboratorsFun = match_fun("https://api.github.com/"
+                                 "repos/some-repo/collaborators", get),
+    meck:expect(ibrowse, send_req, CollaboratorsFun),
+    {ok, _} = egithub:collaborators(Credentials, "some-repo"),
+
+    AddCollabFun = match_fun("https://api.github.com/"
+                             "repos/some-repo/collaborators/username",
+                             put),
+    meck:expect(ibrowse, send_req, AddCollabFun),
+    ok = egithub:add_collaborator(Credentials, "some-repo", "username"),
+
+    DeleteCollabFun = match_fun("https://api.github.com/"
+                                "repos/some-repo/collaborators/username",
+                                delete),
+    meck:expect(ibrowse, send_req, DeleteCollabFun),
+    ok = egithub:remove_collaborator(Credentials, "some-repo", "username")
+  after
+    meck:unload(ibrowse)
+  end.
+
+statuses(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(ibrowse, [passthrough]),
+  try
+    StatusesFun = match_fun("https://api.github.com/repos/"
+                            "some-repo/commits/ref/statuses",
+                            get),
+    meck:expect(ibrowse, send_req, StatusesFun),
+    {ok, _} = egithub:statuses(Credentials, "some-repo", "ref"),
+
+    CreateStatusFun = match_fun("https://api.github.com/"
+                                "repos/some-repo/statuses/SHA",
+                                post),
+    meck:expect(ibrowse, send_req, CreateStatusFun),
+    {ok, _} = egithub:create_status(Credentials, "some-repo", "SHA", pending,
+                                    "description", "context"),
+
+    CreateStatusUrlFun = match_fun("https://api.github.com/"
+                                   "repos/some-repo/statuses/SHA",
+                                   post),
+    meck:expect(ibrowse, send_req, CreateStatusUrlFun),
+    {ok, _} = egithub:create_status(Credentials, "some-repo", "SHA", pending,
+                                    "description", "context", "url"),
+
+    CombinedStatusFun = match_fun("https://api.github.com/repos/"
+                                  "some-repo/commits/ref/status",
+                                  get),
+    meck:expect(ibrowse, send_req, CombinedStatusFun),
+    {ok, _} = egithub:combined_status(Credentials, "some-repo", "ref")
+  after
+    meck:unload(ibrowse)
+  end.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Helper
