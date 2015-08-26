@@ -13,7 +13,8 @@
          users/1,
          orgs/1,
          repos/1,
-         teams/1
+         teams/1,
+         hooks/1
         ]).
 
 -define(EXCLUDED_FUNS,
@@ -300,6 +301,31 @@ teams(_Config) ->
                                   <<"{\"state\" : \"pending\"}">>),
     meck:expect(ibrowse, send_req, TeamMembershipFun),
     pending = egithub:team_membership(Credentials, 1, "gadgetci")
+  after
+    meck:unload(ibrowse)
+  end.
+
+hooks(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(ibrowse, [passthrough]),
+  try
+    HooksFun = match_fun("https://api.github.com/repos/some-repo/hooks", get),
+    meck:expect(ibrowse, send_req, HooksFun),
+    {ok, _} = egithub:hooks(Credentials, "some-repo"),
+
+    CreateHookFun = match_fun("https://api.github.com/"
+                              "repos/some-repo/hooks",
+                              post),
+    meck:expect(ibrowse, send_req, CreateHookFun),
+    {ok, _} = egithub:create_webhook(Credentials, "some-repo",
+                                     "url", ["pull_request"]),
+
+    DeleteHookFun = match_fun("https://api.github.com/"
+                              "repos/some-repo/hooks/url",
+                              delete),
+    meck:expect(ibrowse, send_req, DeleteHookFun),
+    ok = egithub:delete_webhook(Credentials, "some-repo", "url")
   after
     meck:unload(ibrowse)
   end.
