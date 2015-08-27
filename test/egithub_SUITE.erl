@@ -398,14 +398,7 @@ statuses(_Config) ->
 
 -spec github_credentials() -> {string(), string()}.
 github_credentials() ->
-  Username = application:get_env(egithub, github_username, undefined),
-  Password = application:get_env(egithub, github_password, undefined),
-  case {Username, Password} of
-    {U, P} when U =/= undefined, P =/= undefined ->
-      egithub:basic_auth(Username, Password);
-    _ ->
-      throw("Please specifiy a GitHub username and password.")
-  end.
+  egithub:basic_auth("username", "password").
 
 match_fun(Url, Method) ->
   match_fun(Url, Method, <<"[]">>).
