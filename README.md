@@ -109,7 +109,7 @@ There is also a lot of code that calls the functions in `egithub` in the module
 Contact Us
 ==========
 For **questions** or **general comments** regarding the use of this library, please use
-our public [hipchat room](https://www.hipchat.com/gpBpW3SsT).
+our public [hipchat room](http://inaka.net/hipchat).
 
 If you find any **bugs** or have a **problem** while using this library, please [open an
 issue](https://github.com/inaka/erlang-github/issues/new) in this repo (or a pull request
