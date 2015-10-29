@@ -23,6 +23,9 @@
          create_issue/6,
          create_issue/7,
          create_issue/8,
+         issues/4,
+         issues_user/1,
+         issues_org/2,
          %% Users
          user/1,
          user/2,
@@ -180,22 +183,24 @@ create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels, Options) ->
     maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
 
 %%TODO: think about handling optional arguments
--spec list_all_issues(credentials(), repository(), options()) -> result().
-list_all_issues(Cred, Filter, State, Labels, Sort, Direction, Since, Options) ->
-    Url = make_url(issues, {undefined}),
+-spec issues(credentials(), repository(), issue_state(), string()) -> result().
+issues(Cred, Repo, State, Labels) ->
+    Args = #{<<"state">>  => State,
+             <<"labels">> => Labels},
+    Url = make_url(issues, {Repo, Args}),
     {ok, Result} = egithub_req:run(Cred, Url),
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
 
--spec list_user_issues(credentials(), repository(), options()) -> result().
-list_user_issues(Cred, Options) ->
+-spec issues_user(credentials()) -> result().
+issues_user(Cred) ->
     Url = make_url(issues_user, {undefined}),
     {ok, Result} = egithub_req:run(Cred, Url),
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
 
--spec list_org_issues(credentials(), repository(), options()) -> result().
-list_org_issues(Cred, Org, Options) ->
+-spec issues_org(credentials(), string()) -> result().
+issues_org(Cred, Org) ->
     Url = make_url(issues, {Org}),
     {ok, Result} = egithub_req:run(Cred, Url),
     Issues = egithub_json:decode(Result),
@@ -551,8 +556,9 @@ make_url({pull_req, Subentity}, {Repo, PR}) ->
 %% Issues
 make_url(issues, {undefined}) ->
     io_lib:format(?GITHUB_API ++ "/issues/", []);
-make_url(issue, {Repo}) ->
-    io_lib:format(?GITHUB_API ++ "/repos/~s/issues/", [Repo]);
+make_url(issue, {Repo, Args}) ->
+    QS = build_query_string(Args),
+    io_lib:format(?GITHUB_API ++ "/repos/~s/issues/?~s", [Repo, QS]);
 make_url(issue_user, {undefined}) ->
     io_lib:format(?GITHUB_API ++ "/user/issues/", []);
 make_url(issues, {Org}) ->
