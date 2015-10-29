@@ -72,13 +72,17 @@
               state/0
              ]).
 
--type state() :: pending | success | error | failure.
--type credentials() ::
-    {basic, Username :: string(), Password :: string()}
-    | {oauth, Token :: string()}.
--type repository() :: string(). %% "username/reponame"
--type options() :: #{post_method => queue | run}.
--type result() :: ok | {ok, term()} | {error, term()}.
+%% Types
+-type state()            :: pending | success | error | failure.
+-type credentials()      :: {basic, Username :: string(), Password :: string()}
+                          | {oauth, Token :: string()}.
+-type repository()       :: string(). %% "username/reponame"
+-type options()          :: #{post_method => queue | run}.
+-type result()           :: ok | {ok, term()} | {error, term()}.
+-type issue_filter()     :: assigned | created | mentioned | subscribed | all.
+-type issue_state()      :: open | closed | all.
+-type issue_sort()       :: created | updated | comments.
+-type issue_sort_order() :: asc | desc.
 
 -define(GITHUB_API, "https://api.github.com").
 -define(MAX_DESCRIPTION_LENGTH, 140).
@@ -115,18 +119,18 @@ oauth(Token) ->
 
 -spec pull_req_files(credentials(), repository(), integer()) ->
     result().
-pull_req_files(Credentials, Repo, PR) ->
+pull_req_files(Cred, Repo, PR) ->
     Url = make_url({pull_req, files}, {Repo, PR}),
-    {ok, Result} = egithub_req:run(Credentials, Url),
+    {ok, Result} = egithub_req:run(Cred, Url),
     Files = egithub_json:decode(Result),
     {ok, Files}.
 
 -spec pull_req_comment_line(credentials(), repository(), integer(),
                             string(), binary(), integer(), binary()) ->
     result().
-pull_req_comment_line(Credentials, Repo, PR,
+pull_req_comment_line(Cred, Repo, PR,
                       CommitId, Filename, Line, Text) ->
-    pull_req_comment_line(Credentials, Repo, PR,
+    pull_req_comment_line(Cred, Repo, PR,
                           CommitId, Filename, Line, Text,
                           #{post_method => run}).
 
@@ -134,21 +138,15 @@ pull_req_comment_line(Credentials, Repo, PR,
                             string(), binary(), integer(), binary(),
                             options()) ->
     result().
-pull_req_comment_line(Credentials, Repo, PR,
+pull_req_comment_line(Cred, Repo, PR,
                       CommitId, Filename, Line, Text, Options) ->
     Url = make_url({pull_req, comments}, {Repo, PR}),
-    Body = #{<<"commit_id">> => list_to_binary(CommitId),
+    Body = #{<<"commit_id">> => to_bin(CommitId),
              <<"path">> => Filename,
              <<"position">> => Line,
              <<"body">> => Text
             },
-    JsonBody = egithub_json:encode(Body),
-    case Options of
-        #{post_method := run} ->
-            egithub_req:run(Credentials, Url, post, JsonBody);
-        #{post_method := queue} ->
-            egithub_req:queue(Credentials, Url, post, JsonBody)
-    end.
+    maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
 
 -spec pull_req_comments(credentials(), repository(), integer()) ->
     result().
@@ -170,23 +168,38 @@ create_issue(Cred, Repo, Title, Text, Assignee, Labels) ->
 create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels) ->
     create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels,
                  #{post_method => run}).
--spec create_issue(credentials(), repository(), binary(), binary(), binary(),
-                   pos_integer(), list(binary()), options()) -> result().
+-spec create_issue(credentials(), repository(), string(), string(), string(),
+                   integer(), list(string()), options()) -> result().
 create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels, Options) ->
-    Url = make_url(issue, Repo),
-    Body = #{<<"title">> => Title,
-             <<"body">>  => Text,
-             <<"assignee">> => Assignee,
+    Url = make_url(issue, {Repo}),
+    Body = #{<<"title">> => to_bin(Title),
+             <<"body">>  => to_bin(Text),
+             <<"assignee">> => to_bin(Assignee),
              <<"milestone">> => Milestone,
-             <<"labels">> => Labels
-            },
-    JsonBody = egithub_json:encode(Body),
-    case Options of
-        #{post_method := run} ->
-            egithub_req:run(Cred, Url, post, JsonBody);
-        #{post_method := queue} ->
-            egithub_req:queue(Cred, Url, post, JsonBody)
-    end.
+             <<"labels">> => lists:map(fun to_bin/1, Labels)},
+    maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
+
+%%TODO: think about handling optional arguments
+-spec list_all_issues(credentials(), repository(), options()) -> result().
+list_all_issues(Cred, Filter, State, Labels, Sort, Direction, Since, Options) ->
+    Url = make_url(issues, {undefined}),
+    {ok, Result} = egithub_req:run(Cred, Url),
+    Issues = egithub_json:decode(Result),
+    {ok, Issues}.
+
+-spec list_user_issues(credentials(), repository(), options()) -> result().
+list_user_issues(Cred, Options) ->
+    Url = make_url(issues_user, {undefined}),
+    {ok, Result} = egithub_req:run(Cred, Url),
+    Issues = egithub_json:decode(Result),
+    {ok, Issues}.
+
+-spec list_org_issues(credentials(), repository(), options()) -> result().
+list_org_issues(Cred, Org, Options) ->
+    Url = make_url(issues, {Org}),
+    {ok, Result} = egithub_req:run(Cred, Url),
+    Issues = egithub_json:decode(Result),
+    {ok, Issues}.
 
 -spec issue_comment(credentials(), repository(), integer(), binary()) ->
                            result().
@@ -199,13 +212,7 @@ issue_comment(Cred, Repo, PR, Text) ->
 issue_comment(Cred, Repo, PR, Text, Options) ->
     Url = make_url({issue, comments}, {Repo, PR}),
     Body = #{<<"body">> => Text},
-    JsonBody = egithub_json:encode(Body),
-    case Options of
-        #{post_method := run} ->
-            egithub_req:run(Cred, Url, post, JsonBody);
-        #{post_method := queue} ->
-            egithub_req:queue(Cred, Url, post, JsonBody)
-    end.
+    maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
 
 -spec issue_comments(credentials(), repository(), integer()) ->
     result().
@@ -329,9 +336,9 @@ teams(Cred, Org) ->
     result().
 create_team(Cred, Org, Name, Permission, Repos) ->
     Url = make_url(teams, {Org}),
-    BodyMap = #{name => list_to_binary(Name),
-                 permission => list_to_binary(Permission),
-                 repo_names => list_to_binary(Repos)},
+    BodyMap = #{name => to_bin(Name),
+                permission => to_bin(Permission),
+                repo_names => to_bin(Repos)},
     Body = egithub_json:encode(BodyMap),
     case egithub_req:run(Cred, Url, post, Body) of
         {ok, Result} ->
@@ -346,8 +353,7 @@ create_team(Cred, Org, Name, Permission, Repos) ->
 -spec add_team_repository(credentials(), integer(), string()) -> result().
 add_team_repository(Cred, TeamId, RepoFullName) ->
     Url = make_url(teams_repos, {TeamId, RepoFullName}),
-    Body = [],
-    case egithub_req:run(Cred, Url, put, Body) of
+    case egithub_req:run(Cred, Url, put, []) of
         {ok, _} ->
             ok;
         Error ->
@@ -357,8 +363,7 @@ add_team_repository(Cred, TeamId, RepoFullName) ->
 -spec add_team_member(credentials(), integer(), string()) -> result().
 add_team_member(Cred, TeamId, Username) ->
     Url = make_url(teams, {TeamId, Username}),
-    Body = [],
-    case egithub_req:run(Cred, Url, put, Body) of
+    case egithub_req:run(Cred, Url, put, []) of
         {ok, _} ->
             ok;
         Error ->
@@ -368,8 +373,7 @@ add_team_member(Cred, TeamId, Username) ->
 -spec delete_team_member(credentials(), integer(), string()) -> result().
 delete_team_member(Cred, TeamId, Username) ->
     Url = make_url(teams, {TeamId, Username}),
-    Body = [],
-    case egithub_req:run(Cred, Url, delete, Body) of
+    case egithub_req:run(Cred, Url, delete, []) of
         {ok, _} ->
             ok;
         Error ->
@@ -398,11 +402,11 @@ hooks(Cred, Repo) ->
     result().
 create_webhook(Cred, Repo, WebhookUrl, Events) ->
     Url = make_url(hooks, {Repo}),
-    BinEvents = [list_to_binary(E) || E <- Events],
+    BinEvents = [to_bin(E) || E <- Events],
     Data = #{<<"name">> => <<"web">>,
              <<"active">> => true,
              <<"events">> => BinEvents,
-             <<"config">> => #{<<"url">> => list_to_binary(WebhookUrl),
+             <<"config">> => #{<<"url">> => to_bin(WebhookUrl),
                                <<"content_type">> => <<"json">>}},
     Body = egithub_json:encode(Data),
     case egithub_req:run(Cred, Url, post, Body) of
@@ -441,8 +445,7 @@ collaborators(Cred, Repo) ->
 -spec add_collaborator(credentials(), repository(), string()) -> result().
 add_collaborator(Cred, Repo, Collaborator) ->
     Url = make_url(collaborators, {Repo, Collaborator}),
-    Body = [],
-    case egithub_req:run(Cred, Url, put, Body) of
+    case egithub_req:run(Cred, Url, put, []) of
         {ok, _Result} ->
             ok;
         {error, Reason} ->
@@ -452,8 +455,7 @@ add_collaborator(Cred, Repo, Collaborator) ->
 -spec remove_collaborator(credentials(), repository(), string()) -> result().
 remove_collaborator(Cred, Repo, Collaborator) ->
     Url = make_url(collaborators, {Repo, Collaborator}),
-    Body = [],
-    case egithub_req:run(Cred, Url, delete, Body) of
+    case egithub_req:run(Cred, Url, delete, []) of
         {ok, _Result} ->
             ok;
         {error, Reason} ->
@@ -469,8 +471,8 @@ create_status(Cred, Repo, Sha, State, Description, Context) ->
     Url = make_url(new_status, {Repo, Sha}),
     FormatDescription = format_description(Description),
     Data = #{<<"state">>        => State,
-             <<"description">>  => list_to_binary(FormatDescription),
-             <<"context">>      => list_to_binary(Context)
+             <<"description">>  => to_bin(FormatDescription),
+             <<"context">>      => to_bin(Context)
             },
     Body = egithub_json:encode(Data),
     case egithub_req:run(Cred, Url, post, Body) of
@@ -487,9 +489,9 @@ create_status(Cred, Repo, Sha, State, Description, Context) ->
 create_status(Cred, Repo, Sha, State, Description, Context, TargetUrl) ->
     Url = make_url(new_status, {Repo, Sha}),
     Data = #{<<"state">>        => State,
-             <<"description">>  => list_to_binary(Description),
-             <<"context">>      => list_to_binary(Context),
-             <<"target_url">>   => list_to_binary(TargetUrl)
+             <<"description">>  => to_bin(Description),
+             <<"context">>      => to_bin(Context),
+             <<"target_url">>   => to_bin(TargetUrl)
             },
     Body = egithub_json:encode(Data),
     case egithub_req:run(Cred, Url, post, Body) of
@@ -547,8 +549,14 @@ make_url({pull_req, Subentity}, {Repo, PR}) ->
     io_lib:format(Url, [Repo, PR]);
 
 %% Issues
-make_url(issue, Repo) ->
-    io_lib:format(?GITHUB_API ++ "/repos/~s/issues", [Repo]);
+make_url(issues, {undefined}) ->
+    io_lib:format(?GITHUB_API ++ "/issues/", []);
+make_url(issue, {Repo}) ->
+    io_lib:format(?GITHUB_API ++ "/repos/~s/issues/", [Repo]);
+make_url(issue_user, {undefined}) ->
+    io_lib:format(?GITHUB_API ++ "/user/issues/", []);
+make_url(issues, {Org}) ->
+    io_lib:format(?GITHUB_API ++ "/org/~s/issues/", [Org]);
 make_url({issue, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = ?GITHUB_API ++ "/repos/~s/issues/~p/" ++ SubentityStr,
@@ -643,6 +651,22 @@ api_call_json_result(Cred, Url) ->
             {error, Reason}
     end.
 
+maybe_queue_request(Cred, Url, JsonBody, Options) ->
+    case Options of
+        #{post_method := run} ->
+            egithub_req:run(Cred, Url, post, JsonBody);
+        #{post_method := queue} ->
+            egithub_req:queue(Cred, Url, post, JsonBody)
+    end.
+
+build_query_string(Args) ->
+    Parts = maps:fold(
+              fun (K, V, Acc) ->
+                      Part = to_str(K) ++ "=" ++ http_uri:encode(to_str(V)),
+                      [Part | Acc]
+              end, [], Args),
+    string:join(lists:reverse(Parts), "&").
+
 to_str(Arg) when is_binary(Arg) ->
     unicode:characters_to_list(Arg);
 to_str(Arg) when is_atom(Arg) ->
@@ -650,4 +674,11 @@ to_str(Arg) when is_atom(Arg) ->
 to_str(Arg) when is_integer(Arg) ->
     integer_to_list(Arg);
 to_str(Arg) when is_list(Arg) ->
+    Arg.
+
+to_bin(Arg) when is_list(Arg) ->
+    list_to_binary(Arg);
+to_bin(Arg) when is_atom(Arg) ->
+    atom_to_binary(Arg, latin1);
+to_bin(Arg) when is_binary(Arg) ->
     Arg.
