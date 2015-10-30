@@ -558,7 +558,7 @@ make_url(issues, {undefined}) ->
     io_lib:format(?GITHUB_API ++ "/issues", []);
 make_url(issues, {Repo, Args}) ->
     QS = build_query_string(Args),
-    io_lib:format(?GITHUB_API ++ "/repos/~s/issues/?~s", [Repo, QS]);
+    io_lib:format(?GITHUB_API ++ "/repos/~s/issues?~s", [Repo, QS]);
 make_url(issue_user, {undefined}) ->
     io_lib:format(?GITHUB_API ++ "/user/issues", []);
 make_url(issues, {Org}) ->
