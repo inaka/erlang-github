@@ -4,10 +4,10 @@ DEPS = lager jiffy ibrowse
 TEST_DEPS = meck
 SHELL_DEPS = sync
 
-dep_lager = git https://github.com/basho/lager.git 2.1.1
-dep_sync = git https://github.com/inaka/sync.git 0.1.3
-dep_jiffy = git https://github.com/davisp/jiffy 0.11.3
-dep_ibrowse = git https://github.com/cmullaparthi/ibrowse v4.1.2
+dep_lager = git https://github.com/basho/lager.git 3.0.2
+dep_sync = git https://github.com/rustyio/sync.git 9c78e7b
+dep_jiffy = git https://github.com/davisp/jiffy 0.14.4
+dep_ibrowse = git https://github.com/cmullaparthi/ibrowse v4.2
 dep_meck = git https://github.com/eproxus/meck 0.8.3
 
 DIALYZER_DIRS := ebin/
