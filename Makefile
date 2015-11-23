@@ -26,7 +26,7 @@ COMPILE_FIRST += egithub_json
 include erlang.mk
 
 SHELL_OPTS= -name ${PROJECT}@`hostname` -s egithub -s sync
-CT_OPTS = -cover test/egithub.coverspec -erl_args -config rel/test.config
+CT_OPTS = -cover test/egithub.coverspec
 
 erldocs:
 	erldocs -o docs/ .
