@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.1.17](https://github.com/inaka/erlang-github/tree/0.1.17) (2016-01-04)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.16...0.1.17)
+
+**Merged pull requests:**
+
+- \[\#61\] Upload to hex.pm [\#69](https://github.com/inaka/erlang-github/pull/69) ([davecaos](https://github.com/davecaos))
+
 ## [0.1.16](https://github.com/inaka/erlang-github/tree/0.1.16) (2015-11-23)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.15...0.1.16)
 
@@ -10,10 +17,12 @@
 
 **Closed issues:**
 
+- Bump Version to 0.1.16 [\#65](https://github.com/inaka/erlang-github/issues/65)
 - Fulfill the open-source checklist [\#4](https://github.com/inaka/erlang-github/issues/4)
 
 **Merged pull requests:**
 
+- \[Fix \#65\] Bump version to 0.1.16 [\#68](https://github.com/inaka/erlang-github/pull/68) ([harenson](https://github.com/harenson))
 - \[Fix \#66\] Fix tests [\#67](https://github.com/inaka/erlang-github/pull/67) ([harenson](https://github.com/harenson))
 - \[Fix \#62\] Move sync to SHELL\_DEPS [\#64](https://github.com/inaka/erlang-github/pull/64) ([harenson](https://github.com/harenson))
 - \[\#4\] Remove test.config since it is not actually used [\#59](https://github.com/inaka/erlang-github/pull/59) ([jfacorro](https://github.com/jfacorro))
