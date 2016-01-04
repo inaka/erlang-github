@@ -4,11 +4,11 @@ DEPS = lager barrel_jiffy ibrowse
 TEST_DEPS = meck
 SHELL_DEPS = sync
 
-dep_lager        = hex  3.0.2
-dep_sync         = git  https://github.com/rustyio/sync.git 9c78e7b
-dep_barrel_jiffy = hex  0.14.4
-dep_ibrowse      = hex  4.2.2
-dep_meck         = hex  0.8.4
+dep_lager = git https://github.com/basho/lager.git 3.0.2
+dep_sync = git https://github.com/rustyio/sync.git 9c78e7b
+dep_barrel_jiffy = hex 0.14.4
+dep_ibrowse = hex 4.2.2
+dep_meck = git https://github.com/eproxus/meck 0.8.3
 
 DIALYZER_DIRS := ebin/
 DIALYZER_OPTS := --verbose --statistics -Werror_handling \
