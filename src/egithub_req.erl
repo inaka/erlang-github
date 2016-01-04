@@ -8,17 +8,19 @@
         , create_table/0
         ]).
 
--record(req, { id = erlang:now() :: tuple()
-             , url               :: iodata()
-             , headers           :: proplists:proplist()
-             , method            :: ibrowse:method()
-             , body              :: ibrowse:body()
-             , options           :: proplists:proplist()
+-type method() :: get | post | put | delete.
+
+-record(req, { id = os:timestamp() :: erlang:timestamp()
+             , url                 :: iodata()
+             , headers             :: proplists:proplist()
+             , method              :: method()
+             , body                :: iodata()
+             , options             :: proplists:proplist()
              }).
 -type req() :: #req{}.
 -export_type([req/0]).
 
--spec create_table() -> ets:tab_name().
+-spec create_table() -> ets:tab().
 create_table() -> ets:new(?MODULE, [set, named_table, public, {keypos, 2}]).
 
 -spec run(req()) -> {ok, string()} | {error, tuple()}.
@@ -36,7 +38,7 @@ run(#req{} = Req) ->
 run(Cred, Url) ->
   run(Cred, Url, get, []).
 
--spec run(egithub:credentials(), string(), ibrowse:method(), ibrowse:body()) ->
+-spec run(egithub:credentials(), string(), method(), iodata()) ->
   {ok, string()} | {error, term()}.
 run(Cred, Url, Method, Body) ->
   Options0 = [{ssl_options, [{depth, 0}]}],
@@ -45,7 +47,7 @@ run(Cred, Url, Method, Body) ->
   run(Url, Headers, Method, Body, Options).
 
 run(Url, Headers, Method, Body, Options) ->
-  lager:info("[Github API] ~s", [Url]),
+  _ = lager:info("[Github API] ~s", [Url]),
   case ibrowse:send_req(Url, Headers, Method, Body, Options) of
     {ok, "200", _RespHeaders, RespBody} ->
       {ok, RespBody};
@@ -57,14 +59,14 @@ run(Url, Headers, Method, Body, Options) ->
       RedirectUrl = proplists:get_value("Location", RespHeaders),
       run(RedirectUrl, Headers, Method, Body, Options);
     {ok, Status, RespHeaders, RespBody} ->
-      lager:warning(
+      _ = lager:warning(
         "[Github API] Error:~nUrl: ~s~nError: ~p~n",
         [Url, {Status, RespHeaders, RespBody}]),
       {error, {Status, RespHeaders, RespBody}}
   end.
 
 -spec queue(
-  egithub:credentials(), string(), ibrowse:method(), ibrowse:body()) ->
+  egithub:credentials(), string(), method(), iodata()) ->
     ok.
 queue(Cred, Url, Method, Body) ->
   Options0 = [{ssl_options, [{depth, 0}]}],

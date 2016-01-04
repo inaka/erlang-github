@@ -41,13 +41,13 @@ all() ->
 
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
-  egithub:start(),
+  {ok, _} = egithub:start(),
   Config.
 
 -spec end_per_suite(config()) -> config().
-end_per_suite(_Config) ->
-  application:stop(egithub),
-  ok.
+end_per_suite(Config) ->
+  ok = application:stop(egithub),
+  Config.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Test cases
@@ -69,7 +69,7 @@ pull_reqs(_Config) ->
                                  post),
     meck:expect(ibrowse, send_req, PRCommentLineFun),
     {ok, _} = egithub:pull_req_comment_line(Credentials, "user/repo", 1,
-                                            "SHA", "file-path",
+                                            "SHA", <<"file-path">>,
                                             5, "comment text"),
 
     Self = self(),
@@ -79,7 +79,7 @@ pull_reqs(_Config) ->
                             end,
     meck:expect(ibrowse, send_req, PRCommentLineQueueFun),
     ok = egithub:pull_req_comment_line(Credentials, "user/repo", 1,
-                                       "SHA", "file-path",
+                                       "SHA", <<"file-path">>,
                                        5, "comment text",
                                        #{post_method => queue}),
     ok = receive ok -> ok after 5000 -> timeout end,
@@ -396,7 +396,7 @@ statuses(_Config) ->
 %% Helper
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
--spec github_credentials() -> {string(), string()}.
+-spec github_credentials() -> {'basic', string(), string()}.
 github_credentials() ->
   egithub:basic_auth("username", "password").
 

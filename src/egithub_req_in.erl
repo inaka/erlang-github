@@ -12,14 +12,14 @@
         , handle_info/2
         ]).
 
--type state() :: #{table => ets:tab_name()}.
+-type state() :: #{table => ets:tab()}.
 
--spec start_link(ets:tab_name()) -> {ok, pid()}.
+-spec start_link(ets:tab()) -> {ok, pid()}.
 start_link(Table) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, Table, []).
 
 %% @private
--spec init(ets:tab_name()) -> {ok, state()}.
+-spec init(ets:tab()) -> {ok, state()}.
 init(Table) -> {ok, #{table => Table}}.
 
 %% @private
@@ -33,7 +33,7 @@ handle_call(Msg, _From, State) ->
 handle_cast(Request, State) ->
   #{table := Table} = State,
   true = ets:insert(Table, Request),
-  lager:info("[Github API] ~p queued requests", [ets:info(Table, size)]),
+  _ = lager:info("[Github API] ~p queued requests", [ets:info(Table, size)]),
   {noreply, State}.
 
 %% @private

@@ -14,16 +14,16 @@
         , handle_info/2
         ]).
 
--type state() :: #{ table  => ets:tab_name()
+-type state() :: #{ table  => ets:tab()
                   , delays => [pos_integer()]
                   }.
 
--spec start_link(ets:tab_name()) -> {ok, pid()}.
+-spec start_link(ets:tab()) -> {ok, pid()}.
 start_link(Table) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, Table, []).
 
 %% @private
--spec init(ets:tab_name()) -> {ok, state(), pos_integer()}.
+-spec init(ets:tab()) -> {ok, state(), pos_integer()}.
 init(Table) ->
   State =
     #{ table => Table
@@ -54,10 +54,11 @@ handle_info(timeout, State) ->
             State#{delays => ?DELAY_MILLIS}
         end
     end,
-  case ets:info(Table, size) of
-    0 -> ok;
-    Size -> lager:info("[Github API] ~p queued requests", [Size])
-  end,
+  _ =
+    case ets:info(Table, size) of
+      0 -> ok;
+      Size -> lager:info("[Github API] ~p queued requests", [Size])
+    end,
   {noreply, NewState, NextDelay};
 handle_info(_Info, State) ->
   {noreply, State, ?DELAY_MILLIS}.
@@ -87,16 +88,16 @@ process_request(Request) ->
     {error, {"403", RespHeaders, RespBody}} ->
       case lists:keyfind("X-RateLimit-Limit", 1, RespHeaders) of
         false ->
-          lager:warning(
+          _ = lager:warning(
             "[Github API] Error:~nRequest: ~p~nError: ~p~n",
             [Request, {"403", RespHeaders, RespBody}]),
           error;
         _ ->
-          lager:warning("[Github API] Rate limited: ~p", [RespHeaders]),
+          _ = lager:warning("[Github API] Rate limited: ~p", [RespHeaders]),
           retry
       end;
     {error, {Status, RespHeaders, RespBody}} ->
-      lager:warning(
+      _ = lager:warning(
         "[Github API] Error:~nRequest: ~p~nError: ~p~n",
         [Request, {Status, RespHeaders, RespBody}]),
       error
