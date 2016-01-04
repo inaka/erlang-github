@@ -1,3 +1,5 @@
+egithub.d
+.erlang.mk/
 .eunit
 deps
 *.o

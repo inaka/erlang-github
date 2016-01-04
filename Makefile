@@ -11,8 +11,7 @@ dep_ibrowse = hex 4.2.2
 dep_meck = git https://github.com/eproxus/meck 0.8.3
 
 DIALYZER_DIRS := ebin/
-DIALYZER_OPTS := --verbose --statistics -Werror_handling \
-                 -Wrace_conditions #-Wunmatched_returns
+DIALYZER_OPTS := --verbose --statistics -Wunmatched_returns
 
 ERLC_OPTS := +'{parse_transform, lager_transform}'
 ERLC_OPTS += +warn_unused_vars +warn_export_all +warn_shadow_vars +warn_unused_import +warn_unused_function
@@ -31,13 +30,17 @@ CT_OPTS = -cover test/egithub.coverspec
 erldocs:
 	erldocs -o docs/ .
 
-quicktest-build:
+quicktests: app
 	@$(MAKE) --no-print-directory app-build test-dir ERLC_OPTS="$(TEST_ERLC_OPTS)"
+	$(verbose) mkdir -p $(CURDIR)/logs/
+	$(gen_verbose) $(CT_RUN) -suite $(addsuffix _SUITE,$(CT_SUITES)) $(CT_OPTS)
 
-quicktests: clean-app clean-test-dir quicktest-build
-	@if [ -d "test" ] ; \
-	then \
-		mkdir -p logs/ ; \
-		$(CT_RUN) -suite $(addsuffix _SUITE,$(CT_SUITES)) $(CT_OPTS) ; \
-	fi
-	$(gen_verbose) rm -f test/*.beam
+test-build-plt: ERLC_OPTS=$(TEST_ERLC_OPTS)
+test-build-plt:
+	@$(MAKE) --no-print-directory test-dir ERLC_OPTS="$(TEST_ERLC_OPTS)"
+	$(gen_verbose) touch ebin/test
+
+plt-all: PLT_APPS := $(ALL_TEST_DEPS_DIRS)
+plt-all: test-deps test-build-plt plt
+
+dialyze-all: app test-build-plt dialyze
