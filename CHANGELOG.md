@@ -1,11 +1,17 @@
 # Change Log
 
-## [0.1.17](https://github.com/inaka/erlang-github/tree/0.1.17) (2016-01-04)
-[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.16...0.1.17)
+## [0.1.18](https://github.com/inaka/erlang-github/tree/0.1.18) (2016-01-04)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.16...0.1.18)
+
+**Closed issues:**
+
+- Version Bump to 0.1.17 [\#71](https://github.com/inaka/erlang-github/issues/71)
 
 **Merged pull requests:**
 
+- \[\#71\] Version Bump 0.1.17 [\#72](https://github.com/inaka/erlang-github/pull/72) ([davecaos](https://github.com/davecaos))
 - \[\#61\] Upload to hex.pm [\#69](https://github.com/inaka/erlang-github/pull/69) ([davecaos](https://github.com/davecaos))
+- Get the project up-to-date [\#63](https://github.com/inaka/erlang-github/pull/63) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.16](https://github.com/inaka/erlang-github/tree/0.1.16) (2015-11-23)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.15...0.1.16)
