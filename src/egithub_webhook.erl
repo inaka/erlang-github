@@ -85,7 +85,7 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
           {error, Error}
       catch
         _:Error ->
-          lager:warning(
+          _ = lager:warning(
             "event:Error ~p Module: ~p ToolName: ~p "
             "Context: ~p EventData: ~p get_stacktrace: ~p",
             [Error
@@ -115,10 +115,12 @@ set_status(FullState, StatusCred, ToolName, Context, EventData) ->
   Sha = binary_to_list(maps:get(<<"sha">>, Head)),
   Description = status_description(FullState, ToolName),
   State = normalize_state(FullState),
-  lager:debug(
+  _ = lager:debug(
     "[Github WH] About to set ~s status in ~s to ~p: ~p",
     [Context, Repo, State, Description]),
-  egithub:create_status(StatusCred, Repo, Sha, State, Description, Context).
+  {ok, _} =
+    egithub:create_status(StatusCred, Repo, Sha, State, Description, Context),
+  ok.
 
 status_description(pending, ToolName) ->
   ToolName ++ " is checking your pull request";
@@ -161,9 +163,9 @@ handle_pull_request(Module, Cred,
 
 %% @doc Comment files that failed rules.
 -spec write_comments(
-    etighub:credentials(), string(), map(), [map()], [message()]) -> ok.
+    egithub:credentials(), string(), map(), [map()], [message()]) -> ok.
 write_comments(Cred, Repo, PR, Comments, Messages) ->
-  lager:debug(
+  _ = lager:debug(
     "[Github WH] About to write ~p messages (there are already ~p comments)",
     [length(Messages), length(Comments)]),
   Fun =
@@ -182,7 +184,7 @@ write_comments(Cred, Repo, PR, Comments, Messages) ->
 write_issue_comment(Cred, Repo, PR, Text, Comments) ->
   case issue_comment_exists(Comments, Text) of
     exists ->
-      lager:info("Comment '~s' for issue ~p is already there", [Text, PR]);
+      _ = lager:info("Comment '~s' for issue ~p is already there", [Text, PR]);
     not_exists ->
       egithub:issue_comment(Cred, Repo, PR, Text, #{post_method => queue})
   end.
@@ -191,8 +193,8 @@ write_line_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
   case line_comment_exists(Comments, Path, Position, Text) of
     exists ->
       Args = [Text, Path, Position],
-      lager:info("Comment '~s' for '~s' on position ~p is already there",
-                 Args);
+      _ = lager:info("Comment '~s' for '~s' on position ~p is already there",
+                     Args);
     not_exists ->
       egithub:pull_req_comment_line(
         Cred, Repo, PR, CommitId, Path, Position, Text,

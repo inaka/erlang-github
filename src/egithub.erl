@@ -138,7 +138,7 @@ pull_req_files(Credentials, Repo, PR) ->
 %%                              Line, Text, #{post_method => run})
 %% @end
 -spec pull_req_comment_line(credentials(), repository(), integer(),
-                            string(), binary(), integer(), binary()) ->
+                            string(), binary(), integer(), iodata()) ->
     result().
 pull_req_comment_line(Credentials, Repo, PR,
                       CommitId, Filename, Line, Text) ->
@@ -153,7 +153,7 @@ pull_req_comment_line(Credentials, Repo, PR,
 %%      Returns <code>ok</code> if everything goes well.
 %% @end
 -spec pull_req_comment_line(credentials(), repository(), integer(),
-                            string(), binary(), integer(), binary(),
+                            string(), binary(), integer(), iodata(),
                             options()) ->
     result().
 pull_req_comment_line(Credentials, Repo, PR,
@@ -188,7 +188,7 @@ pull_req_comments(Cred, Repo, PR) ->
 %% Issues
 
 %% @equiv issue_comment(Cred, Repo, PR, Text, #{post_method => run})
--spec issue_comment(credentials(), repository(), integer(), binary()) ->
+-spec issue_comment(credentials(), repository(), integer(), iodata()) ->
     result().
 issue_comment(Cred, Repo, PR, Text) ->
     issue_comment(Cred, Repo, PR, Text, #{post_method => run}).
@@ -199,7 +199,7 @@ issue_comment(Cred, Repo, PR, Text) ->
 %%      Returns <code>{ok, RespBody}</code> if everything goes well, where
 %%      <code>RespBody</code> is the plain text body returned by GitHub.
 %% @end
--spec issue_comment(credentials(), repository(), integer(), binary(),
+-spec issue_comment(credentials(), repository(), integer(), iodata(),
                     options()) ->
    result().
 issue_comment(Cred, Repo, PR, Text, Options) ->

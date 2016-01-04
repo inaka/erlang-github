@@ -1,16 +1,18 @@
 PROJECT = egithub
 
 DEPS = lager barrel_jiffy ibrowse
-TEST_DEPS = meck
+TEST_DEPS = katana mixer meck
 SHELL_DEPS = sync
 BUILD_DEPS = hexer_mk
 
 dep_lager = git https://github.com/basho/lager.git 3.0.2
 dep_barrel_jiffy = hex 0.14.4
 dep_ibrowse = hex 4.2.2
-dep_meck = git https://github.com/eproxus/meck 0.8.3
+dep_katana = hex 0.2.18
+dep_mixer = git https://github.com/inaka/mixer.git 0.1.4
+dep_meck = hex 0.8.4
 dep_sync = git https://github.com/rustyio/sync.git 9c78e7b
-dep_hexer_mk = git git://github.com/inaka/hexer.mk.git 1.0.0
+dep_hexer_mk = git https://github.com/inaka/hexer.mk.git 1.0.0
 
 DEP_PLUGINS = hexer_mk
 
