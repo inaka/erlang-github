@@ -1,5 +1,20 @@
 # Change Log
 
+## [0.1.19](https://github.com/inaka/erlang-github/tree/0.1.19) (2016-01-05)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.18...0.1.19)
+
+**Fixed bugs:**
+
+- Looks like the project doesn't compile on Linux [\#73](https://github.com/inaka/erlang-github/issues/73)
+
+**Closed issues:**
+
+- rename egithub\_webhook:handle\_pull\_request/3 [\#75](https://github.com/inaka/erlang-github/issues/75)
+
+**Merged pull requests:**
+
+- \[Fix \#75\] Rename egithub\_webhook:handle\_pull\_request/3 [\#76](https://github.com/inaka/erlang-github/pull/76) ([harenson](https://github.com/harenson))
+
 ## [0.1.18](https://github.com/inaka/erlang-github/tree/0.1.18) (2016-01-04)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.16...0.1.18)
 
@@ -9,6 +24,7 @@
 
 **Merged pull requests:**
 
+- Version Bump to 0.1.18 [\#74](https://github.com/inaka/erlang-github/pull/74) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - \[\#71\] Version Bump 0.1.17 [\#72](https://github.com/inaka/erlang-github/pull/72) ([davecaos](https://github.com/davecaos))
 - \[\#61\] Upload to hex.pm [\#69](https://github.com/inaka/erlang-github/pull/69) ([davecaos](https://github.com/davecaos))
 - Get the project up-to-date [\#63](https://github.com/inaka/erlang-github/pull/63) ([elbrujohalcon](https://github.com/elbrujohalcon))
