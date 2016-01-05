@@ -45,7 +45,7 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
     <<"ping">> -> ok;
     <<"pull_request">> ->
       EventData = egithub_json:decode(Body),
-      case handle_pull_request(Module, Cred, EventData) of
+      case do_handle_pull_request(Module, Cred, EventData) of
         clean -> ok;
         with_warnings -> ok;
         {error, Error} -> {error, Error}
@@ -72,7 +72,7 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
     <<"pull_request">> ->
       EventData = egithub_json:decode(Body),
       set_status(pending, StatusCred, ToolName, Context, EventData),
-      try handle_pull_request(Module, CommentsCred, EventData) of
+      try do_handle_pull_request(Module, CommentsCred, EventData) of
         clean ->
           set_status(success, StatusCred, ToolName, Context, EventData),
           ok;
@@ -143,7 +143,7 @@ normalize_state(State) -> State.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Events
 
-handle_pull_request(Module, Cred,
+do_handle_pull_request(Module, Cred,
       #{<<"number">> := PR, <<"repository">> := Repository} = Data) ->
   Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
   {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
