@@ -2,7 +2,7 @@
   application, egithub,
   [
    {description, "GitHub API client"},
-   {vsn, "0.1.18"},
+   {vsn, "0.1.19"},
    {applications, [kernel, stdlib, ibrowse, ssl, lager]},
    {mod, {egithub, []}},
    {modules, []},
