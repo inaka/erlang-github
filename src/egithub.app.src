@@ -3,7 +3,7 @@
   [
    {description, "GitHub API client"},
    {vsn, "0.1.19"},
-   {applications, [kernel, stdlib, ibrowse, ssl, lager]},
+   {applications, [kernel, stdlib, shotgun, ssl, lager]},
    {mod, {egithub, []}},
    {modules, []},
    {registered, []},

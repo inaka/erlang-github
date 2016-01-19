@@ -56,339 +56,327 @@ end_per_suite(Config) ->
 pull_reqs(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    PRFilesFun = match_fun("https://api.github.com/repos/"
-                           "user/repo/pulls/1/files",
+    PRFilesFun = match_fun("/repos/user/repo/pulls/1/files",
                            get),
-    meck:expect(ibrowse, send_req, PRFilesFun),
+    meck:expect(shotgun, request, PRFilesFun),
     {ok, _} = egithub:pull_req_files(Credentials, "user/repo", 1),
 
-    PRCommentLineFun = match_fun("https://api.github.com/repos/"
-                                 "user/repo/pulls/1/comments",
+    PRCommentLineFun = match_fun("/repos/user/repo/pulls/1/comments",
                                  post),
-    meck:expect(ibrowse, send_req, PRCommentLineFun),
+    meck:expect(shotgun, request, PRCommentLineFun),
     {ok, _} = egithub:pull_req_comment_line(Credentials, "user/repo", 1,
                                             "SHA", <<"file-path">>,
                                             5, "comment text"),
 
     Self = self(),
-    PRCommentLineQueueFun = fun(_, _, _, _, _) ->
+    PRCommentLineQueueFun = fun(_, _, _, _, _, _) ->
                                 Self ! ok,
-                                {ok, "200", [], <<"[]">>}
+                                {ok, #{status_code => 200,
+                                       headers => [], body => <<"[]">>}}
                             end,
-    meck:expect(ibrowse, send_req, PRCommentLineQueueFun),
+    meck:expect(shotgun, request, PRCommentLineQueueFun),
     ok = egithub:pull_req_comment_line(Credentials, "user/repo", 1,
                                        "SHA", <<"file-path">>,
                                        5, "comment text",
                                        #{post_method => queue}),
     ok = receive ok -> ok after 5000 -> timeout end,
 
-    PRCommentsFun = match_fun("https://api.github.com/repos/"
-                              "user/repo/pulls/1/comments",
+    PRCommentsFun = match_fun("/repos/user/repo/pulls/1/comments",
                               get),
-    meck:expect(ibrowse, send_req, PRCommentsFun),
+    meck:expect(shotgun, request, PRCommentsFun),
     {ok, _} = egithub:pull_req_comments(Credentials, "user/repo", 1)
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 issues(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    IssueCommentFun = match_fun("https://api.github.com/repos/"
-                                "user/repo/issues/1/comments",
+    IssueCommentFun = match_fun("/repos/user/repo/issues/1/comments",
                                 post),
-    meck:expect(ibrowse, send_req, IssueCommentFun),
+    meck:expect(shotgun, request, IssueCommentFun),
     {ok, _} = egithub:issue_comment(Credentials, "user/repo", 1, "txt"),
 
     Self = self(),
-    IssueCommentQueueFun = fun(Url, _, post, _, _) ->
-                               "https://api.github.com/repos/"
-                                 "user/repo/issues/1/comments" =
+    IssueCommentQueueFun = fun(_, post, Url, _, _, _) ->
+                               "/repos/user/repo/issues/1/comments" =
                                  lists:flatten(Url),
                                Self ! ok,
-                               {ok, "200", [], <<"[]">>}
+                               {ok, #{status_code => 200,
+                                      headers => [], body => <<"[]">>}}
                            end,
-    meck:expect(ibrowse, send_req, IssueCommentQueueFun),
+    meck:expect(shotgun, request, IssueCommentQueueFun),
     ok = egithub:issue_comment(Credentials, "user/repo", 1,
                                "txt", #{post_method => queue}),
     ok = receive ok -> ok after 5000 -> timeout end,
 
-    IssueCommentsFun = match_fun("https://api.github.com/repos/"
-                                "user/repo/issues/1/comments",
+    IssueCommentsFun = match_fun("/repos/user/repo/issues/1/comments",
                                  get),
-    meck:expect(ibrowse, send_req, IssueCommentsFun),
+    meck:expect(shotgun, request, IssueCommentsFun),
     {ok, _} = egithub:issue_comments(Credentials, "user/repo", 1)
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 files(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    FileContentFun = match_fun("https://api.github.com/repos/"
-                               "user/repo/contents/file?ref=SHA",
+    FileContentFun = match_fun("/repos/user/repo/contents/file?ref=SHA",
                                get,
                                <<"{\"content\" : \"\"}">>),
-    meck:expect(ibrowse, send_req, FileContentFun),
+    meck:expect(shotgun, request, FileContentFun),
     {ok, _} = egithub:file_content(Credentials, "user/repo", "SHA", "file")
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 users(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    UserFun = match_fun("https://api.github.com/user", get),
-    meck:expect(ibrowse, send_req, UserFun),
+    UserFun = match_fun("/user", get),
+    meck:expect(shotgun, request, UserFun),
     {ok, _} = egithub:user(Credentials),
 
-    GadgetCIFun = match_fun("https://api.github.com/users/gadgetci", get),
-    meck:expect(ibrowse, send_req, GadgetCIFun),
+    GadgetCIFun = match_fun("/users/gadgetci", get),
+    meck:expect(shotgun, request, GadgetCIFun),
     {ok, _} = egithub:user(Credentials, "gadgetci"),
 
-    EmailsFun = match_fun("https://api.github.com/user/emails", get),
-    meck:expect(ibrowse, send_req, EmailsFun),
+    EmailsFun = match_fun("/user/emails", get),
+    meck:expect(shotgun, request, EmailsFun),
     {ok, _} = egithub:user_emails(Credentials)
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 orgs(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    OrgsFun = match_fun("https://api.github.com/user/orgs", get),
-    meck:expect(ibrowse, send_req, OrgsFun),
+    OrgsFun = match_fun("/user/orgs", get),
+    meck:expect(shotgun, request, OrgsFun),
     {ok, _} = egithub:orgs(Credentials),
 
-    OrgsUserFun = match_fun("https://api.github.com/users/gadgetci/orgs", get),
-    meck:expect(ibrowse, send_req, OrgsUserFun),
+    OrgsUserFun = match_fun("/users/gadgetci/orgs", get),
+    meck:expect(shotgun, request, OrgsUserFun),
     {ok, _} = egithub:orgs(Credentials, "gadgetci"),
 
-    OrgMembershipFun = match_fun("https://api.github.com/user/"
-                                 "memberships/orgs/some-organization",
+    OrgMembershipFun = match_fun("/user/memberships/orgs/some-organization",
                                  get),
-    meck:expect(ibrowse, send_req, OrgMembershipFun),
+    meck:expect(shotgun, request, OrgMembershipFun),
     {ok, _} = egithub:org_membership(Credentials, "some-organization")
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 repos(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    RepoFun = match_fun("https://api.github.com/repos/inaka/whatever", get),
-    meck:expect(ibrowse, send_req, RepoFun),
+    RepoFun = match_fun("/repos/inaka/whatever", get),
+    meck:expect(shotgun, request, RepoFun),
     {ok, _} = egithub:repo(Credentials, "inaka/whatever"),
 
-    ReposFun = match_fun("https://api.github.com/user/repos?"
+    ReposFun = match_fun("/user/repos?"
                          "type=all&sort=full_name&direction=asc&page=1",
                          get),
-    meck:expect(ibrowse, send_req, ReposFun),
+    meck:expect(shotgun, request, ReposFun),
     {ok, _} = egithub:repos(Credentials, #{}),
 
-    ReposUserFun = match_fun("https://api.github.com/users/"
-                             "gadgetci/repos?page=1",
+    ReposUserFun = match_fun("/users/gadgetci/repos?page=1",
                              get),
-    meck:expect(ibrowse, send_req, ReposUserFun),
+    meck:expect(shotgun, request, ReposUserFun),
     {ok, _} = egithub:repos(Credentials, "gadgetci", #{}),
 
-    AllReposFun = match_fun("https://api.github.com/user/repos?"
+    AllReposFun = match_fun("/user/repos?"
                              "type=all&sort=full_name&direction=asc&page=1",
                              get),
-    meck:expect(ibrowse, send_req, AllReposFun),
+    meck:expect(shotgun, request, AllReposFun),
     {ok, _} = egithub:all_repos(Credentials, #{}),
 
     AllReposUserFun =
-      fun(Url, _, get, _, _) ->
+      fun(_, get, Url, _, _, _) ->
           case lists:flatten(Url) of
-            "https://api.github.com/users/gadgetci/repos?page=1" ->
-              {ok, "200", [], <<"[1]">>};
-            "https://api.github.com/users/gadgetci/repos?page=2" ->
-              {ok, "200", [], <<"[]">>}
+            "/users/gadgetci/repos?page=1" ->
+              {ok, #{status_code => 200,
+                     headers => [], body => <<"[1]">>}};
+            "/users/gadgetci/repos?page=2" ->
+              {ok, #{status_code => 200,
+                     headers => [], body => <<"[]">>}}
           end
       end,
-    meck:expect(ibrowse, send_req, AllReposUserFun),
+    meck:expect(shotgun, request, AllReposUserFun),
     {ok, _} = egithub:all_repos(Credentials, "gadgetci", #{}),
 
     AllReposErrorFun =
-      fun(Url, _, get, _, _) ->
+      fun(_, get, Url, _, _, _) ->
           case lists:flatten(Url) of
-            "https://api.github.com/users/gadgetci/repos?page=1" ->
-              {ok, "200", [], <<"[1]">>};
-            "https://api.github.com/users/gadgetci/repos?page=2" ->
-              {ok, "400", [], <<"">>}
+            "/users/gadgetci/repos?page=1" ->
+              {ok, #{status_code => 200,
+                     headers => [], body => <<"[1]">>}};
+            "/users/gadgetci/repos?page=2" ->
+              {ok, #{status_code => 400,
+                     headers => [], body => <<"">>}}
           end
       end,
-    meck:expect(ibrowse, send_req, AllReposErrorFun),
+    meck:expect(shotgun, request, AllReposErrorFun),
     {error, _} = egithub:all_repos(Credentials, "gadgetci", #{}),
 
-    OrgReposFun = match_fun("https://api.github.com/orgs/some-org/repos?page=1",
+    OrgReposFun = match_fun("/orgs/some-org/repos?page=1",
                             get),
-    meck:expect(ibrowse, send_req, OrgReposFun),
+    meck:expect(shotgun, request, OrgReposFun),
     {ok, _} = egithub:org_repos(Credentials, "some-org", #{}),
 
     AllOrgReposFun =
-      fun(Url, _, get, _, _) ->
+      fun(_, get, Url, _, _, _) ->
           case lists:flatten(Url) of
-            "https://api.github.com/orgs/some-org/repos?page=1" ->
-              {ok, "200", [], <<"[1]">>};
-            "https://api.github.com/orgs/some-org/repos?page=2" ->
-              {ok, "200", [], <<"[]">>}
+            "/orgs/some-org/repos?page=1" ->
+              {ok, #{status_code => 200,
+                     headers => [], body => <<"[1]">>}};
+            "/orgs/some-org/repos?page=2" ->
+              {ok, #{status_code => 200,
+                     headers => [], body => <<"[]">>}}
           end
       end,
-    meck:expect(ibrowse, send_req, AllOrgReposFun),
+    meck:expect(shotgun, request, AllOrgReposFun),
     {ok, _} = egithub:all_org_repos(Credentials, "some-org", #{}),
 
     AllOrgReposErrorFun =
-      fun(Url, _, get, _, _) ->
+      fun(_, get, Url, _, _, _) ->
           case lists:flatten(Url) of
-            "https://api.github.com/orgs/some-org/repos?page=1" ->
-              {ok, "200", [], <<"[1]">>};
-            "https://api.github.com/orgs/some-org/repos?page=2" ->
-              {ok, "400", [], <<"[]">>}
+            "/orgs/some-org/repos?page=1" ->
+              {ok, #{status_code => 200,
+                     headers => [], body => <<"[1]">>}};
+            "/orgs/some-org/repos?page=2" ->
+              {ok, #{status_code => 400,
+                     headers => [], body => <<"">>}}
           end
       end,
-    meck:expect(ibrowse, send_req, AllOrgReposErrorFun),
+    meck:expect(shotgun, request, AllOrgReposErrorFun),
     {error, _} = egithub:all_org_repos(Credentials, "some-org", #{})
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 teams(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    TeamsFun = match_fun("https://api.github.com/orgs/some-org/teams", get),
-    meck:expect(ibrowse, send_req, TeamsFun),
+    TeamsFun = match_fun("/orgs/some-org/teams", get),
+    meck:expect(shotgun, request, TeamsFun),
     {ok, _} = egithub:teams(Credentials, "some-org"),
 
-    CreateTeamFun = match_fun("https://api.github.com/"
-                              "orgs/some-org/teams", post),
-    meck:expect(ibrowse, send_req, CreateTeamFun),
+    CreateTeamFun = match_fun("/orgs/some-org/teams", post),
+    meck:expect(shotgun, request, CreateTeamFun),
     {ok, _} = egithub:create_team(Credentials, "some-org", "Team", "", []),
 
-    AddTeamRepoFun = match_fun("https://api.github.com/teams/1/repos/user/repo",
+    AddTeamRepoFun = match_fun("/teams/1/repos/user/repo",
                                put),
-    meck:expect(ibrowse, send_req, AddTeamRepoFun),
+    meck:expect(shotgun, request, AddTeamRepoFun),
     ok = egithub:add_team_repository(Credentials, 1, "user/repo"),
 
-    AddTeamMemberFun = match_fun("https://api.github.com/"
-                                 "teams/1/members/gadgetci",
+    AddTeamMemberFun = match_fun("/teams/1/members/gadgetci",
                                  put),
-    meck:expect(ibrowse, send_req, AddTeamMemberFun),
+    meck:expect(shotgun, request, AddTeamMemberFun),
     ok = egithub:add_team_member(Credentials, 1, "gadgetci"),
 
-    DeleteTeamMemberFun = match_fun("https://api.github.com/"
-                                    "teams/1/members/gadgetci",
+    DeleteTeamMemberFun = match_fun("/teams/1/members/gadgetci",
                                     delete),
-    meck:expect(ibrowse, send_req, DeleteTeamMemberFun),
+    meck:expect(shotgun, request, DeleteTeamMemberFun),
     ok = egithub:delete_team_member(Credentials, 1, "gadgetci"),
 
-    TeamMembershipFun = match_fun("https://api.github.com/"
-                                  "teams/1/memberships/gadgetci",
+    TeamMembershipFun = match_fun("/teams/1/memberships/gadgetci",
                                   get,
                                   <<"{\"state\" : \"pending\"}">>),
-    meck:expect(ibrowse, send_req, TeamMembershipFun),
+    meck:expect(shotgun, request, TeamMembershipFun),
     pending = egithub:team_membership(Credentials, 1, "gadgetci")
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 hooks(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    HooksFun = match_fun("https://api.github.com/repos/some-repo/hooks", get),
-    meck:expect(ibrowse, send_req, HooksFun),
+    HooksFun = match_fun("/repos/some-repo/hooks", get),
+    meck:expect(shotgun, request, HooksFun),
     {ok, _} = egithub:hooks(Credentials, "some-repo"),
 
-    CreateHookFun = match_fun("https://api.github.com/"
-                              "repos/some-repo/hooks",
+    CreateHookFun = match_fun("/repos/some-repo/hooks",
                               post),
-    meck:expect(ibrowse, send_req, CreateHookFun),
+    meck:expect(shotgun, request, CreateHookFun),
     {ok, _} = egithub:create_webhook(Credentials, "some-repo",
                                      "url", ["pull_request"]),
 
-    DeleteHookFun = match_fun("https://api.github.com/"
-                              "repos/some-repo/hooks/url",
+    DeleteHookFun = match_fun("/repos/some-repo/hooks/url",
                               delete),
-    meck:expect(ibrowse, send_req, DeleteHookFun),
+    meck:expect(shotgun, request, DeleteHookFun),
     ok = egithub:delete_webhook(Credentials, "some-repo", "url")
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 collaborators(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    CollaboratorsFun = match_fun("https://api.github.com/"
-                                 "repos/some-repo/collaborators", get),
-    meck:expect(ibrowse, send_req, CollaboratorsFun),
+    CollaboratorsFun = match_fun("/repos/some-repo/collaborators", get),
+    meck:expect(shotgun, request, CollaboratorsFun),
     {ok, _} = egithub:collaborators(Credentials, "some-repo"),
 
-    AddCollabFun = match_fun("https://api.github.com/"
-                             "repos/some-repo/collaborators/username",
+    AddCollabFun = match_fun("/repos/some-repo/collaborators/username",
                              put),
-    meck:expect(ibrowse, send_req, AddCollabFun),
+    meck:expect(shotgun, request, AddCollabFun),
     ok = egithub:add_collaborator(Credentials, "some-repo", "username"),
 
-    DeleteCollabFun = match_fun("https://api.github.com/"
-                                "repos/some-repo/collaborators/username",
+    DeleteCollabFun = match_fun("/repos/some-repo/collaborators/username",
                                 delete),
-    meck:expect(ibrowse, send_req, DeleteCollabFun),
+    meck:expect(shotgun, request, DeleteCollabFun),
     ok = egithub:remove_collaborator(Credentials, "some-repo", "username")
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 statuses(_Config) ->
   Credentials = github_credentials(),
 
-  meck:new(ibrowse, [passthrough]),
+  meck:new(shotgun, [passthrough]),
   try
-    StatusesFun = match_fun("https://api.github.com/repos/"
-                            "some-repo/commits/ref/statuses",
+    StatusesFun = match_fun("/repos/some-repo/commits/ref/statuses",
                             get),
-    meck:expect(ibrowse, send_req, StatusesFun),
+    meck:expect(shotgun, request, StatusesFun),
     {ok, _} = egithub:statuses(Credentials, "some-repo", "ref"),
 
-    CreateStatusFun = match_fun("https://api.github.com/"
-                                "repos/some-repo/statuses/SHA",
+    CreateStatusFun = match_fun("/repos/some-repo/statuses/SHA",
                                 post),
-    meck:expect(ibrowse, send_req, CreateStatusFun),
+    meck:expect(shotgun, request, CreateStatusFun),
     {ok, _} = egithub:create_status(Credentials, "some-repo", "SHA", pending,
                                     "description", "context"),
 
-    CreateStatusUrlFun = match_fun("https://api.github.com/"
-                                   "repos/some-repo/statuses/SHA",
+    CreateStatusUrlFun = match_fun("/repos/some-repo/statuses/SHA",
                                    post),
-    meck:expect(ibrowse, send_req, CreateStatusUrlFun),
+    meck:expect(shotgun, request, CreateStatusUrlFun),
     {ok, _} = egithub:create_status(Credentials, "some-repo", "SHA", pending,
                                     "description", "context", "url"),
 
-    CombinedStatusFun = match_fun("https://api.github.com/repos/"
-                                  "some-repo/commits/ref/status",
+    CombinedStatusFun = match_fun("/repos/some-repo/commits/ref/status",
                                   get),
-    meck:expect(ibrowse, send_req, CombinedStatusFun),
+    meck:expect(shotgun, request, CombinedStatusFun),
     {ok, _} = egithub:combined_status(Credentials, "some-repo", "ref")
   after
-    meck:unload(ibrowse)
+    meck:unload(shotgun)
   end.
 
 
@@ -404,8 +392,8 @@ match_fun(Url, Method) ->
   match_fun(Url, Method, <<"[]">>).
 
 match_fun(Url, Method, ReturnBody) ->
-  fun(UrlParam, _, MethodParam, _, _) ->
+  fun(_, MethodParam, UrlParam, _, _, _) ->
       Url = lists:flatten(UrlParam),
       Method = MethodParam,
-      {ok, "200", [], ReturnBody}
+      {ok, #{status_code => 200, headers => [], body => ReturnBody}}
   end.
