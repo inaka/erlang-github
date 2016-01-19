@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.2.0](https://github.com/inaka/erlang-github/tree/0.2.0) (2016-01-19)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.19...0.2.0)
+
+**Closed issues:**
+
+- Hex.pm Package [\#61](https://github.com/inaka/erlang-github/issues/61)
+
+**Merged pull requests:**
+
+- Replace ibrowse by shotgun [\#60](https://github.com/inaka/erlang-github/pull/60) ([elbrujohalcon](https://github.com/elbrujohalcon))
+
 ## [0.1.19](https://github.com/inaka/erlang-github/tree/0.1.19) (2016-01-05)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.18...0.1.19)
 
@@ -9,10 +20,12 @@
 
 **Closed issues:**
 
+- Bump version to 0.1.19 [\#77](https://github.com/inaka/erlang-github/issues/77)
 - rename egithub\_webhook:handle\_pull\_request/3 [\#75](https://github.com/inaka/erlang-github/issues/75)
 
 **Merged pull requests:**
 
+- \[Fix \#77\] Bump version to 0.1.19 [\#78](https://github.com/inaka/erlang-github/pull/78) ([harenson](https://github.com/harenson))
 - \[Fix \#75\] Rename egithub\_webhook:handle\_pull\_request/3 [\#76](https://github.com/inaka/erlang-github/pull/76) ([harenson](https://github.com/harenson))
 
 ## [0.1.18](https://github.com/inaka/erlang-github/tree/0.1.18) (2016-01-04)
