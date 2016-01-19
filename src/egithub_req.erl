@@ -11,11 +11,10 @@
 -type method() :: get | post | put | delete.
 
 -record(req, { id = os:timestamp() :: erlang:timestamp()
-             , url                 :: iodata()
+             , uri                 :: string()
              , headers             :: proplists:proplist()
              , method              :: method()
              , body                :: iodata()
-             , options             :: proplists:proplist()
              }).
 -type req() :: #req{}.
 -export_type([req/0]).
@@ -25,64 +24,61 @@ create_table() -> ets:new(?MODULE, [set, named_table, public, {keypos, 2}]).
 
 -spec run(req()) -> {ok, string()} | {error, tuple()}.
 run(#req{} = Req) ->
-  #req{ url     = Url
+  #req{ uri     = Uri
       , headers = Headers
       , method  = Method
       , body    = Body
-      , options = Options
       } = Req,
-  run(Url, Headers, Method, Body, Options).
+  do_run(Uri, Headers, Method, Body).
 
 -spec run(egithub:credentials(), string()) ->
   string() | {error, term()}.
-run(Cred, Url) ->
-  run(Cred, Url, get, []).
+run(Cred, Uri) ->
+  run(Cred, Uri, get, []).
 
--spec run(egithub:credentials(), string(), method(), iodata()) ->
+-spec run(egithub:credentials(), iodata(), method(), iodata()) ->
   {ok, string()} | {error, term()}.
-run(Cred, Url, Method, Body) ->
-  Options0 = [{ssl_options, [{depth, 0}]}],
-  Headers0 = [{"User-Agent", "Egithub-Webhook"}],
-  {Options, Headers} = authorization(Cred, Options0, Headers0),
-  run(Url, Headers, Method, Body, Options).
+run(Cred, Uri, Method, Body) ->
+  Headers0 = [{<<"User-Agent">>, <<"Egithub-Webhook">>}],
+  Headers  = authorization(Cred, Headers0),
+  do_run(Uri, Headers, Method, Body).
 
-run(Url, Headers, Method, Body, Options) ->
-  _ = lager:info("[Github API] ~s", [Url]),
-  case ibrowse:send_req(Url, Headers, Method, Body, Options) of
-    {ok, "200", _RespHeaders, RespBody} ->
+do_run(Uri, Headers, Method, Body) ->
+  {ok, Pid} = shotgun:open("api.github.com", 443, https),
+  _ = lager:info("[Github API] ~s", [Uri]),
+  try shotgun:request(Pid, Method, Uri, Headers, Body, #{}) of
+    {ok, #{status_code := 200, body := RespBody}} ->
       {ok, RespBody};
-    {ok, "201", _RespHeaders, RespBody} ->
+    {ok, #{status_code := 201, body := RespBody}} ->
       {ok, RespBody};
-    {ok, "204", _RespHeaders, RespBody} ->
+    {ok, #{status_code := 204, body := RespBody}} ->
       {ok, RespBody};
-    {ok, "302", RespHeaders, _} ->
-      RedirectUrl = proplists:get_value("Location", RespHeaders),
-      run(RedirectUrl, Headers, Method, Body, Options);
-    {ok, Status, RespHeaders, RespBody} ->
+    {ok, #{status_code := 302, headers := RespHeaders}} ->
+      RedirectUrl = proplists:get_value(<<"Location">>, RespHeaders),
+      run(RedirectUrl, Headers, Method, Body);
+    {ok, #{status_code := Status, headers := RespHeaders, body := RespBody}} ->
       _ = lager:warning(
-        "[Github API] Error:~nUrl: ~s~nError: ~p~n",
-        [Url, {Status, RespHeaders, RespBody}]),
+        "[Github API] Error:~nUri: ~s~nError: ~p~n",
+        [Uri, {Status, RespHeaders, RespBody}]),
       {error, {Status, RespHeaders, RespBody}}
+  after
+    shotgun:close(Pid)
   end.
 
 -spec queue(
   egithub:credentials(), string(), method(), iodata()) ->
     ok.
-queue(Cred, Url, Method, Body) ->
-  Options0 = [{ssl_options, [{depth, 0}]}],
-  Headers0 = [{"User-Agent", "Egithub-Webhook"}],
-  {Options, Headers} = authorization(Cred, Options0, Headers0),
-  Request = #req{ url     = Url
+queue(Cred, Uri, Method, Body) ->
+  Headers0 = [{<<"User-Agent">>, "Egithub-Webhook"}],
+  Headers = authorization(Cred, Headers0),
+  Request = #req{ uri     = Uri
                 , headers = Headers
                 , method  = Method
                 , body    = Body
-                , options = Options
                 },
   gen_server:cast(egithub_req_in, Request).
 
-authorization({basic, Username, Password}, Options0, Headers) ->
-    Options = [{basic_auth, {Username, Password}} | Options0],
-    {Options, Headers};
-authorization({oauth, Token}, Options, Headers0) ->
-    Headers = [{"Authorization", "token " ++ Token} | Headers0],
-    {Options, Headers}.
+authorization({basic, Username, Password}, Headers) ->
+    [{basic_auth, {Username, Password}} | Headers];
+authorization({oauth, Token}, Headers0) ->
+    [{<<"Authorization">>, iolist_to_binary(["token ", Token])} | Headers0].

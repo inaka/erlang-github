@@ -79,7 +79,6 @@
 -type options() :: #{post_method => queue | run}.
 -type result() :: ok | {ok, term()} | {error, term()}.
 
--define(GITHUB_API, "https://api.github.com").
 -define(MAX_DESCRIPTION_LENGTH, 140).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -587,75 +586,75 @@ format_description(Description) ->
 
 %% Create Status
 make_url(new_status, {Repo, Sha}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/statuses/~s",
+    Url = "/repos/~s/statuses/~s",
     io_lib:format(Url, [Repo, Sha]);
 
 %% Statuses
 make_url(statuses, {Repo, Sha}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/commits/~s/statuses",
+    Url = "/repos/~s/commits/~s/statuses",
     io_lib:format(Url, [Repo, Sha]);
 
 %% Status
 make_url(status, {Repo, Sha}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/commits/~s/status",
+    Url = "/repos/~s/commits/~s/status",
     io_lib:format(Url, [Repo, Sha]);
 
 %% Pull Resquest
 make_url({pull_req, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
-    Url = ?GITHUB_API ++ "/repos/~s/pulls/~p/" ++ SubentityStr,
+    Url = "/repos/~s/pulls/~p/" ++ SubentityStr,
     io_lib:format(Url, [Repo, PR]);
 
 %% Issues
 make_url({issue, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
-    Url = ?GITHUB_API ++ "/repos/~s/issues/~p/" ++ SubentityStr,
+    Url = "/repos/~s/issues/~p/" ++ SubentityStr,
     io_lib:format(Url, [Repo, PR]);
 
 %% Files
 make_url(file_content, {Repo, CommitId, Filename}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/contents/~s?ref=~s",
+    Url = "/repos/~s/contents/~s?ref=~s",
     io_lib:format(Url, [Repo, Filename, CommitId]);
 
 %% User
 make_url(user, {}) ->
-    Url = ?GITHUB_API ++ "/user",
+    Url = "/user",
     io_lib:format(Url, []);
 make_url(user, {Username}) ->
-    Url = ?GITHUB_API ++ "/users/~s",
+    Url = "/users/~s",
     io_lib:format(Url, [Username]);
 make_url(user_emails, {}) ->
-    Url = ?GITHUB_API ++ "/user/emails",
+    Url = "/user/emails",
     io_lib:format(Url, []);
 
 %% Organizations
 make_url(orgs, {undefined}) ->
-    Url = ?GITHUB_API ++ "/user/orgs",
+    Url = "/user/orgs",
     io_lib:format(Url, []);
 make_url(orgs, {User}) ->
-    Url = ?GITHUB_API ++ "/users/~s/orgs",
+    Url = "/users/~s/orgs",
     io_lib:format(Url, [User]);
 make_url({orgs, memberships}, {OrgName}) ->
-  Url = ?GITHUB_API ++ "/user/memberships/orgs/~s",
+  Url = "/user/memberships/orgs/~s",
   io_lib:format(Url, [OrgName]);
 
 %% Teams
 make_url(teams, {Org}) ->
-    Url = ?GITHUB_API ++ "/orgs/~s/teams",
+    Url = "/orgs/~s/teams",
     io_lib:format(Url, [Org]);
 make_url(teams, {TeamId, Username}) ->
-    Url = ?GITHUB_API ++ "/teams/~p/members/~s",
+    Url = "/teams/~p/members/~s",
     io_lib:format(Url, [TeamId, Username]);
 make_url(teams_repos, {TeamId, RepoFullName}) ->
-    Url = ?GITHUB_API ++ "/teams/~p/repos/~s",
+    Url = "/teams/~p/repos/~s",
     io_lib:format(Url, [TeamId, RepoFullName]);
 make_url(team_membership, {TeamId, Username}) ->
-    Url = ?GITHUB_API ++ "/teams/~p/memberships/~s",
+    Url = "/teams/~p/memberships/~s",
     io_lib:format(Url, [TeamId, Username]);
 
 %% Repositories
 make_url(repo, {RepoFullName}) ->
-    Url = ?GITHUB_API ++ "/repos/~s",
+    Url = "/repos/~s",
     io_lib:format(Url, [RepoFullName]);
 make_url(repos, {User, Opts}) ->
     Type = maps:get(type, Opts, "all"),
@@ -664,32 +663,31 @@ make_url(repos, {User, Opts}) ->
     Page = maps:get(page, Opts, 1),
     case User of
         undefined ->
-            Url = ?GITHUB_API
-                ++ "/user/repos?type=~s&sort=~s&direction=~s&page=~p",
+            Url = "/user/repos?type=~s&sort=~s&direction=~s&page=~p",
             io_lib:format(Url, [Type, Sort, Direction, Page]);
         User ->
-            Url = ?GITHUB_API ++ "/users/~s/repos?page=~p",
+            Url = "/users/~s/repos?page=~p",
             io_lib:format(Url, [User, Page])
     end;
 make_url(org_repos, {User, Opts}) ->
     Page = maps:get(page, Opts, 1),
-    Url = ?GITHUB_API ++ "/orgs/~s/repos?page=~p",
+    Url = "/orgs/~s/repos?page=~p",
     io_lib:format(Url, [User, Page]);
 
 %% Hooks
 make_url(hooks, {Repo}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/hooks",
+    Url = "/repos/~s/hooks",
     io_lib:format(Url, [Repo]);
 make_url(hooks, {Repo, Id}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/hooks/~s",
+    Url = "/repos/~s/hooks/~s",
     io_lib:format(Url, [Repo, Id]);
 
 %% Colaborators
 make_url(collaborators, {Repo}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/collaborators",
+    Url = "/repos/~s/collaborators",
     io_lib:format(Url, [Repo]);
 make_url(collaborators, {Repo, Username}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/collaborators/~s",
+    Url = "/repos/~s/collaborators/~s",
     io_lib:format(Url, [Repo, Username]).
 
 api_call_json_result(Cred, Url) ->
