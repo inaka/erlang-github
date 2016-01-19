@@ -1,6 +1,6 @@
 -module(egithub_meta_SUITE).
 
--include_lib("mixer/include/mixer.hrl").
+-include_lib("inaka_mixer/include/mixer.hrl").
 -mixin([{ ktn_meta_SUITE
         , [ all/0
           , xref/1
