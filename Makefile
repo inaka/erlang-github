@@ -1,13 +1,13 @@
 PROJECT = egithub
 
-DEPS = lager jiffy ibrowse
+DEPS = lager jiffy shotgun
 TEST_DEPS = katana mixer meck
 SHELL_DEPS = sync
 BUILD_DEPS = hexer_mk
 
 dep_lager = git https://github.com/basho/lager.git 3.0.2
 dep_jiffy = git https://github.com/davisp/jiffy.git 0.14.5
-dep_ibrowse = hex 4.2.2
+dep_shotgun = hex 0.2.0
 dep_katana = hex 0.2.18
 dep_mixer = git https://github.com/inaka/mixer.git 0.1.4
 dep_meck = hex 0.8.4
