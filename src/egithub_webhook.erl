@@ -1,10 +1,17 @@
+%% @doc Implements the code to handle GitHub's webhook events. All callbacks
+%%      defined map to a specific GitHub event, for example the
+%%      <code>handle_pull_request</code> callback is used for pull_request
+%%      events.
+%%      It also offers the option of reporting the progress of your webhook
+%%      handler through the Statused API functions, by using the
+%%      <code>event/6</code> function.
+%% @end
 -module(egithub_webhook).
 
 -export([event/3, event/6]).
 
 -export_type([request/0]).
 
--type event() :: pull_request.
 -type request() :: #{headers => map(), body => map()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,6 +34,9 @@
 %%% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% @doc Should be called from the endpoint that handles the GitHub's request
+%%      for the webhook.
+%% @end
 -spec event(atom(), egithub:credentials(), request()) -> ok | {error, term()}.
 event(Module, Cred, #{headers := Headers, body := Body}) ->
   case maps:get(<<"x-github-event">>, Headers, undefined) of
@@ -35,7 +45,7 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
     <<"ping">> -> ok;
     <<"pull_request">> ->
       EventData = egithub_json:decode(Body),
-      case handle_pull_request(Module, Cred, EventData) of
+      case do_handle_pull_request(Module, Cred, EventData) of
         clean -> ok;
         with_warnings -> ok;
         {error, Error} -> {error, Error}
@@ -43,6 +53,13 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
     EventName -> {error, <<"Unknown event: ", EventName/binary>>}
   end.
 
+%% @doc Should be called from the endpoint that handles the GitHub's request
+%%      for the webhook.
+%%
+%%      The credentials provided in the <code>StatusCred</code> argument need
+%%      to have the appropiate permissions to be able to change the
+%%      repository's status.
+%% @end
 -spec event(
   atom(), egithub:credentials(), string(), string(), egithub:credentials(),
   request()) -> ok | {error, term()}.
@@ -55,7 +72,7 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
     <<"pull_request">> ->
       EventData = egithub_json:decode(Body),
       set_status(pending, StatusCred, ToolName, Context, EventData),
-      try handle_pull_request(Module, CommentsCred, EventData) of
+      try do_handle_pull_request(Module, CommentsCred, EventData) of
         clean ->
           set_status(success, StatusCred, ToolName, Context, EventData),
           ok;
@@ -68,7 +85,7 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
           {error, Error}
       catch
         _:Error ->
-          lager:warning(
+          _ = lager:warning(
             "event:Error ~p Module: ~p ToolName: ~p "
             "Context: ~p EventData: ~p get_stacktrace: ~p",
             [Error
@@ -98,10 +115,12 @@ set_status(FullState, StatusCred, ToolName, Context, EventData) ->
   Sha = binary_to_list(maps:get(<<"sha">>, Head)),
   Description = status_description(FullState, ToolName),
   State = normalize_state(FullState),
-  lager:debug(
+  _ = lager:debug(
     "[Github WH] About to set ~s status in ~s to ~p: ~p",
     [Context, Repo, State, Description]),
-  egithub:create_status(StatusCred, Repo, Sha, State, Description, Context).
+  {ok, _} =
+    egithub:create_status(StatusCred, Repo, Sha, State, Description, Context),
+  ok.
 
 status_description(pending, ToolName) ->
   ToolName ++ " is checking your pull request";
@@ -124,7 +143,7 @@ normalize_state(State) -> State.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Events
 
-handle_pull_request(Module, Cred,
+do_handle_pull_request(Module, Cred,
       #{<<"number">> := PR, <<"repository">> := Repository} = Data) ->
   Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
   {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
@@ -146,7 +165,7 @@ handle_pull_request(Module, Cred,
 -spec write_comments(
     egithub:credentials(), string(), map(), [map()], [message()]) -> ok.
 write_comments(Cred, Repo, PR, Comments, Messages) ->
-  lager:debug(
+  _ = lager:debug(
     "[Github WH] About to write ~p messages (there are already ~p comments)",
     [length(Messages), length(Comments)]),
   Fun =
@@ -165,7 +184,7 @@ write_comments(Cred, Repo, PR, Comments, Messages) ->
 write_issue_comment(Cred, Repo, PR, Text, Comments) ->
   case issue_comment_exists(Comments, Text) of
     exists ->
-      lager:info("Comment '~s' for issue ~p is already there", [Text, PR]);
+      _ = lager:info("Comment '~s' for issue ~p is already there", [Text, PR]);
     not_exists ->
       egithub:issue_comment(Cred, Repo, PR, Text, #{post_method => queue})
   end.
@@ -174,8 +193,8 @@ write_line_comment(Cred, Repo, PR, CommitId, Path, Position, Text, Comments) ->
   case line_comment_exists(Comments, Path, Position, Text) of
     exists ->
       Args = [Text, Path, Position],
-      lager:info("Comment '~s' for '~s' on position ~p is already there",
-                 Args);
+      _ = lager:info("Comment '~s' for '~s' on position ~p is already there",
+                     Args);
     not_exists ->
       egithub:pull_req_comment_line(
         Cred, Repo, PR, CommitId, Path, Position, Text,

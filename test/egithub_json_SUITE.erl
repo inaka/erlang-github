@@ -1,9 +1,7 @@
 -module(egithub_json_SUITE).
 
 -export([
-         all/0,
-         init_per_suite/1,
-         end_per_suite/1
+         all/0
         ]).
 
 -export([
@@ -20,8 +18,6 @@
          end_per_suite
         ]).
 
--type config() :: [{atom(), term()}].
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Common test
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,22 +27,20 @@ all() ->
   Exports = ?MODULE:module_info(exports),
   [F || {F, _} <- Exports, not lists:member(F, ?EXCLUDED_FUNS)].
 
--spec init_per_suite(config()) -> config().
-init_per_suite(Config) ->
-  Config.
-
--spec end_per_suite(config()) -> config().
-end_per_suite(_Config) ->
-  ok.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Test cases
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 encode_callback(_Config) ->
+  application:unset_env(egithub, json),
+  <<"{}">> = egithub_json:encode(#{}),
+
   application:set_env(egithub, json, egithub_json_example),
-  1 = egithub_json:encode(#{}).
+  <<"1">> = egithub_json:encode(#{}).
 
 decode_callback(_Config) ->
+  application:unset_env(egithub, json),
+  #{} = egithub_json:decode(<<"{}">>),
+
   application:set_env(egithub, json, egithub_json_example),
-  2 = egithub_json:decode(#{}).
+  2 = egithub_json:decode(<<>>).

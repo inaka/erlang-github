@@ -2,10 +2,14 @@
   application, egithub,
   [
    {description, "GitHub API client"},
-   {vsn, "0.1.15"},
-   {applications, [kernel, stdlib, ibrowse, ssl, lager]},
+   {vsn, "0.2.2"},
+   {applications, [kernel, stdlib, shotgun, ssl, lager]},
    {mod, {egithub, []}},
    {modules, []},
-   {registered, []}
+   {registered, []},
+   {maintainers, ["Inaka"]},
+   {licenses, ["Apache 2.0"]},
+   {links, [{"Github", "https://github.com/inaka/erlang-github"}]},
+   {build_tools, ["erlang.mk", "rebar"]}
   ]
 }.

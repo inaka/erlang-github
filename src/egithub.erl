@@ -1,3 +1,6 @@
+%% @doc Main module that implements the functions to interact with the GitHub's
+%%      API.
+%% @end
 -module(egithub).
 -behavior(application).
 
@@ -88,39 +91,52 @@
 -type issue_sort()       :: created | updated | comments.
 -type issue_sort_order() :: asc | desc.
 
--define(GITHUB_API, "https://api.github.com").
 -define(MAX_DESCRIPTION_LENGTH, 140).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% @hidden
 -spec start() -> {ok, [atom()]}.
 start() -> application:ensure_all_started(egithub).
 
 %% Application Behavior
 
+%% @hidden
 -spec start(application:start_type(), term()) ->
     {ok, pid()} | {ok, pid(), term()} | {error, term()}.
 start(_StartType, _Arg) ->
     egithub_sup:start_link().
 
+%% @hidden
 -spec stop(term()) -> ok.
 stop(_State) ->
     ok.
 
 %% Credentials
 
+%% @doc Takes a username and a password. Returns a value that can be used
+%%      for basic authentication.
+%% @end
 -spec basic_auth(string(), string()) -> egithub:credentials().
 basic_auth(User, Password) ->
     {basic, User, Password}.
 
+%% @doc Takes a valid OAuth token. Returns a value that can be used
+%%      for OAuth authentication.
+%% @end
 -spec oauth(binary()) -> egithub:credentials().
 oauth(Token) ->
     {oauth, Token}.
 
 %% Pull Requests
 
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame" and the pull request number.
+%%      Returns <code>{ok, Files}</code> where <code>Files</code> is the
+%%      decoded JSON representation of GitHub's response.
+%% @end
 -spec pull_req_files(credentials(), repository(), integer()) ->
     result().
 pull_req_files(Cred, Repo, PR) ->
@@ -129,8 +145,11 @@ pull_req_files(Cred, Repo, PR) ->
     Files = egithub_json:decode(Result),
     {ok, Files}.
 
+%% @equiv pull_req_comment_line(Credentials, Repo, PR, CommitId, Filename,
+%%                              Line, Text, #{post_method => run})
+%% @end
 -spec pull_req_comment_line(credentials(), repository(), integer(),
-                            string(), binary(), integer(), binary()) ->
+                            string(), binary(), integer(), iodata()) ->
     result().
 pull_req_comment_line(Cred, Repo, PR,
                       CommitId, Filename, Line, Text) ->
@@ -138,8 +157,14 @@ pull_req_comment_line(Cred, Repo, PR,
                           CommitId, Filename, Line, Text,
                           #{post_method => run}).
 
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame", the pull request number, the commit SHA, the
+%%      relative path to the repository's file, the line where the comment
+%%      shuold be added, the comment's text and some options.
+%%      Returns <code>ok</code> if everything goes well.
+%% @end
 -spec pull_req_comment_line(credentials(), repository(), integer(),
-                            string(), binary(), integer(), binary(),
+                            string(), binary(), integer(), iodata(),
                             options()) ->
     result().
 pull_req_comment_line(Cred, Repo, PR,
@@ -152,6 +177,11 @@ pull_req_comment_line(Cred, Repo, PR,
             },
     maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
 
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame" and the pull request number.
+%%      Returns <code>{ok, Comments}</code> where <code>Comments</code> is the
+%%      decoded JSON representation of GitHub's response.
+%% @end
 -spec pull_req_comments(credentials(), repository(), integer()) ->
     result().
 pull_req_comments(Cred, Repo, PR) ->
@@ -161,17 +191,21 @@ pull_req_comments(Cred, Repo, PR) ->
     {ok, Comments}.
 
 %% Issues
+%% @doc Create an issue
 -spec create_issue(credentials(), repository(), string(), string(), string(),
                    issue_labels()) -> result().
 create_issue(Cred, Repo, Title, Text, Assignee, Labels) ->
     create_issue(Cred, Repo, Title, Text, Assignee, 1, Labels,
                  #{post_method => run}).
 
+%% @doc Create an issue
 -spec create_issue(credentials(), repository(), string(), string(), string(),
                    pos_integer(), issue_labels()) -> result().
 create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels) ->
     create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels,
                  #{post_method => run}).
+
+%% @doc Create an issue
 -spec create_issue(credentials(), repository(), string(), string(), string(),
                    pos_integer(), issue_labels(), options()) -> result().
 create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels, Options) ->
@@ -183,7 +217,11 @@ create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels, Options) ->
              <<"labels">> => lists:map(fun to_bin/1, Labels)},
     maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
 
-%%TODO: think about handling optional arguments
+
+%% @doc List all issues across all the authenticated user's visible repositories
+%%      including owned repositories, member repositories, and organization
+%%      repositories
+%% @end
 -spec issues(credentials(), repository(), issue_state(), string()) -> result().
 issues(Cred, Repo, State, Labels) ->
     Args = #{<<"state">>  => State,
@@ -193,6 +231,9 @@ issues(Cred, Repo, State, Labels) ->
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
 
+%% @doc List all issues across owned and member repositories for the
+%%      authenticated user.
+%% @end
 -spec issues_user(credentials()) -> result().
 issues_user(Cred) ->
     Url = make_url(issues_user, {undefined}),
@@ -200,6 +241,7 @@ issues_user(Cred) ->
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
 
+%% @doc List all issues for a given organization for the authenticated user.
 -spec issues_org(credentials(), string()) -> result().
 issues_org(Cred, Org) ->
     Url = make_url(issues, {Org}),
@@ -207,12 +249,19 @@ issues_org(Cred, Org) ->
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
 
--spec issue_comment(credentials(), repository(), integer(), binary()) ->
-                           result().
+%% @equiv issue_comment(Cred, Repo, PR, Text, #{post_method => run})
+-spec issue_comment(credentials(), repository(), integer(), iodata()) ->
+    result().
 issue_comment(Cred, Repo, PR, Text) ->
     issue_comment(Cred, Repo, PR, Text, #{post_method => run}).
 
--spec issue_comment(credentials(), repository(), integer(), binary(),
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame", the issue number, the comment's text and some
+%%      options.
+%%      Returns <code>{ok, RespBody}</code> if everything goes well, where
+%%      <code>RespBody</code> is the plain text body returned by GitHub.
+%% @end
+-spec issue_comment(credentials(), repository(), integer(), iodata(),
                     options()) ->
    result().
 issue_comment(Cred, Repo, PR, Text, Options) ->
@@ -220,6 +269,11 @@ issue_comment(Cred, Repo, PR, Text, Options) ->
     Body = #{<<"body">> => Text},
     maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
 
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame" and the issue number.
+%%      Returns <code>{ok, Comments}</code> where <code>Comments</code> is the
+%%      decoded JSON representation of GitHub's response.
+%% @end
 -spec issue_comments(credentials(), repository(), integer()) ->
     result().
 issue_comments(Cred, Repo, PR) ->
@@ -230,6 +284,7 @@ issue_comments(Cred, Repo, PR) ->
 
 %% Files
 
+%% @doc Fetches the contents of a file for a given repository and commit SHA.
 -spec file_content(credentials(), repository(), string(), string()) -> result().
 file_content(Cred, Repo, CommitId, Filename) ->
     Url = make_url(file_content, {Repo, CommitId, Filename}),
@@ -245,16 +300,25 @@ file_content(Cred, Repo, CommitId, Filename) ->
 
 %% Users
 
+%% @doc Get the information for the user associated with the provided
+%%      credentials.
+%% @end
 -spec user(credentials()) -> result().
 user(Cred) ->
     Url = make_url(user, {}),
     api_call_json_result(Cred, Url).
 
+%% @doc Get the information for the user associated with the provided
+%%      <code>Username</code>.
+%% @end
 -spec user(credentials(), string()) -> result().
 user(Cred, Username) ->
     Url = make_url(user, {Username}),
     api_call_json_result(Cred, Url).
 
+%% @doc Get the emails registered for the user associated with the provided
+%%      credentials.
+%% @end
 -spec user_emails(credentials()) -> result().
 user_emails(Cred) ->
     Url = make_url(user_emails, {}),
@@ -262,15 +326,24 @@ user_emails(Cred) ->
 
 %% Orgs
 
+%% @doc Get the organizations for the user associated with the provided
+%%      credentials.
+%% @end
 -spec orgs(credentials()) -> result().
 orgs(Cred) ->
     orgs(Cred, undefined).
 
+%% @doc Get the organizations for the user associated with the provided
+%%      <code>Username</code>.
+%% @end
 -spec orgs(credentials(), string()) -> result().
 orgs(Cred, User) ->
     Url = make_url(orgs, {User}),
     api_call_json_result(Cred, Url).
 
+%% @doc Check if the user associated with the provided credentials is a
+%%      member of <code>OrgName</code>.
+%% @end
 -spec org_membership(credentials(), string()) -> result().
 org_membership(Cred, OrgName) ->
   Url = make_url({orgs, memberships}, {OrgName}),
@@ -278,24 +351,43 @@ org_membership(Cred, OrgName) ->
 
 %% Repos
 
+%% @doc Get the repository information of <code>RepoFullName</code>
+%%      (i.e. "username/reponame").
+%% @end
 -spec repo(credentials(), string()) -> result().
 repo(Cred, RepoFullName) ->
     Url = make_url(repo, {RepoFullName}),
     api_call_json_result(Cred, Url).
 
+%% @equiv repos(Cred, undefined, Opts)
 -spec repos(credentials(), map()) -> result().
 repos(Cred, Opts) ->
     repos(Cred, undefined, Opts).
 
+%% @doc Get the repositories associated with the user provided
+%%      taking into account the options supplied. If the <code>User</code>
+%%      is <code>undefined</code> then the user taken into account is
+%%      the one with the credentials.
+%%      The options available depend on the GitHub API specs.
+%%      Check
+%%      <a href="https://developer.github.com/v3/repos/#parameters">here</a>
+%%      for more information.
+%% @end
 -spec repos(credentials(), string(), map()) -> result().
 repos(Cred, User, Opts) ->
     Url = make_url(repos, {User, Opts}),
     api_call_json_result(Cred, Url).
 
+%% @doc Same as repos/2 but if there are a lot of repos that need to be paged
+%%      handles the paging, asking for all pages until it gets an empty page.
+%% @end
 -spec all_repos(credentials(), map()) -> result().
 all_repos(Cred, Opts) ->
     all_repos(Cred, undefined, Opts#{page => 1}, []).
 
+%% @doc Same as repos/3 but if there are a lot of repos that need to be paged
+%%      handles the paging, asking for all pages until it gets an empty page.
+%% @end
 -spec all_repos(credentials(), string(), map()) -> result().
 all_repos(Cred, User, Opts) ->
     all_repos(Cred, User, Opts#{page => 1}, []).
@@ -310,11 +402,13 @@ all_repos(Cred, User, Opts = #{page := Page}, Results) ->
             {error, Reason}
     end.
 
+%% @doc Same as repos/3 but for an organization.
 -spec org_repos(credentials(), string(), map()) -> result().
 org_repos(Cred, Org, Opts) ->
     Url = make_url(org_repos, {Org, Opts}),
     api_call_json_result(Cred, Url).
 
+%% @doc Same as all_repos/3 but for an organization.
 -spec all_org_repos(credentials(), string(), map()) -> result().
 all_org_repos(Cred, Org, Opts) ->
     all_org_repos(Cred, Org, Opts#{page => 1}, []).
@@ -333,11 +427,13 @@ all_org_repos(Cred, Org, Opts = #{page := Page}, Results) ->
 
 %% Teams
 
+%% @doc Gets all the teams from an organization.
 -spec teams(credentials(), string()) -> result().
 teams(Cred, Org) ->
     Url = make_url(teams, {Org}),
     api_call_json_result(Cred, Url).
 
+%% @doc Creates a team in an organization.
 -spec create_team(credentials(), string(), string(), string(), [string()]) ->
     result().
 create_team(Cred, Org, Name, Permission, Repos) ->
@@ -356,6 +452,7 @@ create_team(Cred, Org, Name, Permission, Repos) ->
             Other
     end.
 
+%% @doc Add a repository to a team.
 -spec add_team_repository(credentials(), integer(), string()) -> result().
 add_team_repository(Cred, TeamId, RepoFullName) ->
     Url = make_url(teams_repos, {TeamId, RepoFullName}),
@@ -366,6 +463,7 @@ add_team_repository(Cred, TeamId, RepoFullName) ->
             Error
     end.
 
+%% @doc Add a member to a team.
 -spec add_team_member(credentials(), integer(), string()) -> result().
 add_team_member(Cred, TeamId, Username) ->
     Url = make_url(teams, {TeamId, Username}),
@@ -376,6 +474,7 @@ add_team_member(Cred, TeamId, Username) ->
             Error
     end.
 
+%% @doc Delete a member from a team.
 -spec delete_team_member(credentials(), integer(), string()) -> result().
 delete_team_member(Cred, TeamId, Username) ->
     Url = make_url(teams, {TeamId, Username}),
@@ -386,6 +485,7 @@ delete_team_member(Cred, TeamId, Username) ->
             Error
     end.
 
+%% @doc Check the membership of a user in a team.
 -spec team_membership(credentials(), integer(), string()) ->
     active | pending | none.
 team_membership(Cred, TeamId, Username) ->
@@ -399,11 +499,13 @@ team_membership(Cred, TeamId, Username) ->
 
 %% Hooks
 
+%% @doc Get all hooks for a repository.
 -spec hooks(credentials(), repository()) -> result().
 hooks(Cred, Repo) ->
     Url = make_url(hooks, {Repo}),
     api_call_json_result(Cred, Url).
 
+%% @doc Create a webhook in a repository.
 -spec create_webhook(credentials(), repository(), string(), [string()]) ->
     result().
 create_webhook(Cred, Repo, WebhookUrl, Events) ->
@@ -423,6 +525,7 @@ create_webhook(Cred, Repo, WebhookUrl, Events) ->
             {error, Reason}
     end.
 
+%% @doc Delete a webhook from a repository.
 -spec delete_webhook(credentials(), repository(), string()) -> result().
 delete_webhook(Cred, Repo, Id) ->
     IdStr = to_str(Id),
@@ -437,6 +540,7 @@ delete_webhook(Cred, Repo, Id) ->
 
 %% Collaborators
 
+%% @doc Get all collaborators in a repository.
 -spec collaborators(credentials(), repository()) -> result().
 collaborators(Cred, Repo) ->
     Url = make_url(collaborators, {Repo}),
@@ -448,6 +552,7 @@ collaborators(Cred, Repo) ->
             {error, Reason}
     end.
 
+%% @doc Add a collaborator to a repository.
 -spec add_collaborator(credentials(), repository(), string()) -> result().
 add_collaborator(Cred, Repo, Collaborator) ->
     Url = make_url(collaborators, {Repo, Collaborator}),
@@ -458,6 +563,7 @@ add_collaborator(Cred, Repo, Collaborator) ->
             {error, Reason}
     end.
 
+%% @doc Remove a collaborator from a repository.
 -spec remove_collaborator(credentials(), repository(), string()) -> result().
 remove_collaborator(Cred, Repo, Collaborator) ->
     Url = make_url(collaborators, {Repo, Collaborator}),
@@ -470,17 +576,29 @@ remove_collaborator(Cred, Repo, Collaborator) ->
 
 %% Statuses
 
+%% @equiv create_status(Cred, Repo, Sha, State, Description, Context, undefined)
 -spec create_status(
     credentials(), repository(), string(), state(), string(), string()) ->
     result().
 create_status(Cred, Repo, Sha, State, Description, Context) ->
+    create_status(Cred, Repo, Sha, State, Description, Context, undefined).
+
+%% @doc Create a new status for the provided <code>SHA</code>.
+-spec create_status(
+    credentials(), repository(), string(), state(), string(), string(),
+    string() | undefined) -> result().
+create_status(Cred, Repo, Sha, State, Description, Context, TargetUrl) ->
     Url = make_url(new_status, {Repo, Sha}),
     FormatDescription = format_description(Description),
     Data = #{<<"state">>        => State,
-             <<"description">>  => to_bin(FormatDescription),
-             <<"context">>      => to_bin(Context)
+             <<"description">>  => list_to_binary(FormatDescription),
+             <<"context">>      => list_to_binary(Context)
             },
-    Body = egithub_json:encode(Data),
+    Data1 = case TargetUrl of
+                undefined -> Data;
+                _ -> Data#{<<"target_url">> => list_to_binary(TargetUrl)}
+            end,
+    Body = egithub_json:encode(Data1),
     case egithub_req:run(Cred, Url, post, Body) of
         {ok, Result} ->
             JsonResult = egithub_json:decode(Result),
@@ -489,30 +607,15 @@ create_status(Cred, Repo, Sha, State, Description, Context) ->
             {error, Reason}
     end.
 
--spec create_status(
-    credentials(), repository(), string(), state(), string(), string(),
-    string()) -> result().
-create_status(Cred, Repo, Sha, State, Description, Context, TargetUrl) ->
-    Url = make_url(new_status, {Repo, Sha}),
-    Data = #{<<"state">>        => State,
-             <<"description">>  => to_bin(Description),
-             <<"context">>      => to_bin(Context),
-             <<"target_url">>   => to_bin(TargetUrl)
-            },
-    Body = egithub_json:encode(Data),
-    case egithub_req:run(Cred, Url, post, Body) of
-        {ok, Result} ->
-            JsonResult = egithub_json:decode(Result),
-            {ok, JsonResult};
-        {error, Reason} ->
-            {error, Reason}
-    end.
-
+%% @doc Get all statuses for the provided repository and <code>SHA</code>.
 -spec statuses(credentials(), repository(), string()) -> result().
 statuses(Cred, Repo, Ref) ->
     Url = make_url(statuses, {Repo, Ref}),
     api_call_json_result(Cred, Url).
 
+%% @doc Get a result with the combined values of all statuses for the
+%%      provided repository and <code>SHA</code>.
+%% @end
 -spec combined_status(credentials(), repository(), string()) -> result().
 combined_status(Cred, Repo, Ref) ->
     Url = make_url(status, {Repo, Ref}),
@@ -522,8 +625,8 @@ combined_status(Cred, Repo, Ref) ->
 %% Private Functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%doc format_description format the description to avoid error 422
-%doc The message submitted is longer that the maximum length of 140 characters
+%% @doc format_description format the description to avoid error 422
+%% The message submitted is longer that the maximum length of 140 characters
 -spec format_description(string()) -> string().
 format_description(Description) ->
   case length(Description) of
@@ -535,23 +638,23 @@ format_description(Description) ->
 
 %% Create Status
 make_url(new_status, {Repo, Sha}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/statuses/~s",
+    Url = "/repos/~s/statuses/~s",
     io_lib:format(Url, [Repo, Sha]);
 
 %% Statuses
 make_url(statuses, {Repo, Sha}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/commits/~s/statuses",
+    Url = "/repos/~s/commits/~s/statuses",
     io_lib:format(Url, [Repo, Sha]);
 
 %% Status
 make_url(status, {Repo, Sha}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/commits/~s/status",
+    Url = "/repos/~s/commits/~s/status",
     io_lib:format(Url, [Repo, Sha]);
 
 %% Pull Resquest
 make_url({pull_req, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
-    Url = ?GITHUB_API ++ "/repos/~s/pulls/~p/" ++ SubentityStr,
+    Url = "/repos/~s/pulls/~p/" ++ SubentityStr,
     io_lib:format(Url, [Repo, PR]);
 
 %% Issues
@@ -568,53 +671,53 @@ make_url(issue, {Repo}) ->
     io_lib:format(?GITHUB_API ++ "/repos/~s/issues", [Repo]);
 make_url({issue, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
-    Url = ?GITHUB_API ++ "/repos/~s/issues/~p" ++ SubentityStr,
+    Url = "/repos/~s/issues/~p/" ++ SubentityStr,
     io_lib:format(Url, [Repo, PR]);
 
 %% Files
 make_url(file_content, {Repo, CommitId, Filename}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/contents/~s?ref=~s",
+    Url = "/repos/~s/contents/~s?ref=~s",
     io_lib:format(Url, [Repo, Filename, CommitId]);
 
 %% User
 make_url(user, {}) ->
-    Url = ?GITHUB_API ++ "/user",
+    Url = "/user",
     io_lib:format(Url, []);
 make_url(user, {Username}) ->
-    Url = ?GITHUB_API ++ "/users/~s",
+    Url = "/users/~s",
     io_lib:format(Url, [Username]);
 make_url(user_emails, {}) ->
-    Url = ?GITHUB_API ++ "/user/emails",
+    Url = "/user/emails",
     io_lib:format(Url, []);
 
 %% Organizations
 make_url(orgs, {undefined}) ->
-    Url = ?GITHUB_API ++ "/user/orgs",
+    Url = "/user/orgs",
     io_lib:format(Url, []);
 make_url(orgs, {User}) ->
-    Url = ?GITHUB_API ++ "/users/~s/orgs",
+    Url = "/users/~s/orgs",
     io_lib:format(Url, [User]);
 make_url({orgs, memberships}, {OrgName}) ->
-  Url = ?GITHUB_API ++ "/user/memberships/orgs/~s",
+  Url = "/user/memberships/orgs/~s",
   io_lib:format(Url, [OrgName]);
 
 %% Teams
 make_url(teams, {Org}) ->
-    Url = ?GITHUB_API ++ "/orgs/~s/teams",
+    Url = "/orgs/~s/teams",
     io_lib:format(Url, [Org]);
 make_url(teams, {TeamId, Username}) ->
-    Url = ?GITHUB_API ++ "/teams/~p/members/~s",
+    Url = "/teams/~p/members/~s",
     io_lib:format(Url, [TeamId, Username]);
 make_url(teams_repos, {TeamId, RepoFullName}) ->
-    Url = ?GITHUB_API ++ "/teams/~p/repos/~s",
+    Url = "/teams/~p/repos/~s",
     io_lib:format(Url, [TeamId, RepoFullName]);
 make_url(team_membership, {TeamId, Username}) ->
-    Url = ?GITHUB_API ++ "/teams/~p/memberships/~s",
+    Url = "/teams/~p/memberships/~s",
     io_lib:format(Url, [TeamId, Username]);
 
 %% Repositories
 make_url(repo, {RepoFullName}) ->
-    Url = ?GITHUB_API ++ "/repos/~s",
+    Url = "/repos/~s",
     io_lib:format(Url, [RepoFullName]);
 make_url(repos, {User, Opts}) ->
     Type = maps:get(type, Opts, "all"),
@@ -623,32 +726,31 @@ make_url(repos, {User, Opts}) ->
     Page = maps:get(page, Opts, 1),
     case User of
         undefined ->
-            Url = ?GITHUB_API
-                ++ "/user/repos?type=~s&sort=~s&direction=~s&page=~p",
+            Url = "/user/repos?type=~s&sort=~s&direction=~s&page=~p",
             io_lib:format(Url, [Type, Sort, Direction, Page]);
         User ->
-            Url = ?GITHUB_API ++ "/users/~s/repos?page=~p",
+            Url = "/users/~s/repos?page=~p",
             io_lib:format(Url, [User, Page])
     end;
 make_url(org_repos, {User, Opts}) ->
     Page = maps:get(page, Opts, 1),
-    Url = ?GITHUB_API ++ "/orgs/~s/repos?page=~p",
+    Url = "/orgs/~s/repos?page=~p",
     io_lib:format(Url, [User, Page]);
 
 %% Hooks
 make_url(hooks, {Repo}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/hooks",
+    Url = "/repos/~s/hooks",
     io_lib:format(Url, [Repo]);
 make_url(hooks, {Repo, Id}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/hooks/~s",
+    Url = "/repos/~s/hooks/~s",
     io_lib:format(Url, [Repo, Id]);
 
 %% Colaborators
 make_url(collaborators, {Repo}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/collaborators",
+    Url = "/repos/~s/collaborators",
     io_lib:format(Url, [Repo]);
 make_url(collaborators, {Repo, Username}) ->
-    Url = ?GITHUB_API ++ "/repos/~s/collaborators/~s",
+    Url = "/repos/~s/collaborators/~s",
     io_lib:format(Url, [Repo, Username]).
 
 api_call_json_result(Cred, Url) ->

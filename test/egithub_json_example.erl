@@ -13,8 +13,8 @@
 
 -spec encode(map()) -> binary().
 encode(_Map) ->
-  1.
+  <<"1">>.
 
--spec decode(binary()) -> map().
+-spec decode(binary()) -> 2.
 decode(_Json) ->
   2.
