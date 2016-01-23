@@ -144,7 +144,7 @@ handle_pull_request(Module, Cred,
 
 %% @doc Comment files that failed rules.
 -spec write_comments(
-    etighub:credentials(), string(), map(), [map()], [message()]) -> ok.
+    egithub:credentials(), string(), map(), [map()], [message()]) -> ok.
 write_comments(Cred, Repo, PR, Comments, Messages) ->
   lager:debug(
     "[Github WH] About to write ~p messages (there are already ~p comments)",
