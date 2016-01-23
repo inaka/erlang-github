@@ -86,10 +86,7 @@
 -type options()          :: #{post_method => queue | run}.
 -type result()           :: ok | {ok, term()} | {error, term()}.
 -type issue_labels()     :: list(binary()).
--type issue_filter()     :: assigned | created | mentioned | subscribed | all.
 -type issue_state()      :: open | closed | all.
--type issue_sort()       :: created | updated | comments.
--type issue_sort_order() :: asc | desc.
 
 -define(MAX_DESCRIPTION_LENGTH, 140).
 
