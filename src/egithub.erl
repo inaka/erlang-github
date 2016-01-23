@@ -82,6 +82,7 @@
 -type repository()       :: string(). %% "username/reponame"
 -type options()          :: #{post_method => queue | run}.
 -type result()           :: ok | {ok, term()} | {error, term()}.
+-type issue_labels()     :: list(binary()).
 -type issue_filter()     :: assigned | created | mentioned | subscribed | all.
 -type issue_state()      :: open | closed | all.
 -type issue_sort()       :: created | updated | comments.
@@ -160,19 +161,19 @@ pull_req_comments(Cred, Repo, PR) ->
     {ok, Comments}.
 
 %% Issues
--spec create_issue(credentials(), repository(), binary(), binary(), binary(),
-                   list(binary())) -> result().
+-spec create_issue(credentials(), repository(), string(), string(), string(),
+                   issue_labels()) -> result().
 create_issue(Cred, Repo, Title, Text, Assignee, Labels) ->
     create_issue(Cred, Repo, Title, Text, Assignee, 1, Labels,
                  #{post_method => run}).
 
--spec create_issue(credentials(), repository(), binary(), binary(), binary(),
-                   pos_integer(), list(binary())) -> result().
+-spec create_issue(credentials(), repository(), string(), string(), string(),
+                   pos_integer(), issue_labels()) -> result().
 create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels) ->
     create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels,
                  #{post_method => run}).
 -spec create_issue(credentials(), repository(), string(), string(), string(),
-                   integer(), list(string()), options()) -> result().
+                   pos_integer(), issue_labels(), options()) -> result().
 create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels, Options) ->
     Url = make_url(issue, {Repo}),
     Body = #{<<"title">> => to_bin(Title),
