@@ -659,16 +659,16 @@ make_url({pull_req, Subentity}, {Repo, PR}) ->
 
 %% Issues
 make_url(issues, {undefined}) ->
-    io_lib:format(?GITHUB_API ++ "/issues", []);
+    io_lib:format("/issues", []);
 make_url(issues, {Repo, Args}) ->
     QS = build_query_string(Args),
-    io_lib:format(?GITHUB_API ++ "/repos/~s/issues?~s", [Repo, QS]);
+    io_lib:format("/repos/~s/issues?~s", [Repo, QS]);
 make_url(issue_user, {undefined}) ->
-    io_lib:format(?GITHUB_API ++ "/user/issues", []);
+    io_lib:format("/user/issues", []);
 make_url(issues, {Org}) ->
-    io_lib:format(?GITHUB_API ++ "/org/~s/issues", [Org]);
+    io_lib:format("/org/~s/issues", [Org]);
 make_url(issue, {Repo}) ->
-    io_lib:format(?GITHUB_API ++ "/repos/~s/issues", [Repo]);
+    io_lib:format("/repos/~s/issues", [Repo]);
 make_url({issue, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = "/repos/~s/issues/~p/" ++ SubentityStr,
