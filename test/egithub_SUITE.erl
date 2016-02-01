@@ -8,6 +8,7 @@
 
 -export([
          pull_reqs/1,
+         issue_comments/1,
          issues/1,
          files/1,
          users/1,
@@ -91,7 +92,7 @@ pull_reqs(_Config) ->
     meck:unload(shotgun)
   end.
 
-issues(_Config) ->
+issue_comments(_Config) ->
   Credentials = github_credentials(),
 
   meck:new(shotgun, [passthrough]),
@@ -120,6 +121,17 @@ issues(_Config) ->
     {ok, _} = egithub:issue_comments(Credentials, "user/repo", 1)
   after
     meck:unload(shotgun)
+  end.
+
+issues(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(shotgun, [passthrough]),
+  try
+      %%TODO: implement create tests
+      %%TODO: implement list tests
+  after
+      meck:unload(shotgun)
   end.
 
 files(_Config) ->
