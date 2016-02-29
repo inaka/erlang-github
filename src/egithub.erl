@@ -23,12 +23,13 @@
          issue_comment/5,
          issue_comments/3,
          %% Issues
-         create_issue/6,
          create_issue/7,
          create_issue/8,
-         issues/4,
-         issues_user/1,
-         issues_org/2,
+         create_issue/9,
+         all_issues/2,
+         all_issues/3,
+         issues_user/2,
+         issues_org/3,
          %% Users
          user/1,
          user/2,
@@ -79,14 +80,13 @@
              ]).
 
 %% Types
--type state()            :: pending | success | error | failure.
--type credentials()      :: {basic, Username :: string(), Password :: string()}
+-type state()        :: pending | success | error | failure.
+-type credentials()  :: {basic, Username :: string(), Password :: string()}
                           | {oauth, Token :: string()}.
--type repository()       :: string(). %% "username/reponame"
--type options()          :: #{post_method => queue | run}.
--type result()           :: ok | {ok, term()} | {error, term()}.
--type issue_labels()     :: list(binary()).
--type issue_state()      :: open | closed | all.
+-type repository()   :: string(). %% "username/reponame"
+-type options()      :: #{post_method => queue | run}.
+-type result()       :: ok | {ok, term()} | {error, term()}.
+-type issue_labels() :: list(string()).
 
 -define(MAX_DESCRIPTION_LENGTH, 140).
 
@@ -189,29 +189,31 @@ pull_req_comments(Cred, Repo, PR) ->
 
 %% Issues
 %% @doc Create an issue
--spec create_issue(credentials(), repository(), string(), string(), string(),
-                   issue_labels()) -> result().
-create_issue(Cred, Repo, Title, Text, Assignee, Labels) ->
-    create_issue(Cred, Repo, Title, Text, Assignee, 1, Labels,
+-spec create_issue(credentials(), string(), repository(), string(), string(),
+                   string(), issue_labels()) -> result().
+create_issue(Cred, Username, Repo, Title, Text, Assignee, Labels) ->
+    create_issue(Cred, Username, Repo, Title, Text, Assignee, 1, Labels,
                  #{post_method => run}).
 
 %% @doc Create an issue
--spec create_issue(credentials(), repository(), string(), string(), string(),
-                   pos_integer(), issue_labels()) -> result().
-create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels) ->
-    create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels,
+-spec create_issue(credentials(), string(), repository(), string(), string(),
+                   string(), pos_integer(), issue_labels()) -> result().
+create_issue(Cred, Username, Repo, Title, Text, Assignee, Milestone, Labels) ->
+    create_issue(Cred, Username, Repo, Title, Text, Assignee, Milestone, Labels,
                  #{post_method => run}).
 
 %% @doc Create an issue
--spec create_issue(credentials(), repository(), string(), string(), string(),
-                   pos_integer(), issue_labels(), options()) -> result().
-create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels, Options) ->
-    Url = make_url(issue, {Repo}),
-    Body = #{<<"title">> => to_bin(Title),
-             <<"body">>  => to_bin(Text),
-             <<"assignee">> => to_bin(Assignee),
-             <<"milestone">> => Milestone,
-             <<"labels">> => lists:map(fun to_bin/1, Labels)},
+-spec create_issue(credentials(), string(), repository(), string(), string(),
+                   string(), pos_integer(), issue_labels(), options()) ->
+                          result().
+create_issue(Cred, Username, Repo, Title, Text, Assignee, Milestone, Labels,
+             Options) ->
+    Url = make_url(issue, {Username, Repo}),
+    Body = #{title     => to_bin(Title),
+             body      => to_bin(Text),
+             assignee  => to_bin(Assignee),
+             milestone => Milestone,
+             labels    => lists:map(fun to_bin/1, Labels)},
     maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
 
 
@@ -219,11 +221,16 @@ create_issue(Cred, Repo, Title, Text, Assignee, Milestone, Labels, Options) ->
 %%      including owned repositories, member repositories, and organization
 %%      repositories
 %% @end
--spec issues(credentials(), repository(), issue_state(), string()) -> result().
-issues(Cred, Repo, State, Labels) ->
-    Args = #{<<"state">>  => State,
-             <<"labels">> => Labels},
-    Url = make_url(issues, {Repo, Args}),
+-spec all_issues(credentials(), map()) -> result().
+all_issues(Cred, Opts) ->
+    Url = make_url(issues, {Opts}),
+    {ok, Result} = egithub_req:run(Cred, Url),
+    Issues = egithub_json:decode(Result),
+    {ok, Issues}.
+
+-spec all_issues(credentials(), repository(), map()) -> result().
+all_issues(Cred, Repo, Opts) ->
+    Url = make_url(issues, {Repo, Opts}),
     {ok, Result} = egithub_req:run(Cred, Url),
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
@@ -231,17 +238,17 @@ issues(Cred, Repo, State, Labels) ->
 %% @doc List all issues across owned and member repositories for the
 %%      authenticated user.
 %% @end
--spec issues_user(credentials()) -> result().
-issues_user(Cred) ->
-    Url = make_url(issues_user, {undefined}),
+-spec issues_user(credentials(), map()) -> result().
+issues_user(Cred, Opts) ->
+    Url = make_url(issues_user, {Opts}),
     {ok, Result} = egithub_req:run(Cred, Url),
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
 
 %% @doc List all issues for a given organization for the authenticated user.
--spec issues_org(credentials(), string()) -> result().
-issues_org(Cred, Org) ->
-    Url = make_url(issues, {Org}),
+-spec issues_org(credentials(), string(), map()) -> result().
+issues_org(Cred, Org, Opts) ->
+    Url = make_url(issues_org, {Org, Opts}),
     {ok, Result} = egithub_req:run(Cred, Url),
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
@@ -655,17 +662,17 @@ make_url({pull_req, Subentity}, {Repo, PR}) ->
     io_lib:format(Url, [Repo, PR]);
 
 %% Issues
-make_url(issues, {undefined}) ->
-    io_lib:format("/issues", []);
-make_url(issues, {Repo, Args}) ->
-    QS = build_query_string(Args),
-    io_lib:format("/repos/~s/issues?~s", [Repo, QS]);
-make_url(issue_user, {undefined}) ->
-    io_lib:format("/user/issues", []);
-make_url(issues, {Org}) ->
-    io_lib:format("/org/~s/issues", [Org]);
-make_url(issue, {Repo}) ->
-    io_lib:format("/repos/~s/issues", [Repo]);
+make_url(issue, {User, Repo}) ->
+    io_lib:format("/repos/~s/~s/issues", [User, Repo]);
+make_url(issues, {Opts}) ->
+    maybe_append_qs_params(issues, "/issues", Opts);
+make_url(issue_user, {Opts}) ->
+    maybe_append_qs_params(issues, "/user/issues", Opts);
+make_url(issues_org, {Org, Opts}) ->
+    Url = io_lib:format("/org/~s/issues", [Org]),
+    maybe_append_qs_params(issues, Url, Opts);
+
+%% Issues comments etc
 make_url({issue, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = "/repos/~s/issues/~p/" ++ SubentityStr,
@@ -767,13 +774,21 @@ maybe_queue_request(Cred, Url, JsonBody, Options) ->
             egithub_req:queue(Cred, Url, post, JsonBody)
     end.
 
-build_query_string(Args) ->
-    Parts = maps:fold(
-              fun (K, V, Acc) ->
-                      Part = to_str(K) ++ "=" ++ http_uri:encode(to_str(V)),
-                      [Part | Acc]
-              end, [], Args),
-    string:join(lists:reverse(Parts), "&").
+maybe_append_qs_params(issues, Url, Opts) ->
+    Filter    = maps:get(filter, Opts, "assigned"),
+    State     = maps:get(state, Opts, "open"),
+    Labels    = maps:get(labels, Opts, ""),
+    Sort      = maps:get(sort, Opts, "created"),
+    Direction = maps:get(direction, Opts, "asc"),
+    Since     = maps:get(since, Opts, ""),
+    case Opts of
+        undefined ->
+            io_lib:format(Url, []);
+        _Filter ->
+            QS = "?filter=~s&state=~s&labels=~s&sort=~s&direction=~s&since=~s",
+            io_lib:format(Url ++ QS, [Filter, State, Labels, Sort, Direction,
+                                      Since])
+    end.
 
 to_str(Arg) when is_binary(Arg) ->
     unicode:characters_to_list(Arg);

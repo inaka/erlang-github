@@ -128,8 +128,19 @@ issues(_Config) ->
 
   meck:new(shotgun, [passthrough]),
   try
-      %%TODO: implement create tests
-      %%TODO: implement list tests
+      CreateIssueFun = match_fun("/repos/user/repo/issues", post),
+      meck:expect(shotgun, request, CreateIssueFun),
+      {ok, _} = egithub:create_issue(Credentials, "user", "repo", "title",
+                                     "text", "user", ["bug"]),
+
+      AllIssuesFun = match_fun("/issues", get),
+      meck:expect(shotgun, request, AllIssuesFun),
+      {ok, _} = egithub:all_issues(Credentials, #{state => "open"}),
+
+      UserIssuesFun = match_fun("/user/issues", get),
+      meck:expect(shotgun, request, UserIssuesFun),
+      {ok, _} = egithub:issues_user(Credentials, #{})
+
   after
       meck:unload(shotgun)
   end.
