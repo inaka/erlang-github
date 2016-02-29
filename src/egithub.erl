@@ -781,10 +781,10 @@ maybe_append_qs_params(issues, Url, Opts) ->
     Sort      = maps:get(sort, Opts, "created"),
     Direction = maps:get(direction, Opts, "asc"),
     Since     = maps:get(since, Opts, ""),
-    case Opts of
-        undefined ->
+    case maps:size(Opts) > 0 of
+        false ->
             io_lib:format(Url, []);
-        _Filter ->
+        true ->
             QS = "?filter=~s&state=~s&labels=~s&sort=~s&direction=~s&since=~s",
             io_lib:format(Url ++ QS, [Filter, State, Labels, Sort, Direction,
                                       Since])
