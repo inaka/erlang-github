@@ -8,6 +8,7 @@
 
 -export([
          pull_reqs/1,
+         issue_comments/1,
          issues/1,
          files/1,
          users/1,
@@ -91,7 +92,7 @@ pull_reqs(_Config) ->
     meck:unload(shotgun)
   end.
 
-issues(_Config) ->
+issue_comments(_Config) ->
   Credentials = github_credentials(),
 
   meck:new(shotgun, [passthrough]),
@@ -120,6 +121,28 @@ issues(_Config) ->
     {ok, _} = egithub:issue_comments(Credentials, "user/repo", 1)
   after
     meck:unload(shotgun)
+  end.
+
+issues(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(shotgun, [passthrough]),
+  try
+      CreateIssueFun = match_fun("/repos/user/repo/issues", post),
+      meck:expect(shotgun, request, CreateIssueFun),
+      {ok, _} = egithub:create_issue(Credentials, "user", "repo", "title",
+                                     "text", "user", ["bug"]),
+
+      AllIssuesFun = match_fun("/issues", get),
+      meck:expect(shotgun, request, AllIssuesFun),
+      {ok, _} = egithub:all_issues(Credentials, #{state => "open"}),
+
+      UserIssuesFun = match_fun("/user/issues", get),
+      meck:expect(shotgun, request, UserIssuesFun),
+      {ok, _} = egithub:issues_user(Credentials, #{})
+
+  after
+      meck:unload(shotgun)
   end.
 
 files(_Config) ->
