@@ -72,23 +72,15 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
     <<"pull_request">> ->
       EventData = egithub_json:decode(Body),
       set_status(pending, StatusCred, ToolName, Context, EventData),
-      try do_handle_pull_request(Module, CommentsCred, EventData) of
-        clean ->
-          set_status(success, StatusCred, ToolName, Context, EventData),
-          ok;
-        with_warnings ->
-          set_status(error, StatusCred, ToolName, Context, EventData),
-          ok;
-        {error, Error} ->
-          set_status(
-            {failure, Error}, StatusCred, ToolName, Context, EventData),
-          {error, Error}
+      try
+        Result = do_handle_pull_request(Module, CommentsCred, EventData),
+        specify_status(Result, StatusCred, Module, Context, EventData)
       catch
         _:Error ->
           _ = lager:warning(
             "event:Error ~p Module: ~p ToolName: ~p "
             "Context: ~p EventData: ~p get_stacktrace: ~p",
-            [Error
+            [ Error
             , Module
             , ToolName
             , Context
@@ -107,7 +99,35 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Statuses
+-spec specify_status( atom() | {atom(), any()} | {atom(), any(), string()}
+                    , egithub:credentials(), atom(), string()
+                    , egithub_json:json()) -> ok | {error, any()}.
+specify_status(clean, StatusCred, ToolName, Context, EventData) ->
+  set_status(success, StatusCred, ToolName, Context, EventData),
+  ok;
+specify_status({clean, TargetUrl}, StatusCred, ToolName, Context, EventData) ->
+  set_status(success, StatusCred, ToolName, Context, EventData, TargetUrl),
+  ok;
+specify_status(with_warnings, StatusCred, ToolName, Context, EventData) ->
+  set_status(error, StatusCred, ToolName, Context, EventData),
+  ok;
+specify_status( {with_warnings, TargetUrl}, StatusCred, ToolName, Context
+              , EventData) ->
+  set_status(error, StatusCred, ToolName, Context, EventData, TargetUrl),
+  ok;
+specify_status({error, Error}, StatusCred, ToolName, Context, EventData) ->
+  set_status({failure, Error}, StatusCred, ToolName, Context, EventData),
+  {error, Error};
+specify_status( {error, Error, TargetUrl}, StatusCred, ToolName, Context
+              , EventData) ->
+  set_status( {failure, Error}, StatusCred, ToolName, Context, EventData
+            , TargetUrl),
+  {error, Error}.
+
 set_status(FullState, StatusCred, ToolName, Context, EventData) ->
+  set_status(FullState, StatusCred, ToolName, Context, EventData, undefined).
+
+set_status(FullState, StatusCred, ToolName, Context, EventData, TargetUrl) ->
   #{ <<"repository">> := Repository
    , <<"pull_request">> := #{<<"head">> := Head}
    } = EventData,
@@ -119,7 +139,8 @@ set_status(FullState, StatusCred, ToolName, Context, EventData) ->
     "[Github WH] About to set ~s status in ~s to ~p: ~p",
     [Context, Repo, State, Description]),
   {ok, _} =
-    egithub:create_status(StatusCred, Repo, Sha, State, Description, Context),
+    egithub:create_status(
+      StatusCred, Repo, Sha, State, Description, Context, TargetUrl),
   ok.
 
 status_description(pending, ToolName) ->
@@ -155,7 +176,15 @@ do_handle_pull_request(Module, Cred,
       Comments = LineComments ++ IssueComments,
       write_comments(Cred, Repo, PR, Comments, Messages),
       with_warnings;
-    {error, Reason} -> {error, Reason}
+    {ok, [], TargetUrl} -> {clean, TargetUrl};
+    {ok, Messages, TargetUrl} ->
+      {ok, LineComments} = egithub:pull_req_comments(Cred, Repo, PR),
+      {ok, IssueComments} = egithub:issue_comments(Cred, Repo, PR),
+      Comments = LineComments ++ IssueComments,
+      write_comments(Cred, Repo, PR, Comments, Messages),
+      {with_warnings, TargetUrl};
+    {error, Reason} -> {error, Reason};
+    {error, Reason, TargetUrl} -> {error, Reason, TargetUrl}
   end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
