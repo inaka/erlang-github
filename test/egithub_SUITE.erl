@@ -135,7 +135,7 @@ issues(_Config) ->
 
       AllIssuesFun = match_fun("/issues", get),
       meck:expect(shotgun, request, AllIssuesFun),
-      {ok, _} = egithub:all_issues(Credentials, #{state => "open"}),
+      {ok, _} = egithub:all_issues(Credentials, #{}),
 
       UserIssuesFun = match_fun("/user/issues", get),
       meck:expect(shotgun, request, UserIssuesFun),

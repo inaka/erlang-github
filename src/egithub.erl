@@ -666,7 +666,7 @@ make_url(issue, {User, Repo}) ->
     io_lib:format("/repos/~s/~s/issues", [User, Repo]);
 make_url(issues, {Opts}) ->
     maybe_append_qs_params(issues, "/issues", Opts);
-make_url(issue_user, {Opts}) ->
+make_url(issues_user, {Opts}) ->
     maybe_append_qs_params(issues, "/user/issues", Opts);
 make_url(issues_org, {Org, Opts}) ->
     Url = io_lib:format("/org/~s/issues", [Org]),
