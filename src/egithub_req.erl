@@ -40,7 +40,7 @@ run(Cred, Uri) ->
   {ok, string()} | {error, term()}.
 run(Cred, Uri, Method, Body) ->
   Headers0 = [{<<"User-Agent">>, <<"Egithub-Webhook">>}],
-  Headers  = authorization(Cred, Headers0),
+  Headers  = maps:from_list(authorization(Cred, Headers0)),
   do_run(Uri, Headers, Method, Body).
 
 do_run(Uri, Headers, Method, Body) ->
