@@ -781,19 +781,20 @@ maybe_queue_request(Cred, Url, JsonBody, Options) ->
     end.
 
 maybe_append_qs_params(issues, Url, Opts) ->
-    Filter    = maps:get(filter, Opts, "assigned"),
-    State     = maps:get(state, Opts, "open"),
-    Labels    = maps:get(labels, Opts, ""),
-    Sort      = maps:get(sort, Opts, "created"),
-    Direction = maps:get(direction, Opts, "asc"),
-    Since     = maps:get(since, Opts, ""),
+    Params = #{filter    => maps:get(filter, Opts, "assigned"),
+               state     => maps:get(state, Opts, "open"),
+               labels    => maps:get(labels, Opts, ""),
+               sort      => maps:get(sort, Opts, "created"),
+               direction => maps:get(direction, Opts, "asc"),
+               since     => maps:get(since, Opts, "")},
     case maps:size(Opts) > 0 of
         false ->
             io_lib:format(Url, []);
         true ->
-            QS = "?filter=~s&state=~s&labels=~s&sort=~s&direction=~s&since=~s",
-            io_lib:format(Url ++ QS, [Filter, State, Labels, Sort, Direction,
-                                      Since])
+            QS = maps:fold(fun (K, V, Acc) ->
+                                   [to_str(K) ++ "=" ++ to_str(V) | Acc]
+                           end, [], Params),
+            io_lib:format("~s?~s", [Url, string:join("&", QS)])
     end.
 
 to_str(Arg) when is_binary(Arg) ->
