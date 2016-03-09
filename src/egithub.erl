@@ -791,10 +791,12 @@ maybe_append_qs_params(issues, Url, Opts) ->
         false ->
             io_lib:format(Url, []);
         true ->
-            QS = maps:fold(fun (K, V, Acc) ->
-                                   [to_str(K) ++ "=" ++ to_str(V) | Acc]
+            QS = maps:fold(fun (_K, "", Acc) ->
+                                   Acc;
+                               (K, V, Acc) ->
+                                   [io_lib:format("~s=~s", [K, V]) | Acc]
                            end, [], Params),
-            io_lib:format("~s?~s", [Url, string:join("&", QS)])
+            io_lib:format("~s?~s", [Url, string:join(lists:reverse(QS), "&")])
     end.
 
 to_str(Arg) when is_binary(Arg) ->
