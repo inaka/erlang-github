@@ -27,7 +27,7 @@
          create_issue/8,
          create_issue/9,
          all_issues/2,
-         all_issues/4,
+         all_issues/3,
          issues_user/2,
          issues_org/3,
          %% Users
@@ -229,9 +229,9 @@ all_issues(Cred, Opts) ->
     {ok, Issues}.
 
 %% @doc List issues for a specific owner repository
--spec all_issues(credentials(), string(), repository(), map()) -> result().
-all_issues(Cred, Username, Repo, Opts) ->
-    Url = make_url(issues, {Username, Repo, Opts}),
+-spec all_issues(credentials(), repository(), map()) -> result().
+all_issues(Cred, Repo, Opts) ->
+    Url = make_url(issues, {Repo, Opts}),
     {ok, Result} = egithub_req:run(Cred, Url),
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
@@ -665,8 +665,8 @@ make_url({pull_req, Subentity}, {Repo, PR}) ->
 %% Issues
 make_url(issue, {User, Repo}) ->
     io_lib:format("/repos/~s/~s/issues", [User, Repo]);
-make_url(issues, {User, Repo, Opts}) ->
-    Url = io_lib:format("/repos/~s/~s/issues", [User, Repo]),
+make_url(issues, {Repo, Opts}) ->
+    Url = io_lib:format("/repos/~s/issues", [Repo]),
     maybe_append_qs_params(issues, Url, Opts);
 make_url(issues, {Opts}) ->
     maybe_append_qs_params(issues, "/issues", Opts);
