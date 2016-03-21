@@ -137,8 +137,12 @@ issues(_Config) ->
       meck:expect(shotgun, request, AllIssuesFun),
       {ok, _} = egithub:all_issues(Credentials, #{}),
 
-      IssueUrl = "/issues?filter=assigned&state=open&labels=&sort=created" ++
-                 "&direction=asc&since=",
+      AllRepoIssuesFun = match_fun("/issues", get),
+      meck:expect(shotgun, request, AllRepoIssuesFun),
+      {ok, _} = egithub:all_issues(Credentials, "user/repo", #{}),
+
+      IssueUrl = "/issues?filter=assigned&state=open&sort=created"
+          "&direction=asc",
       AllIssuesOpenFun = match_fun(IssueUrl, get),
       meck:expect(shotgun, request, AllIssuesOpenFun),
       {ok, _} = egithub:all_issues(Credentials, #{state => "open"}),
@@ -146,6 +150,10 @@ issues(_Config) ->
       UserIssuesFun = match_fun("/user/issues", get),
       meck:expect(shotgun, request, UserIssuesFun),
       {ok, _} = egithub:issues_user(Credentials, #{})
+
+      OrgIssuesFun = match_fun("/orgs/foo/issues", get),
+      meck:expect(shotgun, request, OrgissuesFun),
+      {ok, _} = egithub:issues_org(Credentials, "foo", #{})
 
   after
       meck:unload(shotgun)

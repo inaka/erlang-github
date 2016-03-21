@@ -228,6 +228,7 @@ all_issues(Cred, Opts) ->
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
 
+%% @doc List issues for a specific owner repository
 -spec all_issues(credentials(), repository(), map()) -> result().
 all_issues(Cred, Repo, Opts) ->
     Url = make_url(issues, {Repo, Opts}),
@@ -664,12 +665,15 @@ make_url({pull_req, Subentity}, {Repo, PR}) ->
 %% Issues
 make_url(issue, {User, Repo}) ->
     io_lib:format("/repos/~s/~s/issues", [User, Repo]);
+make_url(issues, {Repo, Opts}) ->
+    Url = io_lib:format("/repos/~s/issues", [Repo]),
+    maybe_append_qs_params(issues, Url, Opts);
 make_url(issues, {Opts}) ->
     maybe_append_qs_params(issues, "/issues", Opts);
 make_url(issues_user, {Opts}) ->
     maybe_append_qs_params(issues, "/user/issues", Opts);
 make_url(issues_org, {Org, Opts}) ->
-    Url = io_lib:format("/org/~s/issues", [Org]),
+    Url = io_lib:format("/orgs/~s/issues", [Org]),
     maybe_append_qs_params(issues, Url, Opts);
 
 %% Issues comments etc
@@ -775,19 +779,22 @@ maybe_queue_request(Cred, Url, JsonBody, Options) ->
     end.
 
 maybe_append_qs_params(issues, Url, Opts) ->
-    Filter    = maps:get(filter, Opts, "assigned"),
-    State     = maps:get(state, Opts, "open"),
-    Labels    = maps:get(labels, Opts, ""),
-    Sort      = maps:get(sort, Opts, "created"),
-    Direction = maps:get(direction, Opts, "asc"),
-    Since     = maps:get(since, Opts, ""),
+    Params = #{filter    => maps:get(filter, Opts, "assigned"),
+               state     => maps:get(state, Opts, "open"),
+               labels    => maps:get(labels, Opts, ""),
+               sort      => maps:get(sort, Opts, "created"),
+               direction => maps:get(direction, Opts, "asc"),
+               since     => maps:get(since, Opts, "")},
     case maps:size(Opts) > 0 of
         false ->
             io_lib:format(Url, []);
         true ->
-            QS = "?filter=~s&state=~s&labels=~s&sort=~s&direction=~s&since=~s",
-            io_lib:format(Url ++ QS, [Filter, State, Labels, Sort, Direction,
-                                      Since])
+            QS = maps:fold(fun (_K, "", Acc) ->
+                                   Acc;
+                               (K, V, Acc) ->
+                                   [io_lib:format("~s=~s", [K, V]) | Acc]
+                           end, [], Params),
+            io_lib:format("~s?~s", [Url, string:join(lists:reverse(QS), "&")])
     end.
 
 to_str(Arg) when is_binary(Arg) ->
