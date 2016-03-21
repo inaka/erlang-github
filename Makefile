@@ -1,7 +1,7 @@
 PROJECT = egithub
 
 DEPS = goldrush lager jiffy shotgun
-TEST_DEPS = katana inaka_mixer meck
+TEST_DEPS = katana_test inaka_mixer meck
 SHELL_DEPS = sync
 BUILD_DEPS = inaka_mk hexer_mk
 
@@ -10,12 +10,12 @@ dep_goldrush = hex 0.1.7
 dep_lager = hex 3.0.2
 dep_jiffy = hex 0.14.7
 dep_shotgun = hex 0.2.3
-dep_katana = hex 0.2.20
+dep_katana_test = git https://github.com/inaka/katana-test.git 0.0.3
 dep_inaka_mixer = hex 0.1.5
 dep_meck = hex 0.8.4
-dep_sync = git https://github.com/rustyio/sync.git 9c78e7b
+dep_sync = git https://github.com/rustyio/sync.git de3c42d
 dep_inaka_mk = git https://github.com/inaka/inaka.mk.git 1.0.0
-dep_hexer_mk = git https://github.com/inaka/hexer.mk.git 1.0.2
+dep_hexer_mk = git https://github.com/inaka/hexer.mk.git 1.1.0
 
 DEP_PLUGINS = inaka_mk hexer_mk
 
