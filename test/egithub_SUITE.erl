@@ -141,7 +141,8 @@ issues(_Config) ->
       meck:expect(shotgun, request, AllRepoIssuesFun),
       {ok, _} = egithub:all_issues(Credentials, "user/repo", #{}),
 
-      IssueUrl = "/issues?filter=assigned&state=open&sort=created&direction=asc",
+      IssueUrl = "/issues?filter=assigned&state=open&sort=created"
+          "&direction=asc",
       AllIssuesOpenFun = match_fun(IssueUrl, get),
       meck:expect(shotgun, request, AllIssuesOpenFun),
       {ok, _} = egithub:all_issues(Credentials, #{state => "open"}),
