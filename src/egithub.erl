@@ -670,12 +670,10 @@ make_url(issues, {Repo, Opts}) ->
     maybe_append_qs_params(issues, Url, Opts);
 make_url(issues, {Opts}) ->
     maybe_append_qs_params(issues, "/issues", Opts);
-make_url(issues, {Repo, Opts}) ->
-    maybe_append_qs_params(issues, "/issues", Opts);
 make_url(issues_user, {Opts}) ->
     maybe_append_qs_params(issues, "/user/issues", Opts);
 make_url(issues_org, {Org, Opts}) ->
-    Url = io_lib:format("/org/~s/issues", [Org]),
+    Url = io_lib:format("/orgs/~s/issues", [Org]),
     maybe_append_qs_params(issues, Url, Opts);
 
 %% Issues comments etc
