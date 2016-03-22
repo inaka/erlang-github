@@ -74,7 +74,7 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
       set_status(pending, StatusCred, ToolName, Context, EventData),
       try
         Result = do_handle_pull_request(Module, CommentsCred, EventData),
-        specify_status(Result, StatusCred, Module, Context, EventData)
+        specify_status(Result, StatusCred, ToolName, Context, EventData)
       catch
         _:Error ->
           _ = lager:warning(
