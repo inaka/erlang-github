@@ -149,10 +149,10 @@ issues(_Config) ->
 
       UserIssuesFun = match_fun("/user/issues", get),
       meck:expect(shotgun, request, UserIssuesFun),
-      {ok, _} = egithub:issues_user(Credentials, #{})
+      {ok, _} = egithub:issues_user(Credentials, #{}),
 
       OrgIssuesFun = match_fun("/orgs/foo/issues", get),
-      meck:expect(shotgun, request, OrgissuesFun),
+      meck:expect(shotgun, request, OrgIssuesFun),
       {ok, _} = egithub:issues_org(Credentials, "foo", #{})
 
   after
