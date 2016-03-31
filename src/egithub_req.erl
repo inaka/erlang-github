@@ -40,7 +40,7 @@ run(Cred, Uri) ->
   {ok, string()} | {error, term()}.
 run(Cred, Uri, Method, Body) ->
   Headers0 = [{<<"User-Agent">>, <<"Egithub-Webhook">>}],
-  Headers  = maps:from_list(authorization(Cred, Headers0)),
+  Headers  = authorization(Cred, Headers0),
   do_run(Uri, Headers, Method, Body).
 
 do_run(Uri, Headers, Method, Body) ->
@@ -55,7 +55,7 @@ do_run(Uri, Headers, Method, Body) ->
       {ok, RespBody};
     {ok, #{status_code := 302, headers := RespHeaders}} ->
       RedirectUrl = proplists:get_value(<<"Location">>, RespHeaders),
-      run(RedirectUrl, Headers, Method, Body);
+      do_run(RedirectUrl, Headers, Method, Body);
     {ok, #{status_code := Status, headers := RespHeaders, body := RespBody}} ->
       _ = lager:warning(
         "[Github API] Error:~nUri: ~s~nError: ~p~n",
