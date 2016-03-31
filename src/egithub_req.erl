@@ -25,11 +25,12 @@ create_table() -> ets:new(?MODULE, [set, named_table, public, {keypos, 2}]).
 -spec run(req()) -> {ok, string()} | {error, tuple()}.
 run(#req{} = Req) ->
   #req{ uri     = Uri
-      , headers = Headers
+      , headers = Headers0
       , method  = Method
       , body    = Body
       } = Req,
-  do_run(Uri, Headers, Method, Body).
+  Headers1 = maps:from_list(Headers0),
+  do_run(Uri, Headers1, Method, Body).
 
 -spec run(egithub:credentials(), string()) ->
   string() | {error, term()}.
