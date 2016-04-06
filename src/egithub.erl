@@ -742,8 +742,10 @@ make_url(repos, {User, Opts}) ->
     end;
 make_url(org_repos, {User, Opts}) ->
     Page = maps:get(page, Opts, 1),
-    Url = "/orgs/~s/repos?page=~p",
-    io_lib:format(Url, [User, Page]);
+    % 100 by default to reduce the number of requests
+    PerPage = maps:get(per_page, Opts, 100),
+    Url = "/orgs/~s/repos?page=~p&per_page=~p",
+    io_lib:format(Url, [User, Page, PerPage]);
 
 %% Hooks
 make_url(hooks, {Repo}) ->
