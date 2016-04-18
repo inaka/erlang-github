@@ -44,25 +44,28 @@ run(Cred, Uri, Method, Body) ->
   do_run(Uri, Headers, Method, Body).
 
 do_run(Uri, Headers, Method, Body) ->
-  {ok, Pid} = shotgun:open("api.github.com", 443, https),
+  Transport = hackney_tcp_transport,
+  Host = << "api.github.com" >>,
+  Port = 443,
+  Options = [],
+  {ok, ConnRef} = hackney:connect(Transport, Host, Port, Options),
   _ = lager:info("[Github API] ~s", [Uri]),
-  try shotgun:request(Pid, Method, Uri, Headers, Body, #{}) of
-    {ok, #{status_code := 200, body := RespBody}} ->
-      {ok, RespBody};
-    {ok, #{status_code := 201, body := RespBody}} ->
-      {ok, RespBody};
-    {ok, #{status_code := 204, body := RespBody}} ->
-      {ok, RespBody};
-    {ok, #{status_code := 302, headers := RespHeaders}} ->
+  case hackney:send_request(ConnRef, {Method, Uri, Headers, Body})of
+    {ok, 200, _RespHeaders, ClientRef} ->
+      hackney:body(ClientRef);
+    {ok, 201, _RespHeaders, ClientRef} ->
+      hackney:body(ClientRef);
+    {ok, 204, _RespHeaders, ClientRef} ->
+      hackney:body(ClientRef);
+    {ok, 302, RespHeaders, _ClientRef} ->
       RedirectUrl = proplists:get_value(<<"Location">>, RespHeaders),
       do_run(RedirectUrl, Headers, Method, Body);
-    {ok, #{status_code := Status, headers := RespHeaders, body := RespBody}} ->
+    {ok, Status, RespHeaders, ClientRef} ->
+      {ok, RespBody} = hackney:body(ClientRef),
       _ = lager:warning(
         "[Github API] Error:~nUri: ~s~nError: ~p~n",
         [Uri, {Status, RespHeaders, RespBody}]),
       {error, {Status, RespHeaders, RespBody}}
-  after
-    shotgun:close(Pid)
   end.
 
 -spec queue(
