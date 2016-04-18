@@ -1,14 +1,43 @@
 # Change Log
 
-## [0.2.2](https://github.com/inaka/erlang-github/tree/0.2.2) (2016-01-20)
-[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.19...0.2.2)
+## [0.2.3](https://github.com/inaka/erlang-github/tree/0.2.3) (2016-04-18)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.2...0.2.3)
 
 **Closed issues:**
 
+- Replace shotgun with hackney library [\#97](https://github.com/inaka/erlang-github/issues/97)
+
+**Merged pull requests:**
+
+- \[\#97\] replaced shotgun with hackney dependency [\#98](https://github.com/inaka/erlang-github/pull/98) ([davecaos](https://github.com/davecaos))
+
+## [0.2.2](https://github.com/inaka/erlang-github/tree/0.2.2) (2016-04-06)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.19...0.2.2)
+
+**Fixed bugs:**
+
+- Failing when listing organization repositories [\#95](https://github.com/inaka/erlang-github/issues/95)
+
+**Closed issues:**
+
+- Update repo and make it ready for hex.pm [\#90](https://github.com/inaka/erlang-github/issues/90)
+- Update type to fix gadget login [\#89](https://github.com/inaka/erlang-github/issues/89)
+- Add TargetURL parameter in egithub\_webhook:event [\#85](https://github.com/inaka/erlang-github/issues/85)
+- Requirements [\#82](https://github.com/inaka/erlang-github/issues/82)
 - Hex.pm Package [\#61](https://github.com/inaka/erlang-github/issues/61)
 
 **Merged pull requests:**
 
+- \[Fix \#95\] Add per\_page param when listing organization repositories [\#96](https://github.com/inaka/erlang-github/pull/96) ([harenson](https://github.com/harenson))
+- \[Fix \#85\] Transform Header list to map and fix tests [\#94](https://github.com/inaka/erlang-github/pull/94) ([Euen](https://github.com/Euen))
+- \[Fix \#85\] fix fail parameter in egithub\_webhook:specify\_status/5 [\#93](https://github.com/inaka/erlang-github/pull/93) ([Euen](https://github.com/Euen))
+- Fix bug in getting issues [\#92](https://github.com/inaka/erlang-github/pull/92) ([tgrk](https://github.com/tgrk))
+- \[Fix \#90\] Update dependencies; Update erlang.mk; Add ruleset to elvis config [\#91](https://github.com/inaka/erlang-github/pull/91) ([harenson](https://github.com/harenson))
+- Fix egithub tests [\#88](https://github.com/inaka/erlang-github/pull/88) ([Euen](https://github.com/Euen))
+- \[Fix \#85\] Add TargetUrl and dialyzer [\#87](https://github.com/inaka/erlang-github/pull/87) ([Euen](https://github.com/Euen))
+- Fix build for rebar2 [\#84](https://github.com/inaka/erlang-github/pull/84) ([tgrk](https://github.com/tgrk))
+- Add support for creating and listing issues [\#83](https://github.com/inaka/erlang-github/pull/83) ([tgrk](https://github.com/tgrk))
+- Update shotgun dep to 0.2.2 [\#81](https://github.com/inaka/erlang-github/pull/81) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - Version bump to 0.2.1 [\#80](https://github.com/inaka/erlang-github/pull/80) ([cabol](https://github.com/cabol))
 - Switch build tools to erlang.mk and republish to hex.pm [\#79](https://github.com/inaka/erlang-github/pull/79) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - Replace ibrowse by shotgun [\#60](https://github.com/inaka/erlang-github/pull/60) ([elbrujohalcon](https://github.com/elbrujohalcon))
