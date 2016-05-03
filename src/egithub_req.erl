@@ -44,14 +44,10 @@ run(Cred, Uri, Method, Body) ->
   do_run(Uri, Headers, Method, Body).
 
 do_run(Uri, Headers, Method, Body) ->
-  Transport = hackney_tcp_transport,
-  Host = << "api.github.com" >>,
-  Port = 443,
-  Options = [],
-  {ok, ConnRef} = hackney:connect(Transport, Host, Port, Options),
   _ = lager:info("[Github API] ~s", [Uri]),
   BinUri = iolist_to_binary(Uri),
-  case hackney:send_request(ConnRef, {Method, BinUri, Headers, Body})of
+  Url = <<"https://api.github.com", BinUri/binary>>,
+  case hackney:request(Method, Url, Headers, Body) of
     {ok, 200, _RespHeaders, ClientRef} ->
       hackney:body(ClientRef);
     {ok, 201, _RespHeaders, ClientRef} ->
@@ -66,7 +62,11 @@ do_run(Uri, Headers, Method, Body) ->
       _ = lager:warning(
         "[Github API] Error:~nUri: ~s~nError: ~p~n",
         [Uri, {Status, RespHeaders, RespBody}]),
-      {error, {Status, RespHeaders, RespBody}}
+      {error, {Status, RespHeaders, RespBody}};
+    {error, Reason} ->
+      _ = lager:warning(
+        "[Github API] Error:~nUri: ~s~nError: ~p~n", [Uri, Reason]),
+      {error, Reason}
   end.
 
 -spec queue(
@@ -83,6 +83,9 @@ queue(Cred, Uri, Method, Body) ->
   gen_server:cast(egithub_req_in, Request).
 
 authorization({basic, Username, Password}, Headers) ->
-    [{basic_auth, {Username, Password}} | Headers];
+  User1 = list_to_binary(Username),
+  Pwd1 = list_to_binary(Password),
+  Credentials = base64:encode(<<User1/binary, ":", Pwd1/binary>>),
+  [{<<"Authorization">>, <<"Basic ", Credentials/binary>>} | Headers];
 authorization({oauth, Token}, Headers0) ->
-    [{<<"Authorization">>, iolist_to_binary(["token ", Token])} | Headers0].
+  [{<<"Authorization">>, iolist_to_binary(["token ", Token])} | Headers0].
