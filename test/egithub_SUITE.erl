@@ -106,8 +106,8 @@ issue_comments(_Config) ->
 
     Self = self(),
     IssueCommentQueueFun = fun(_, {post, Url, _, _}) ->
-                               "/repos/user/repo/issues/1/comments" =
-                                 lists:flatten(Url),
+                               <<"/repos/user/repo/issues/1/comments">> =
+                                 iolist_to_binary(Url),
                                Self ! ok,
                                {ok, 200, [], #client{}}
                            end,
@@ -252,11 +252,11 @@ repos(_Config) ->
     BodyReturnEmptyFun = fun(_) -> {ok, <<"[]">>} end,
     AllReposUserFun =
       fun(_, {get, Url, _, _}) ->
-          case lists:flatten(Url) of
-            "/users/gadgetci/repos?page=1" ->
+          case iolist_to_binary(Url) of
+            <<"/users/gadgetci/repos?page=1">> ->
               meck:expect(hackney, body, BodyReturn1Fun),
               {ok, 200, [], #client{}};
-            "/users/gadgetci/repos?page=2" ->
+            <<"/users/gadgetci/repos?page=2">> ->
               meck:expect(hackney, body, BodyReturnEmptyFun),
               {ok, 200, [], #client{}}
           end
@@ -266,11 +266,11 @@ repos(_Config) ->
 
     AllReposErrorFun =
       fun(_, {get, Url, _, _}) ->
-          case lists:flatten(Url) of
-            "/users/gadgetci/repos?page=1" ->
+          case Url of
+            <<"/users/gadgetci/repos?page=1">> ->
               meck:expect(hackney, body, BodyReturn1Fun),
               {ok, 200, [], #client{}};
-            "/users/gadgetci/repos?page=2" ->
+            <<"/users/gadgetci/repos?page=2">> ->
               meck:expect(hackney, body, BodyReturnEmptyFun),
               {ok, 400, [], #client{}}
           end
@@ -285,11 +285,11 @@ repos(_Config) ->
 
     AllOrgReposFun =
       fun(_, {get, Url, _, _}) ->
-          case lists:flatten(Url) of
-            "/orgs/some-org/repos?page=1&per_page=100" ->
+          case Url of
+            <<"/orgs/some-org/repos?page=1&per_page=100">> ->
               meck:expect(hackney, body, BodyReturn1Fun),
               {ok, 200, [], #client{}};
-            "/orgs/some-org/repos?page=2&per_page=100" ->
+            <<"/orgs/some-org/repos?page=2&per_page=100">> ->
               meck:expect(hackney, body, BodyReturnEmptyFun),
               {ok, 200, [], #client{}}
           end
@@ -299,11 +299,11 @@ repos(_Config) ->
 
     AllOrgReposErrorFun =
       fun(_, {get, Url, _, _})  ->
-          case lists:flatten(Url) of
-            "/orgs/some-org/repos?page=1&per_page=100" ->
+          case Url of
+            <<"/orgs/some-org/repos?page=1&per_page=100">> ->
               meck:expect(hackney, body, BodyReturn1Fun),
               {ok, 200, [], #client{}};
-            "/orgs/some-org/repos?page=2&per_page=100" ->
+            <<"/orgs/some-org/repos?page=2&per_page=100">> ->
               meck:expect(hackney, body, BodyReturnEmptyFun),
               {ok, 400, [], #client{}}
           end
@@ -444,7 +444,7 @@ github_credentials() ->
 
 match_fun(Url, Method) ->
   fun(_, {MethodParam, UrlParam, _, _}) ->
-      Url = lists:flatten(UrlParam),
+      Url = binary_to_list(iolist_to_binary(UrlParam)),
       Method = MethodParam,
       RespHeaders = [],
       ClientRef = #client{},
