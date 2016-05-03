@@ -50,7 +50,8 @@ do_run(Uri, Headers, Method, Body) ->
   Options = [],
   {ok, ConnRef} = hackney:connect(Transport, Host, Port, Options),
   _ = lager:info("[Github API] ~s", [Uri]),
-  case hackney:send_request(ConnRef, {Method, Uri, Headers, Body})of
+  BinUri = iolist_to_binary(Uri),
+  case hackney:send_request(ConnRef, {Method, BinUri, Headers, Body})of
     {ok, 200, _RespHeaders, ClientRef} ->
       hackney:body(ClientRef);
     {ok, 201, _RespHeaders, ClientRef} ->
