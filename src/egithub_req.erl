@@ -46,7 +46,7 @@ run(Cred, Uri, Method, Body) ->
 do_run(Uri, Headers, Method, Body) ->
   _ = lager:info("[Github API] ~s", [Uri]),
   BinUri = iolist_to_binary(Uri),
-  Url = <<"https://api.github.com/", BinUri/binary>>,
+  Url = <<"https://api.github.com", BinUri/binary>>,
   case hackney:request(Method, Url, Headers, Body) of
     {ok, 200, _RespHeaders, ClientRef} ->
       hackney:body(ClientRef);
