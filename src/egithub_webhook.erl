@@ -47,8 +47,11 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
       EventData = egithub_json:decode(Body),
       case do_handle_pull_request(Module, Cred, EventData) of
         clean -> ok;
+        {clean, _TargetUrl} -> ok;
         with_warnings -> ok;
-        {error, Error} -> {error, Error}
+        {with_warnings, _TargetUrl} -> ok;
+        {error, Error} -> {error, Error};
+        {error, Error, _TargetUrl} -> {error, Error}
       end;
     EventName -> {error, <<"Unknown event: ", EventName/binary>>}
   end.
