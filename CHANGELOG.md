@@ -1,5 +1,22 @@
 # Change Log
 
+## [0.2.4](https://github.com/inaka/erlang-github/tree/0.2.4) (2016-05-04)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.3...0.2.4)
+
+**Fixed bugs:**
+
+- When running events without credentials, not all outputs are handled [\#105](https://github.com/inaka/erlang-github/pull/105) ([elbrujohalcon](https://github.com/elbrujohalcon))
+- Hackney expects uris to be binaries [\#101](https://github.com/inaka/erlang-github/pull/101) ([elbrujohalcon](https://github.com/elbrujohalcon))
+
+**Closed issues:**
+
+- Version Bump to 0.2.3 [\#99](https://github.com/inaka/erlang-github/issues/99)
+
+**Merged pull requests:**
+
+- \[\#103\] fix hackney issue in suite [\#104](https://github.com/inaka/erlang-github/pull/104) ([Euen](https://github.com/Euen))
+- Use hackney:request instead of hackney:send\_request [\#103](https://github.com/inaka/erlang-github/pull/103) ([elbrujohalcon](https://github.com/elbrujohalcon))
+
 ## [0.2.3](https://github.com/inaka/erlang-github/tree/0.2.3) (2016-04-18)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.2...0.2.3)
 
@@ -9,6 +26,7 @@
 
 **Merged pull requests:**
 
+- \[\#99\] Version Bump to 0.2.3 [\#100](https://github.com/inaka/erlang-github/pull/100) ([davecaos](https://github.com/davecaos))
 - \[\#97\] replaced shotgun with hackney dependency [\#98](https://github.com/inaka/erlang-github/pull/98) ([davecaos](https://github.com/davecaos))
 
 ## [0.2.2](https://github.com/inaka/erlang-github/tree/0.2.2) (2016-04-06)
