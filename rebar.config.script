@@ -1,18 +1,17 @@
-case erlang:function_exported(rebar3, main, 1) of
+case erlang:function_exported(rebar3, main, 1) orelse
+     erlang:function_exported('Elixir.Mix.Rebar', rebar_cmd, 1) of
     true ->
-        %% rebar3
+        %% rebar3 / Mix
         CONFIG;
     false ->
         %% rebar 2.x or older
         NewConf = lists:keystore(deps_dir, 1, CONFIG, {deps_dir, "deps"}),
-        Deps = [{lager, "2.*",
+        Deps = [{lager, ".*",
                  {git, "https://github.com/basho/lager.git", "3.0.2"}},
-                {jiffy, "0.*",
-                 {git, "https://github.com/davisp/jiffy.git", "0.11.3"}},
-                {gun, "1.*",
-                 {git, "https://github.com/ninenines/gun.git", "1.0.0-pre.1"}},
-                {shotgun, "0.*",
-                 {git, "https://github.com/inaka/shotgun.git", "0.2.2"}}
+                {jiffy, ".*",
+                 {git, "https://github.com/davisp/jiffy.git", "0.14.7"}},
+                {hackney, ".*",
+                 {git, "https://github.com/benoitc/hackney.git", "1.6.0"}}
                ],
         lists:keystore(deps, 1, NewConf, {deps, Deps})
 end.
