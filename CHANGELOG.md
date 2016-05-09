@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.2.5](https://github.com/inaka/erlang-github/tree/0.2.5) (2016-05-09)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.4...0.2.5)
+
+**Fixed bugs:**
+
+- Rebar config script has old dependencies [\#106](https://github.com/inaka/erlang-github/pull/106) ([alemata](https://github.com/alemata))
+
 ## [0.2.4](https://github.com/inaka/erlang-github/tree/0.2.4) (2016-05-04)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.3...0.2.4)
 
@@ -16,6 +23,7 @@
 
 - \[\#103\] fix hackney issue in suite [\#104](https://github.com/inaka/erlang-github/pull/104) ([Euen](https://github.com/Euen))
 - Use hackney:request instead of hackney:send\_request [\#103](https://github.com/inaka/erlang-github/pull/103) ([elbrujohalcon](https://github.com/elbrujohalcon))
+- Version Bump to 0.2.4 [\#102](https://github.com/inaka/erlang-github/pull/102) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.2.3](https://github.com/inaka/erlang-github/tree/0.2.3) (2016-04-18)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.2...0.2.3)
