@@ -1,11 +1,22 @@
 # Change Log
 
+## [0.2.6](https://github.com/inaka/erlang-github/tree/0.2.6) (2016-05-17)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.5...0.2.6)
+
+**Merged pull requests:**
+
+- Add `jiffy` to the applications list [\#108](https://github.com/inaka/erlang-github/pull/108) ([alemata](https://github.com/alemata))
+
 ## [0.2.5](https://github.com/inaka/erlang-github/tree/0.2.5) (2016-05-09)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.4...0.2.5)
 
 **Fixed bugs:**
 
 - Rebar config script has old dependencies [\#106](https://github.com/inaka/erlang-github/pull/106) ([alemata](https://github.com/alemata))
+
+**Merged pull requests:**
+
+- Version Bump to 0.2.5 [\#107](https://github.com/inaka/erlang-github/pull/107) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.2.4](https://github.com/inaka/erlang-github/tree/0.2.4) (2016-05-04)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.3...0.2.4)
