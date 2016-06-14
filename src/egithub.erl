@@ -445,13 +445,13 @@ create_team(Cred, Org, Name, Permission, Repos) ->
     Url = make_url(teams, {Org}),
     BodyMap = #{name => to_bin(Name),
                 permission => to_bin(Permission),
-                repo_names => to_bin(Repos)},
+                repo_names => [to_bin(Repo) || Repo <- Repos]},
     Body = egithub_json:encode(BodyMap),
     case egithub_req:run(Cred, Url, post, Body) of
         {ok, Result} ->
             JsonResult = egithub_json:decode(Result),
             {ok, JsonResult};
-        {error, {"422", _, _}} ->
+        {error, {422, _, _}} ->
             {ok, already_exists};
         Other ->
             Other
@@ -498,7 +498,7 @@ team_membership(Cred, TeamId, Username) ->
     case api_call_json_result(Cred, Url) of
         {ok, #{<<"state">> := <<"active">>}} -> active;
         {ok, #{<<"state">> := <<"pending">>}} -> pending;
-        {error, {"404", _, _}} -> none;
+        {error, {404, _, _}} -> none;
         {error, Reason} -> {error, Reason}
     end.
 
