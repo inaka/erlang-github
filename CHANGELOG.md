@@ -1,10 +1,18 @@
 # Change Log
 
+## [0.2.7](https://github.com/inaka/erlang-github/tree/0.2.7) (2016-06-14)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.6...0.2.7)
+
+**Fixed bugs:**
+
+- create\_team not working [\#110](https://github.com/inaka/erlang-github/pull/110) ([elbrujohalcon](https://github.com/elbrujohalcon))
+
 ## [0.2.6](https://github.com/inaka/erlang-github/tree/0.2.6) (2016-05-17)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.5...0.2.6)
 
 **Merged pull requests:**
 
+- Version Bump to 0.2.6 [\#109](https://github.com/inaka/erlang-github/pull/109) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - Add `jiffy` to the applications list [\#108](https://github.com/inaka/erlang-github/pull/108) ([alemata](https://github.com/alemata))
 
 ## [0.2.5](https://github.com/inaka/erlang-github/tree/0.2.5) (2016-05-09)
