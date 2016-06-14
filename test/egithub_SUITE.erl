@@ -333,6 +333,15 @@ teams(_Config) ->
     meck:expect(hackney, request, CreateTeamFun),
     {ok, _} = egithub:create_team(Credentials, "some-org", "Team", "", []),
 
+    CreateTeam422Fun =
+        fun(post, <<"https://api.github.com/orgs/some-org/teams">>, _, _) ->
+            {error, {422, [{<<"Server">>, <<"GitHub.com">>}], <<"error">>}}
+        end,
+    meck:expect(hackney, request, CreateTeam422Fun),
+    {ok, already_exists} =
+        egithub:create_team(Credentials, "some-org", "Team", "",
+                            ["some-org/repo"]),
+
     AddTeamRepoFun = match_fun("/teams/1/repos/user/repo",
                                put),
     meck:expect(hackney, request, AddTeamRepoFun),

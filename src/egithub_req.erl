@@ -19,10 +19,14 @@
 -type req() :: #req{}.
 -export_type([req/0]).
 
+-type error() :: {error, {100..600, [{binary(), binary()}], binary()}}
+               | {error, term()}.
+-export_type([error/0]).
+
 -spec create_table() -> ets:tab().
 create_table() -> ets:new(?MODULE, [set, named_table, public, {keypos, 2}]).
 
--spec run(req()) -> {ok, string()} | {error, tuple()}.
+-spec run(req()) -> {ok, string()} | error().
 run(#req{} = Req) ->
   #req{ uri     = Uri
       , headers = Headers
@@ -32,12 +36,12 @@ run(#req{} = Req) ->
   do_run(Uri, Headers, Method, Body).
 
 -spec run(egithub:credentials(), string()) ->
-  string() | {error, term()}.
+  string() | error().
 run(Cred, Uri) ->
   run(Cred, Uri, get, []).
 
 -spec run(egithub:credentials(), iodata(), method(), iodata()) ->
-  {ok, string()} | {error, term()}.
+  {ok, string()} | error().
 run(Cred, Uri, Method, Body) ->
   Headers0 = [{<<"User-Agent">>, <<"Egithub-Webhook">>}],
   Headers  = authorization(Cred, Headers0),
