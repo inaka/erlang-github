@@ -63,7 +63,9 @@
          create_status/7,
          create_status/6,
          statuses/3,
-         combined_status/3
+         combined_status/3,
+         %% Languages
+         languages/2
         ]).
 
 %% Files
@@ -626,6 +628,12 @@ combined_status(Cred, Repo, Ref) ->
     Url = make_url(status, {Repo, Ref}),
     api_call_json_result(Cred, Url).
 
+-spec languages(Cred::credentials(), Repo::repository()) ->
+  {ok, map()} | egithub_req:error().
+languages(Cred, Repo) ->
+  Url = make_url(languages, {Repo}),
+  api_call_json_result(Cred, Url).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private Functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -761,7 +769,12 @@ make_url(collaborators, {Repo}) ->
     io_lib:format(Url, [Repo]);
 make_url(collaborators, {Repo, Username}) ->
     Url = "/repos/~s/collaborators/~s",
-    io_lib:format(Url, [Repo, Username]).
+    io_lib:format(Url, [Repo, Username]);
+
+%% Languages
+make_url(languages, {Repo}) ->
+  Url = "/repos/~s/languages",
+  io_lib:format(Url, [Repo]).
 
 api_call_json_result(Cred, Url) ->
     case egithub_req:run(Cred, Url) of
