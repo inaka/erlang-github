@@ -1,11 +1,26 @@
 # Change Log
 
+## [0.2.8](https://github.com/inaka/erlang-github/tree/0.2.8) (2016-07-22)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.7...0.2.8)
+
+**Closed issues:**
+
+- Add support for getting languages by repo [\#112](https://github.com/inaka/erlang-github/issues/112)
+
+**Merged pull requests:**
+
+- \[Fix \#112\] Add support for getting languages by repository [\#113](https://github.com/inaka/erlang-github/pull/113) ([harenson](https://github.com/harenson))
+
 ## [0.2.7](https://github.com/inaka/erlang-github/tree/0.2.7) (2016-06-14)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.6...0.2.7)
 
 **Fixed bugs:**
 
 - create\_team not working [\#110](https://github.com/inaka/erlang-github/pull/110) ([elbrujohalcon](https://github.com/elbrujohalcon))
+
+**Merged pull requests:**
+
+- Version bump to 0.2.7 [\#111](https://github.com/inaka/erlang-github/pull/111) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.2.6](https://github.com/inaka/erlang-github/tree/0.2.6) (2016-05-17)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.5...0.2.6)
