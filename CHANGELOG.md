@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.2.9](https://github.com/inaka/erlang-github/tree/0.2.9) (2016-09-13)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.8...0.2.9)
+
+**Closed issues:**
+
+- Wrong spec for request\(\) type on egithub\_webhook module [\#115](https://github.com/inaka/erlang-github/issues/115)
+
+**Merged pull requests:**
+
+- \[Fix \#115\] Fix wrong specs according to dialyzer@r19.0.5 [\#116](https://github.com/inaka/erlang-github/pull/116) ([harenson](https://github.com/harenson))
+
 ## [0.2.8](https://github.com/inaka/erlang-github/tree/0.2.8) (2016-07-22)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.7...0.2.8)
 
@@ -9,6 +20,7 @@
 
 **Merged pull requests:**
 
+- Bump version to 0.2.8 [\#114](https://github.com/inaka/erlang-github/pull/114) ([harenson](https://github.com/harenson))
 - \[Fix \#112\] Add support for getting languages by repository [\#113](https://github.com/inaka/erlang-github/pull/113) ([harenson](https://github.com/harenson))
 
 ## [0.2.7](https://github.com/inaka/erlang-github/tree/0.2.7) (2016-06-14)
