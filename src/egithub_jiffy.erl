@@ -17,6 +17,6 @@
 encode(Map) ->
   jiffy:encode(Map).
 
--spec decode(binary()) -> map().
+-spec decode(binary()) -> egithub_json:json().
 decode(Json) ->
   jiffy:decode(Json, [return_maps]).
