@@ -12,7 +12,7 @@
 
 -export_type([request/0]).
 
--type request() :: #{headers => map(), body => map()}.
+-type request() :: #{headers => map(), body => binary()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Callbacks

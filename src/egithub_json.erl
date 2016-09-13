@@ -15,8 +15,7 @@
 %% Behavior definition
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
--type json() :: binary() | number() | null | boolean() |
-                #{binary() | atom() => json()} | [json()].
+-type json() :: jiffy:jiffy_decode_result().
 
 -callback encode(json()) -> binary().
 -callback decode(iodata()) -> json().
