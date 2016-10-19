@@ -1,14 +1,29 @@
 # Change Log
 
+## [0.3.0](https://github.com/inaka/erlang-github/tree/0.3.0) (2016-10-19)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.9...0.3.0)
+
+**Closed issues:**
+
+- Update lager dependency with hex when erlang.mk issue will be done [\#70](https://github.com/inaka/erlang-github/issues/70)
+
+**Merged pull requests:**
+
+- add handle\_error for descriptive errors in gadget [\#124](https://github.com/inaka/erlang-github/pull/124) ([Euen](https://github.com/Euen))
+
 ## [0.2.9](https://github.com/inaka/erlang-github/tree/0.2.9) (2016-09-13)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.8...0.2.9)
 
 **Closed issues:**
 
+- Update lager dep to 3.2.1 version so egithub works with R19.0.5 [\#120](https://github.com/inaka/erlang-github/issues/120)
+- Bump version to 0.2.9 [\#118](https://github.com/inaka/erlang-github/issues/118)
 - Wrong spec for request\(\) type on egithub\_webhook module [\#115](https://github.com/inaka/erlang-github/issues/115)
 
 **Merged pull requests:**
 
+- \[Fix \#120\] Make egithub works with R19.0.5 by updating lager dep to 3.2.1 version [\#121](https://github.com/inaka/erlang-github/pull/121) ([harenson](https://github.com/harenson))
+- \[Fix \#118\] Bump version to 0.2.9 [\#119](https://github.com/inaka/erlang-github/pull/119) ([harenson](https://github.com/harenson))
 - \[Fix \#115\] Fix wrong specs according to dialyzer@r19.0.5 [\#116](https://github.com/inaka/erlang-github/pull/116) ([harenson](https://github.com/harenson))
 
 ## [0.2.8](https://github.com/inaka/erlang-github/tree/0.2.8) (2016-07-22)
