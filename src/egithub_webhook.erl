@@ -30,6 +30,9 @@
 -callback handle_pull_request(egithub:credentials(), req_data(), [file()]) ->
   {ok, [message()]} | {error, term()}.
 
+-callback handle_error({error, term()}, req_data(), [file()]) ->
+  {ok, [message()]} | {error, term()}.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Public API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -89,8 +92,10 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
             , Context
             , EventData
             , erlang:get_stacktrace()]),
-          set_status(
-            {failure, Error}, StatusCred, ToolName, Context, EventData),
+          ErrSource =
+            do_handle_error_source(Error, Module, CommentsCred, EventData),
+          _ =
+            specify_status(ErrSource, StatusCred, ToolName, Context, EventData),
           throw(Error)
       end;
     EventName -> {error, <<"Unknown event: ", EventName/binary>>}
@@ -141,8 +146,7 @@ set_status(FullState, StatusCred, ToolName, Context, EventData, TargetUrl) ->
   _ = lager:debug(
     "[Github WH] About to set ~s status in ~s to ~p: ~p",
     [Context, Repo, State, Description]),
-  {ok, _} =
-    egithub:create_status(
+    {ok, _} = egithub:create_status(
       StatusCred, Repo, Sha, State, Description, Context, TargetUrl),
   ok.
 
@@ -187,6 +191,16 @@ do_handle_pull_request(Module, Cred,
       write_comments(Cred, Repo, PR, Comments, Messages),
       {with_warnings, TargetUrl};
     {error, Reason} -> {error, Reason};
+    {error, Reason, TargetUrl} -> {error, Reason, TargetUrl}
+  end.
+
+do_handle_error_source(Error, Module, Cred, Data) ->
+  #{<<"number">> := PR, <<"repository">> := Repository} = Data,
+  Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
+  {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
+  case Module:handle_error(Error, Data, GithubFiles) of
+    {ok, [], TargetUrl}        -> {clean, TargetUrl};
+    {ok, _Messages, TargetUrl} -> {with_warnings, TargetUrl};
     {error, Reason, TargetUrl} -> {error, Reason, TargetUrl}
   end.
 
