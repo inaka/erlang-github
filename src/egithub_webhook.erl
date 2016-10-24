@@ -31,7 +31,7 @@
   {ok, [message()]} | {error, term()}.
 
 -callback handle_error({error, term()}, req_data(), [file()]) ->
-  {ok, [message()]} | {error, term()}.
+  {error, {failed, integer()}, string()} | {ok, [map()], string()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Public API
