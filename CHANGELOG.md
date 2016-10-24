@@ -1,14 +1,23 @@
 # Change Log
 
+## [0.3.1](https://github.com/inaka/erlang-github/tree/0.3.1) (2016-10-24)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.0...0.3.1)
+
+**Merged pull requests:**
+
+- Fix specification [\#127](https://github.com/inaka/erlang-github/pull/127) ([Euen](https://github.com/Euen))
+
 ## [0.3.0](https://github.com/inaka/erlang-github/tree/0.3.0) (2016-10-19)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.9...0.3.0)
 
 **Closed issues:**
 
+- Bump Version to 0.3.0 [\#125](https://github.com/inaka/erlang-github/issues/125)
 - Update lager dependency with hex when erlang.mk issue will be done [\#70](https://github.com/inaka/erlang-github/issues/70)
 
 **Merged pull requests:**
 
+- \[Close \#125\] Bump Version 0.3.0 [\#126](https://github.com/inaka/erlang-github/pull/126) ([Euen](https://github.com/Euen))
 - add handle\_error for descriptive errors in gadget [\#124](https://github.com/inaka/erlang-github/pull/124) ([Euen](https://github.com/Euen))
 
 ## [0.2.9](https://github.com/inaka/erlang-github/tree/0.2.9) (2016-09-13)
