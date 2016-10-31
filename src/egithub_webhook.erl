@@ -25,13 +25,15 @@
                     }.
 -type file() :: map().
 -type req_data() :: map().
--export_type([req_data/0, message/0, file/0]).
+-type webhook_target_url() :: string()|undefined.
+-export_type([req_data/0, message/0, file/0, webhook_target_url/0]).
 
 -callback handle_pull_request(egithub:credentials(), req_data(), [file()]) ->
   {ok, [message()]} | {error, term()}.
 
 -callback handle_error({error, term()}, req_data(), [file()]) ->
-  {error, {failed, integer()}, string()} | {ok, [map()], string()}.
+    {error, term(),  webhook_target_url()}
+  | {ok,    [map()], webhook_target_url()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Public API
@@ -194,6 +196,10 @@ do_handle_pull_request(Module, Cred,
     {error, Reason, TargetUrl} -> {error, Reason, TargetUrl}
   end.
 
+-spec do_handle_error_source(term(), atom(), egithub:credentials(), map()) ->
+     {clean, webhook_target_url()}
+   | {with_warnings, webhook_target_url()}
+   | {error, term(), webhook_target_url()}.
 do_handle_error_source(Error, Module, Cred, Data) ->
   #{<<"number">> := PR, <<"repository">> := Repository} = Data,
   Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
