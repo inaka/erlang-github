@@ -10,9 +10,6 @@
 
 -export([event/3, event/6]).
 
--export_type([request/0]).
-
--type request() :: #{headers => map(), body => binary()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Callbacks
@@ -42,14 +39,15 @@
 %% @doc Should be called from the endpoint that handles the GitHub's request
 %%      for the webhook.
 %% @end
--spec event(atom(), egithub:credentials(), request()) -> ok | {error, term()}.
-event(Module, Cred, #{headers := Headers, body := Body}) ->
-  case maps:get(<<"x-github-event">>, Headers, undefined) of
+-spec event(atom(), egithub:credentials(), egithub_webhook_req:request()) ->
+      ok | {error, term()}.
+event(Module, Cred, Request) ->
+  case egithub_webhook_req:header(<<"x-github-event">>, Request) of
     undefined ->
       {error, missing_header};
     <<"ping">> -> ok;
     <<"pull_request">> ->
-      EventData = egithub_json:decode(Body),
+      {_Request2, EventData} = egithub_webhook_req:payload(Request),
       case do_handle_pull_request(Module, Cred, EventData) of
         clean -> ok;
         {clean, _TargetUrl} -> ok;
@@ -70,15 +68,14 @@ event(Module, Cred, #{headers := Headers, body := Body}) ->
 %% @end
 -spec event(
   atom(), egithub:credentials(), string(), string(), egithub:credentials(),
-  request()) -> ok | {error, term()}.
+  egithub_webhook_req:request()) -> ok | {error, term()}.
 event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
-  #{headers := Headers, body := Body} = Request,
-  case maps:get(<<"x-github-event">>, Headers, undefined) of
+  case egithub_webhook_req:header(<<"x-github-event">>, Request) of
     undefined ->
       {error, missing_header};
     <<"ping">> -> ok;
     <<"pull_request">> ->
-      EventData = egithub_json:decode(Body),
+      {_Request2, EventData} = egithub_webhook_req:payload(Request),
       set_status(pending, StatusCred, ToolName, Context, EventData),
       try
         Result = do_handle_pull_request(Module, CommentsCred, EventData),
