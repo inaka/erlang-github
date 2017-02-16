@@ -7,9 +7,9 @@ BUILD_DEPS = inaka_mk hexer_mk
 
 # TODO: Remove this line once https://github.com/ninenines/erlang.mk/issues/473 is fixed
 dep_goldrush = hex 0.1.7
-dep_lager = hex 3.2.1
-dep_jiffy = hex 0.14.7
-dep_hackney = hex 1.6.0
+dep_lager = hex 3.2.4
+dep_jiffy = hex 0.14.11
+dep_hackney = hex 1.6.5
 dep_katana_test = git https://github.com/inaka/katana-test.git 0.0.6
 dep_mixer = git https://github.com/inaka/mixer.git 0.1.5
 dep_meck = hex 0.8.4
