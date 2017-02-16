@@ -1,10 +1,32 @@
 # Change Log
 
-## [0.3.1](https://github.com/inaka/erlang-github/tree/0.3.1) (2016-10-24)
-[Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.0...0.3.1)
+## [0.3.2](https://github.com/inaka/erlang-github/tree/0.3.2) (2017-02-16)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.1...0.3.2)
+
+**Fixed bugs:**
+
+- change 'request' type on egithub\_webhook [\#123](https://github.com/inaka/erlang-github/issues/123)
+
+**Closed issues:**
+
+- Update dependencies [\#133](https://github.com/inaka/erlang-github/issues/133)
 
 **Merged pull requests:**
 
+- \[\#133\] Dependencies updated [\#135](https://github.com/inaka/erlang-github/pull/135) ([ferigis](https://github.com/ferigis))
+- make egithub\_webhook:request\(\) type opaque [\#131](https://github.com/inaka/erlang-github/pull/131) ([mfelsche](https://github.com/mfelsche))
+- fix egithub\_webhook:handle\_error spec [\#130](https://github.com/inaka/erlang-github/pull/130) ([mfelsche](https://github.com/mfelsche))
+
+## [0.3.1](https://github.com/inaka/erlang-github/tree/0.3.1) (2016-10-24)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.0...0.3.1)
+
+**Closed issues:**
+
+- Bump Version to 0.3.1 [\#128](https://github.com/inaka/erlang-github/issues/128)
+
+**Merged pull requests:**
+
+- \[Close \#128\] bump version to 0.3.1 [\#129](https://github.com/inaka/erlang-github/pull/129) ([Euen](https://github.com/Euen))
 - Fix specification [\#127](https://github.com/inaka/erlang-github/pull/127) ([Euen](https://github.com/Euen))
 
 ## [0.3.0](https://github.com/inaka/erlang-github/tree/0.3.0) (2016-10-19)
