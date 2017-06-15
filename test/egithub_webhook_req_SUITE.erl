@@ -64,6 +64,7 @@ setup_test_data() ->
 %% Test cases
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+-spec get_headers(config()) -> binary().
 get_headers(Config) ->
   #{
     headers := TestHeaders,
@@ -74,6 +75,7 @@ get_headers(Config) ->
   undefined = egithub_webhook_req:header(<<"Undefined">>, Req),
   <<"*">> = egithub_webhook_req:header(<<"Accept">>, Req).
 
+-spec encoded_body(config()) -> {egithub_webhook_req:request(), map()}.
 encoded_body(Config) ->
   #{
     encoded_request := Req,
@@ -83,6 +85,7 @@ encoded_body(Config) ->
   {Req2, DecodedBody} = egithub_webhook_req:payload(Req),
   {_Req3, DecodedBody} = egithub_webhook_req:payload(Req2).
 
+-spec decoded_body(config()) -> {egithub_webhook_req:request(), map()}.
 decoded_body(Config) ->
   #{
     decoded_request := Req,

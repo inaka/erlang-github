@@ -18,6 +18,8 @@
          end_per_suite
         ]).
 
+-type config() :: [{atom(), term()}].
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Common test
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,6 +33,7 @@ all() ->
 %% Test cases
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+-spec encode_callback(config()) -> binary().
 encode_callback(_Config) ->
   application:unset_env(egithub, json),
   <<"{}">> = egithub_json:encode(#{}),
@@ -38,6 +41,7 @@ encode_callback(_Config) ->
   application:set_env(egithub, json, egithub_json_example),
   <<"1">> = egithub_json:encode(#{}).
 
+-spec decode_callback(config()) -> 2.
 decode_callback(_Config) ->
   application:unset_env(egithub, json),
   #{} = egithub_json:decode(<<"{}">>),
