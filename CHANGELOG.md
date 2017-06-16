@@ -1,15 +1,24 @@
 # Change Log
 
+## [0.4.1](https://github.com/inaka/erlang-github/tree/0.4.1) (2017-06-16)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.4.0...0.4.1)
+
+**Merged pull requests:**
+
+- Update dependencies to publish in hex [\#143](https://github.com/inaka/erlang-github/pull/143) ([Euen](https://github.com/Euen))
+
 ## [0.4.0](https://github.com/inaka/erlang-github/tree/0.4.0) (2017-06-16)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.2...0.4.0)
 
 **Closed issues:**
 
+- Bump Version to 0.4.0 [\#141](https://github.com/inaka/erlang-github/issues/141)
 - Move from Erlang.mk to rebar3 [\#139](https://github.com/inaka/erlang-github/issues/139)
 - Version Bump to 0.3.2 [\#136](https://github.com/inaka/erlang-github/issues/136)
 
 **Merged pull requests:**
 
+- \[Close \#141\] Bump Version to 0.4.0 [\#142](https://github.com/inaka/erlang-github/pull/142) ([Euen](https://github.com/Euen))
 - \[Close \#139\] Move from Erlang.mk to rebar3. [\#140](https://github.com/inaka/erlang-github/pull/140) ([Euen](https://github.com/Euen))
 
 ## [0.3.2](https://github.com/inaka/erlang-github/tree/0.3.2) (2017-02-16)
