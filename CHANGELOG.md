@@ -1,5 +1,17 @@
 # Change Log
 
+## [0.4.0](https://github.com/inaka/erlang-github/tree/0.4.0) (2017-06-16)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.2...0.4.0)
+
+**Closed issues:**
+
+- Move from Erlang.mk to rebar3 [\#139](https://github.com/inaka/erlang-github/issues/139)
+- Version Bump to 0.3.2 [\#136](https://github.com/inaka/erlang-github/issues/136)
+
+**Merged pull requests:**
+
+- \[Close \#139\] Move from Erlang.mk to rebar3. [\#140](https://github.com/inaka/erlang-github/pull/140) ([Euen](https://github.com/Euen))
+
 ## [0.3.2](https://github.com/inaka/erlang-github/tree/0.3.2) (2017-02-16)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.1...0.3.2)
 
@@ -13,6 +25,7 @@
 
 **Merged pull requests:**
 
+- \[\#136\] Version Bump to 0.3.2 [\#137](https://github.com/inaka/erlang-github/pull/137) ([ferigis](https://github.com/ferigis))
 - \[\#133\] Dependencies updated [\#135](https://github.com/inaka/erlang-github/pull/135) ([ferigis](https://github.com/ferigis))
 - make egithub\_webhook:request\(\) type opaque [\#131](https://github.com/inaka/erlang-github/pull/131) ([mfelsche](https://github.com/mfelsche))
 - fix egithub\_webhook:handle\_error spec [\#130](https://github.com/inaka/erlang-github/pull/130) ([mfelsche](https://github.com/mfelsche))
