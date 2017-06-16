@@ -10,6 +10,6 @@
    {maintainers, ["Inaka"]},
    {licenses, ["Apache 2.0"]},
    {links, [{"Github", "https://github.com/inaka/erlang-github"}]},
-   {build_tools, ["erlang.mk", "rebar"]}
+   {build_tools, ["rebar3"]}
   ]
 }.

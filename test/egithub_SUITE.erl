@@ -32,6 +32,7 @@
         ]).
 
 -type config() :: [{atom(), term()}].
+-type result() :: ok | {ok, term()} | {error, term()}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Common test
@@ -56,6 +57,7 @@ end_per_suite(Config) ->
 %% Test cases
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+-spec pull_reqs(config()) -> result().
 pull_reqs(_Config) ->
   Credentials = github_credentials(),
 
@@ -93,6 +95,7 @@ pull_reqs(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec issue_comments(config()) -> result().
 issue_comments(_Config) ->
   Credentials = github_credentials(),
 
@@ -124,6 +127,7 @@ issue_comments(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec issues(config()) -> result().
 issues(_Config) ->
   Credentials = github_credentials(),
 
@@ -162,6 +166,7 @@ issues(_Config) ->
       meck:unload(hackney)
   end.
 
+-spec files(config()) -> result().
 files(_Config) ->
   Credentials = github_credentials(),
 
@@ -176,6 +181,7 @@ files(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec users(config()) -> result().
 users(_Config) ->
   Credentials = github_credentials(),
 
@@ -198,6 +204,7 @@ users(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec orgs(config()) -> result().
 orgs(_Config) ->
   Credentials = github_credentials(),
 
@@ -221,6 +228,7 @@ orgs(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec repos(config()) -> result().
 repos(_Config) ->
   Credentials = github_credentials(),
 
@@ -318,6 +326,7 @@ repos(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec teams(config()) -> pending.
 teams(_Config) ->
   Credentials = github_credentials(),
 
@@ -366,6 +375,7 @@ teams(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec hooks(config()) -> result().
 hooks(_Config) ->
   Credentials = github_credentials(),
 
@@ -391,6 +401,7 @@ hooks(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec collaborators(config()) -> result().
 collaborators(_Config) ->
   Credentials = github_credentials(),
 
@@ -415,6 +426,7 @@ collaborators(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec statuses(config()) -> result().
 statuses(_Config) ->
   Credentials = github_credentials(),
 
