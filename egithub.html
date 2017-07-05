@@ -1,0 +1,445 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module egithub</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module egithub</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>Main module that implements the functions to interact with the GitHub's
+       API.
+
+
+<h2><a name="description">Description</a></h2>Main module that implements the functions to interact with the GitHub's
+       API.
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-credentials">credentials()</a></h3>
+<p><tt>credentials() = {basic, Username::string(), Password::string()} | {oauth, Token::string()}</tt></p>
+
+
+<h3 class="typedecl"><a name="type-issue_labels">issue_labels()</a></h3>
+<p><tt>issue_labels() = [string()]</tt></p>
+
+
+<h3 class="typedecl"><a name="type-options">options()</a></h3>
+<p><tt>options() = #{post_method =&gt; queue | run}</tt></p>
+
+
+<h3 class="typedecl"><a name="type-repository">repository()</a></h3>
+<p><tt>repository() = string()</tt></p>
+<p>  "username/reponame"</p>
+
+<h3 class="typedecl"><a name="type-result">result()</a></h3>
+<p><tt>result() = ok | {ok, term()} | {error, term()}</tt></p>
+
+
+<h3 class="typedecl"><a name="type-state">state()</a></h3>
+<p><tt>state() = pending | success | error | failure</tt></p>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#add_collaborator-3">add_collaborator/3</a></td><td>Add a collaborator to a repository.</td></tr>
+<tr><td valign="top"><a href="#add_team_member-3">add_team_member/3</a></td><td>Add a member to a team.</td></tr>
+<tr><td valign="top"><a href="#add_team_repository-3">add_team_repository/3</a></td><td>Add a repository to a team.</td></tr>
+<tr><td valign="top"><a href="#all_issues-2">all_issues/2</a></td><td>List all issues across all the authenticated user's visible repositories
+       including owned repositories, member repositories, and organization
+       repositories.</td></tr>
+<tr><td valign="top"><a href="#all_issues-3">all_issues/3</a></td><td>List issues for a specific owner repository.</td></tr>
+<tr><td valign="top"><a href="#all_org_repos-3">all_org_repos/3</a></td><td>Same as all_repos/3 but for an organization.</td></tr>
+<tr><td valign="top"><a href="#all_repos-2">all_repos/2</a></td><td>Same as repos/2 but if there are a lot of repos that need to be paged
+       handles the paging, asking for all pages until it gets an empty page.</td></tr>
+<tr><td valign="top"><a href="#all_repos-3">all_repos/3</a></td><td>Same as repos/3 but if there are a lot of repos that need to be paged
+       handles the paging, asking for all pages until it gets an empty page.</td></tr>
+<tr><td valign="top"><a href="#basic_auth-2">basic_auth/2</a></td><td>Takes a username and a password.</td></tr>
+<tr><td valign="top"><a href="#collaborators-2">collaborators/2</a></td><td>Get all collaborators in a repository.</td></tr>
+<tr><td valign="top"><a href="#combined_status-3">combined_status/3</a></td><td>Get a result with the combined values of all statuses for the
+       provided repository and <code>SHA</code>.</td></tr>
+<tr><td valign="top"><a href="#create_issue-7">create_issue/7</a></td><td>Create an issue.</td></tr>
+<tr><td valign="top"><a href="#create_issue-8">create_issue/8</a></td><td>Create an issue.</td></tr>
+<tr><td valign="top"><a href="#create_issue-9">create_issue/9</a></td><td>Create an issue.</td></tr>
+<tr><td valign="top"><a href="#create_status-6">create_status/6</a></td><td>Equivalent to <a href="#create_status-7"><tt>create_status(Cred, Repo, Sha, State, Description,
+	      Context, undefined)</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#create_status-7">create_status/7</a></td><td>Create a new status for the provided <code>SHA</code>.</td></tr>
+<tr><td valign="top"><a href="#create_team-5">create_team/5</a></td><td>Creates a team in an organization.</td></tr>
+<tr><td valign="top"><a href="#create_webhook-4">create_webhook/4</a></td><td>Create a webhook in a repository.</td></tr>
+<tr><td valign="top"><a href="#delete_team_member-3">delete_team_member/3</a></td><td>Delete a member from a team.</td></tr>
+<tr><td valign="top"><a href="#delete_webhook-3">delete_webhook/3</a></td><td>Delete a webhook from a repository.</td></tr>
+<tr><td valign="top"><a href="#dismiss_pr_review-5">dismiss_pr_review/5</a></td><td>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", the issue/pull number, review ID, and a PR
+       review dismissal message.</td></tr>
+<tr><td valign="top"><a href="#file_content-4">file_content/4</a></td><td>Fetches the contents of a file for a given repository and commit SHA.</td></tr>
+<tr><td valign="top"><a href="#hooks-2">hooks/2</a></td><td>Get all hooks for a repository.</td></tr>
+<tr><td valign="top"><a href="#issue_comment-4">issue_comment/4</a></td><td>Equivalent to <a href="#issue_comment-5"><tt>issue_comment(Cred, Repo, PR, Text,
+	      #{post_method =&gt; run})</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#issue_comment-5">issue_comment/5</a></td><td>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", the issue number, the comment's text and some
+       options.</td></tr>
+<tr><td valign="top"><a href="#issue_comments-3">issue_comments/3</a></td><td>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame" and the issue number.</td></tr>
+<tr><td valign="top"><a href="#issues_org-3">issues_org/3</a></td><td>List all issues for a given organization for the authenticated user.</td></tr>
+<tr><td valign="top"><a href="#issues_user-2">issues_user/2</a></td><td>List all issues across owned and member repositories for the
+       authenticated user.</td></tr>
+<tr><td valign="top"><a href="#languages-2">languages/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#oauth-1">oauth/1</a></td><td>Takes a valid OAuth token.</td></tr>
+<tr><td valign="top"><a href="#org_membership-2">org_membership/2</a></td><td>Check if the user associated with the provided credentials is a
+       member of <code>OrgName</code>.</td></tr>
+<tr><td valign="top"><a href="#org_repos-3">org_repos/3</a></td><td>Same as repos/3 but for an organization.</td></tr>
+<tr><td valign="top"><a href="#orgs-1">orgs/1</a></td><td>Get the organizations for the user associated with the provided
+       credentials.</td></tr>
+<tr><td valign="top"><a href="#orgs-2">orgs/2</a></td><td>Get the organizations for the user associated with the provided
+       <code>Username</code>.</td></tr>
+<tr><td valign="top"><a href="#pr_review-5">pr_review/5</a></td><td>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", the issue/pull number, the PR review object
+       and some options.</td></tr>
+<tr><td valign="top"><a href="#pr_reviews-3">pr_reviews/3</a></td><td>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", and the issue/pull number.</td></tr>
+<tr><td valign="top"><a href="#pull_req_comment_line-7">pull_req_comment_line/7</a></td><td>Equivalent to <a href="#pull_req_comment_line-8"><tt>pull_req_comment_line(Credentials, Repo, PR, CommitId,
+		      Filename, Line, Text, #{post_method =&gt; run})</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#pull_req_comment_line-8">pull_req_comment_line/8</a></td><td>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", the pull request number, the commit SHA, the
+       relative path to the repository's file, the line where the comment
+       shuold be added, the comment's text and some options.</td></tr>
+<tr><td valign="top"><a href="#pull_req_comments-3">pull_req_comments/3</a></td><td>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame" and the pull request number.</td></tr>
+<tr><td valign="top"><a href="#pull_req_files-3">pull_req_files/3</a></td><td>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame" and the pull request number.</td></tr>
+<tr><td valign="top"><a href="#remove_collaborator-3">remove_collaborator/3</a></td><td>Remove a collaborator from a repository.</td></tr>
+<tr><td valign="top"><a href="#repo-2">repo/2</a></td><td>Get the repository information of <code>RepoFullName</code>
+       (i.e.</td></tr>
+<tr><td valign="top"><a href="#repos-2">repos/2</a></td><td>Equivalent to <a href="#repos-3"><tt>repos(Cred, undefined, Opts)</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#repos-3">repos/3</a></td><td>Get the repositories associated with the user provided
+       taking into account the options supplied.</td></tr>
+<tr><td valign="top"><a href="#statuses-3">statuses/3</a></td><td>Get all statuses for the provided repository and <code>SHA</code>.</td></tr>
+<tr><td valign="top"><a href="#team_membership-3">team_membership/3</a></td><td>Check the membership of a user in a team.</td></tr>
+<tr><td valign="top"><a href="#teams-2">teams/2</a></td><td>Gets all the teams from an organization.</td></tr>
+<tr><td valign="top"><a href="#user-1">user/1</a></td><td>Get the information for the user associated with the provided
+       credentials.</td></tr>
+<tr><td valign="top"><a href="#user-2">user/2</a></td><td>Get the information for the user associated with the provided
+       <code>Username</code>.</td></tr>
+<tr><td valign="top"><a href="#user_emails-1">user_emails/1</a></td><td>Get the emails registered for the user associated with the provided
+       credentials.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="add_collaborator-3">add_collaborator/3</a></h3>
+<div class="spec">
+<p><tt>add_collaborator(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, Collaborator::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Add a collaborator to a repository.</p>
+
+<h3 class="function"><a name="add_team_member-3">add_team_member/3</a></h3>
+<div class="spec">
+<p><tt>add_team_member(Cred::<a href="#type-credentials">credentials()</a>, TeamId::integer(), Username::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Add a member to a team.</p>
+
+<h3 class="function"><a name="add_team_repository-3">add_team_repository/3</a></h3>
+<div class="spec">
+<p><tt>add_team_repository(Cred::<a href="#type-credentials">credentials()</a>, TeamId::integer(), RepoFullName::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Add a repository to a team.</p>
+
+<h3 class="function"><a name="all_issues-2">all_issues/2</a></h3>
+<div class="spec">
+<p><tt>all_issues(Cred::<a href="#type-credentials">credentials()</a>, Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>List all issues across all the authenticated user's visible repositories
+       including owned repositories, member repositories, and organization
+       repositories</p>
+
+<h3 class="function"><a name="all_issues-3">all_issues/3</a></h3>
+<div class="spec">
+<p><tt>all_issues(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>List issues for a specific owner repository</p>
+
+<h3 class="function"><a name="all_org_repos-3">all_org_repos/3</a></h3>
+<div class="spec">
+<p><tt>all_org_repos(Cred::<a href="#type-credentials">credentials()</a>, Org::string(), Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Same as all_repos/3 but for an organization.</p>
+
+<h3 class="function"><a name="all_repos-2">all_repos/2</a></h3>
+<div class="spec">
+<p><tt>all_repos(Cred::<a href="#type-credentials">credentials()</a>, Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Same as repos/2 but if there are a lot of repos that need to be paged
+       handles the paging, asking for all pages until it gets an empty page.</p>
+
+<h3 class="function"><a name="all_repos-3">all_repos/3</a></h3>
+<div class="spec">
+<p><tt>all_repos(Cred::<a href="#type-credentials">credentials()</a>, User::string(), Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Same as repos/3 but if there are a lot of repos that need to be paged
+       handles the paging, asking for all pages until it gets an empty page.</p>
+
+<h3 class="function"><a name="basic_auth-2">basic_auth/2</a></h3>
+<div class="spec">
+<p><tt>basic_auth(User::string(), Password::string()) -&gt; <a href="egithub.html#type-credentials">egithub:credentials()</a></tt><br></p>
+</div><p>Takes a username and a password. Returns a value that can be used
+       for basic authentication.</p>
+
+<h3 class="function"><a name="collaborators-2">collaborators/2</a></h3>
+<div class="spec">
+<p><tt>collaborators(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get all collaborators in a repository.</p>
+
+<h3 class="function"><a name="combined_status-3">combined_status/3</a></h3>
+<div class="spec">
+<p><tt>combined_status(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, Ref::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get a result with the combined values of all statuses for the
+       provided repository and <code>SHA</code>.</p>
+
+<h3 class="function"><a name="create_issue-7">create_issue/7</a></h3>
+<div class="spec">
+<p><tt>create_issue(Cred::<a href="#type-credentials">credentials()</a>, Username::string(), Repo::<a href="#type-repository">repository()</a>, Title::string(), Text::string(), Assignee::string(), Labels::<a href="#type-issue_labels">issue_labels()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Create an issue</p>
+
+<h3 class="function"><a name="create_issue-8">create_issue/8</a></h3>
+<div class="spec">
+<p><tt>create_issue(Cred::<a href="#type-credentials">credentials()</a>, Username::string(), Repo::<a href="#type-repository">repository()</a>, Title::string(), Text::string(), Assignee::string(), Milestone::pos_integer(), Labels::<a href="#type-issue_labels">issue_labels()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Create an issue</p>
+
+<h3 class="function"><a name="create_issue-9">create_issue/9</a></h3>
+<div class="spec">
+<p><tt>create_issue(Cred::<a href="#type-credentials">credentials()</a>, Username::string(), Repo::<a href="#type-repository">repository()</a>, Title::string(), Text::string(), Assignee::string(), Milestone::pos_integer(), Labels::<a href="#type-issue_labels">issue_labels()</a>, Options::<a href="#type-options">options()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Create an issue</p>
+
+<h3 class="function"><a name="create_status-6">create_status/6</a></h3>
+<div class="spec">
+<p><tt>create_status(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, Sha::string(), State::<a href="#type-state">state()</a>, Description::string(), Context::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Equivalent to <a href="#create_status-7"><tt>create_status(Cred, Repo, Sha, State, Description,
+	      Context, undefined)</tt></a>.</p>
+
+
+<h3 class="function"><a name="create_status-7">create_status/7</a></h3>
+<div class="spec">
+<p><tt>create_status(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, Sha::string(), State::<a href="#type-state">state()</a>, Description::string(), Context::string(), TargetUrl::string() | undefined) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Create a new status for the provided <code>SHA</code>.</p>
+
+<h3 class="function"><a name="create_team-5">create_team/5</a></h3>
+<div class="spec">
+<p><tt>create_team(Cred::<a href="#type-credentials">credentials()</a>, Org::string(), Name::string(), Permission::string(), Repos::[string()]) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Creates a team in an organization.</p>
+
+<h3 class="function"><a name="create_webhook-4">create_webhook/4</a></h3>
+<div class="spec">
+<p><tt>create_webhook(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, WebhookUrl::string(), Events::[string()]) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Create a webhook in a repository.</p>
+
+<h3 class="function"><a name="delete_team_member-3">delete_team_member/3</a></h3>
+<div class="spec">
+<p><tt>delete_team_member(Cred::<a href="#type-credentials">credentials()</a>, TeamId::integer(), Username::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Delete a member from a team.</p>
+
+<h3 class="function"><a name="delete_webhook-3">delete_webhook/3</a></h3>
+<div class="spec">
+<p><tt>delete_webhook(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, Id::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Delete a webhook from a repository.</p>
+
+<h3 class="function"><a name="dismiss_pr_review-5">dismiss_pr_review/5</a></h3>
+<div class="spec">
+<p><tt>dismiss_pr_review(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer(), RId::integer(), Body::iodata()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", the issue/pull number, review ID, and a PR
+       review dismissal message.
+       Returns <code>{ok, RespBody}</code> if everything goes well, where
+       <code>RespBody</code> is the plain text body returned by GitHub.</p>
+
+<h3 class="function"><a name="file_content-4">file_content/4</a></h3>
+<div class="spec">
+<p><tt>file_content(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, CommitId::string(), Filename::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Fetches the contents of a file for a given repository and commit SHA.</p>
+
+<h3 class="function"><a name="hooks-2">hooks/2</a></h3>
+<div class="spec">
+<p><tt>hooks(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get all hooks for a repository.</p>
+
+<h3 class="function"><a name="issue_comment-4">issue_comment/4</a></h3>
+<div class="spec">
+<p><tt>issue_comment(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer(), Text::iodata()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Equivalent to <a href="#issue_comment-5"><tt>issue_comment(Cred, Repo, PR, Text,
+	      #{post_method =&gt; run})</tt></a>.</p>
+
+
+<h3 class="function"><a name="issue_comment-5">issue_comment/5</a></h3>
+<div class="spec">
+<p><tt>issue_comment(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer(), Text::iodata(), Options::<a href="#type-options">options()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", the issue number, the comment's text and some
+       options.
+       Returns <code>{ok, RespBody}</code> if everything goes well, where
+       <code>RespBody</code> is the plain text body returned by GitHub.</p>
+
+<h3 class="function"><a name="issue_comments-3">issue_comments/3</a></h3>
+<div class="spec">
+<p><tt>issue_comments(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame" and the issue number.
+       Returns <code>{ok, Comments}</code> where <code>Comments</code> is the
+       decoded JSON representation of GitHub's response.</p>
+
+<h3 class="function"><a name="issues_org-3">issues_org/3</a></h3>
+<div class="spec">
+<p><tt>issues_org(Cred::<a href="#type-credentials">credentials()</a>, Org::string(), Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>List all issues for a given organization for the authenticated user.</p>
+
+<h3 class="function"><a name="issues_user-2">issues_user/2</a></h3>
+<div class="spec">
+<p><tt>issues_user(Cred::<a href="#type-credentials">credentials()</a>, Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>List all issues across owned and member repositories for the
+       authenticated user.</p>
+
+<h3 class="function"><a name="languages-2">languages/2</a></h3>
+<div class="spec">
+<p><tt>languages(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>) -&gt; {ok, #{}} | <a href="egithub_req.html#type-error">egithub_req:error()</a></tt><br></p>
+</div>
+
+<h3 class="function"><a name="oauth-1">oauth/1</a></h3>
+<div class="spec">
+<p><tt>oauth(Token::binary()) -&gt; <a href="egithub.html#type-credentials">egithub:credentials()</a></tt><br></p>
+</div><p>Takes a valid OAuth token. Returns a value that can be used
+       for OAuth authentication.</p>
+
+<h3 class="function"><a name="org_membership-2">org_membership/2</a></h3>
+<div class="spec">
+<p><tt>org_membership(Cred::<a href="#type-credentials">credentials()</a>, OrgName::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Check if the user associated with the provided credentials is a
+       member of <code>OrgName</code>.</p>
+
+<h3 class="function"><a name="org_repos-3">org_repos/3</a></h3>
+<div class="spec">
+<p><tt>org_repos(Cred::<a href="#type-credentials">credentials()</a>, Org::string(), Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Same as repos/3 but for an organization.</p>
+
+<h3 class="function"><a name="orgs-1">orgs/1</a></h3>
+<div class="spec">
+<p><tt>orgs(Cred::<a href="#type-credentials">credentials()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get the organizations for the user associated with the provided
+       credentials.</p>
+
+<h3 class="function"><a name="orgs-2">orgs/2</a></h3>
+<div class="spec">
+<p><tt>orgs(Cred::<a href="#type-credentials">credentials()</a>, User::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get the organizations for the user associated with the provided
+       <code>Username</code>.</p>
+
+<h3 class="function"><a name="pr_review-5">pr_review/5</a></h3>
+<div class="spec">
+<p><tt>pr_review(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer(), Body::<a href="egithub_webhook.html#type-review">egithub_webhook:review()</a>, Options::<a href="#type-options">options()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", the issue/pull number, the PR review object
+       and some options.
+       Returns <code>{ok, RespBody}</code> if everything goes well, where
+       <code>RespBody</code> is the plain text body returned by GitHub.</p>
+
+<h3 class="function"><a name="pr_reviews-3">pr_reviews/3</a></h3>
+<div class="spec">
+<p><tt>pr_reviews(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", and the issue/pull number.
+       Returns <code>{ok, [map()]}</code> if everything goes well, where
+       <code>[map()]</code> is a list of reviews.</p>
+
+<h3 class="function"><a name="pull_req_comment_line-7">pull_req_comment_line/7</a></h3>
+<div class="spec">
+<p><tt>pull_req_comment_line(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer(), CommitId::string(), Filename::binary(), Line::integer(), Text::iodata()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Equivalent to <a href="#pull_req_comment_line-8"><tt>pull_req_comment_line(Credentials, Repo, PR, CommitId,
+		      Filename, Line, Text, #{post_method =&gt; run})</tt></a>.</p>
+
+
+<h3 class="function"><a name="pull_req_comment_line-8">pull_req_comment_line/8</a></h3>
+<div class="spec">
+<p><tt>pull_req_comment_line(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer(), CommitId::string(), Filename::binary(), Line::integer(), Text::iodata(), Options::<a href="#type-options">options()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame", the pull request number, the commit SHA, the
+       relative path to the repository's file, the line where the comment
+       shuold be added, the comment's text and some options.
+       Returns <code>ok</code> if everything goes well.</p>
+
+<h3 class="function"><a name="pull_req_comments-3">pull_req_comments/3</a></h3>
+<div class="spec">
+<p><tt>pull_req_comments(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame" and the pull request number.
+       Returns <code>{ok, Comments}</code> where <code>Comments</code> is the
+       decoded JSON representation of GitHub's response.</p>
+
+<h3 class="function"><a name="pull_req_files-3">pull_req_files/3</a></h3>
+<div class="spec">
+<p><tt>pull_req_files(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, PR::integer()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Takes valid credentials, a string representing a repository (i.e
+       "username/reponame" and the pull request number.
+       Returns <code>{ok, Files}</code> where <code>Files</code> is the
+       decoded JSON representation of GitHub's response.</p>
+
+<h3 class="function"><a name="remove_collaborator-3">remove_collaborator/3</a></h3>
+<div class="spec">
+<p><tt>remove_collaborator(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, Collaborator::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Remove a collaborator from a repository.</p>
+
+<h3 class="function"><a name="repo-2">repo/2</a></h3>
+<div class="spec">
+<p><tt>repo(Cred::<a href="#type-credentials">credentials()</a>, RepoFullName::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get the repository information of <code>RepoFullName</code>
+       (i.e. "username/reponame").</p>
+
+<h3 class="function"><a name="repos-2">repos/2</a></h3>
+<div class="spec">
+<p><tt>repos(Cred::<a href="#type-credentials">credentials()</a>, Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Equivalent to <a href="#repos-3"><tt>repos(Cred, undefined, Opts)</tt></a>.</p>
+
+
+<h3 class="function"><a name="repos-3">repos/3</a></h3>
+<div class="spec">
+<p><tt>repos(Cred::<a href="#type-credentials">credentials()</a>, User::string(), Opts::#{}) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get the repositories associated with the user provided
+       taking into account the options supplied. If the <code>User</code>
+       is <code>undefined</code> then the user taken into account is
+       the one with the credentials.
+       The options available depend on the GitHub API specs.
+       Check
+       <a href="https://developer.github.com/v3/repos/#parameters">here</a>
+       for more information.</p>
+
+<h3 class="function"><a name="statuses-3">statuses/3</a></h3>
+<div class="spec">
+<p><tt>statuses(Cred::<a href="#type-credentials">credentials()</a>, Repo::<a href="#type-repository">repository()</a>, Ref::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get all statuses for the provided repository and <code>SHA</code>.</p>
+
+<h3 class="function"><a name="team_membership-3">team_membership/3</a></h3>
+<div class="spec">
+<p><tt>team_membership(Cred::<a href="#type-credentials">credentials()</a>, TeamId::integer(), Username::string()) -&gt; active | pending | none</tt><br></p>
+</div><p>Check the membership of a user in a team.</p>
+
+<h3 class="function"><a name="teams-2">teams/2</a></h3>
+<div class="spec">
+<p><tt>teams(Cred::<a href="#type-credentials">credentials()</a>, Org::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Gets all the teams from an organization.</p>
+
+<h3 class="function"><a name="user-1">user/1</a></h3>
+<div class="spec">
+<p><tt>user(Cred::<a href="#type-credentials">credentials()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get the information for the user associated with the provided
+       credentials.</p>
+
+<h3 class="function"><a name="user-2">user/2</a></h3>
+<div class="spec">
+<p><tt>user(Cred::<a href="#type-credentials">credentials()</a>, Username::string()) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get the information for the user associated with the provided
+       <code>Username</code>.</p>
+
+<h3 class="function"><a name="user_emails-1">user_emails/1</a></h3>
+<div class="spec">
+<p><tt>user_emails(Cred::<a href="#type-credentials">credentials()</a>) -&gt; <a href="#type-result">result()</a></tt><br></p>
+</div><p>Get the emails registered for the user associated with the provided
+       credentials.</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc, Jul 5 2017, 13:04:07.</i></p>
+</body>
+</html>
