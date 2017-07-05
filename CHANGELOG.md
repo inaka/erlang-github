@@ -1,10 +1,20 @@
 # Change Log
 
-## [0.4.1](https://github.com/inaka/erlang-github/tree/0.4.1) (2017-06-16)
-[Full Changelog](https://github.com/inaka/erlang-github/compare/0.4.0...0.4.1)
+## [0.5.0](https://github.com/inaka/erlang-github/tree/0.5.0) (2017-07-05)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.4.0...0.5.0)
+
+**Implemented enhancements:**
+
+- Allow the users to use the new GitHub's PR review feature [\#138](https://github.com/inaka/erlang-github/issues/138)
+
+**Closed issues:**
+
+- Bump Version to 0.4.1 [\#144](https://github.com/inaka/erlang-github/issues/144)
 
 **Merged pull requests:**
 
+- \[Fix \#138\] Allow the users to use the new GitHub's PR review feature [\#146](https://github.com/inaka/erlang-github/pull/146) ([harenson](https://github.com/harenson))
+- \[Close \#144\] bump version to 0.4.1 [\#145](https://github.com/inaka/erlang-github/pull/145) ([Euen](https://github.com/Euen))
 - Update dependencies to publish in hex [\#143](https://github.com/inaka/erlang-github/pull/143) ([Euen](https://github.com/Euen))
 
 ## [0.4.0](https://github.com/inaka/erlang-github/tree/0.4.0) (2017-06-16)
