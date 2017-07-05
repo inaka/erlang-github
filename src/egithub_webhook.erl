@@ -20,10 +20,20 @@
                      position  => pos_integer(),
                      text      => binary()
                     }.
+-type review_comment() :: #{path      => string() | binary(),
+                            position  => pos_integer(),
+                            body      => string() | binary()
+                           }.
+-type review_event() :: string() | binary(). % "APPROVE" | "REQUEST_CHANGES".
+-type review() :: #{commit_id => string() | binary(),
+                    body      => string() | binary(),
+                    event     => review_event(),
+                    comments  => [review_comment()]
+                   }.
 -type file() :: map().
 -type req_data() :: map().
 -type webhook_target_url() :: string()|undefined.
--export_type([req_data/0, message/0, file/0, webhook_target_url/0]).
+-export_type([req_data/0, message/0, file/0, webhook_target_url/0, review/0]).
 
 -callback handle_pull_request(egithub:credentials(), req_data(), [file()]) ->
   {ok, [message()]} | {error, term()}.
@@ -170,24 +180,18 @@ normalize_state(State) -> State.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Events
 
-do_handle_pull_request(Module, Cred,
-      #{<<"number">> := PR, <<"repository">> := Repository} = Data) ->
-  Repo = binary_to_list(maps:get(<<"full_name">>, Repository)),
+do_handle_pull_request(Module, Cred, #{<<"number">> := PR,
+                                       <<"repository">> := RepoInfo} = Data) ->
+  Repo = binary_to_list(maps:get(<<"full_name">>, RepoInfo)),
   {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
   case Module:handle_pull_request(Cred, Data, GithubFiles) of
     {ok, []} -> clean;
     {ok, Messages} ->
-      {ok, LineComments} = egithub:pull_req_comments(Cred, Repo, PR),
-      {ok, IssueComments} = egithub:issue_comments(Cred, Repo, PR),
-      Comments = LineComments ++ IssueComments,
-      write_comments(Cred, Repo, PR, Comments, Messages),
+      ok = handle_messages_or_review(Cred, Repo, PR, Messages),
       with_warnings;
     {ok, [], TargetUrl} -> {clean, TargetUrl};
     {ok, Messages, TargetUrl} ->
-      {ok, LineComments} = egithub:pull_req_comments(Cred, Repo, PR),
-      {ok, IssueComments} = egithub:issue_comments(Cred, Repo, PR),
-      Comments = LineComments ++ IssueComments,
-      write_comments(Cred, Repo, PR, Comments, Messages),
+      ok = handle_messages_or_review(Cred, Repo, PR, Messages),
       {with_warnings, TargetUrl};
     {error, Reason} -> {error, Reason};
     {error, Reason, TargetUrl} -> {error, Reason, TargetUrl}
@@ -275,3 +279,52 @@ line_comment_exists(Comments, Path, Position, Body) ->
     [] -> not_exists;
     [_|_] -> exists
   end.
+
+-spec handle_messages_or_review(egithub:credentials(), egithub:repository(),
+                                integer(), review() | [message()]) ->
+  egithub:result().
+handle_messages_or_review(Cred, Repo, PR, Messages) ->
+  {ok, ReviewStyle} = application:get_env(egithub, review_style, pr_review),
+  case ReviewStyle of
+    individual_comments ->
+      {ok, LineComments} = egithub:pull_req_comments(Cred, Repo, PR),
+      {ok, IssueComments} = egithub:issue_comments(Cred, Repo, PR),
+      Comments = LineComments ++ IssueComments,
+      write_comments(Cred, Repo, PR, Comments, Messages);
+    pr_review ->
+      dismiss_old_pr_reviews(Cred, Repo, PR),
+      % Without this sleep call, the dismissal message will appear below the
+      % new review, so with this sleep call, the dismissal message will appear
+      % above the new review.
+      timer:sleep(500),
+      write_pr_review(Cred, Repo, PR, Messages)
+  end.
+
+-spec write_pr_review(egithub:credentials(), egithub:repository(), integer(),
+                      review())->
+  egithub:result().
+write_pr_review(Cred, Repo, PR, PrReview) ->
+  egithub:pr_review(Cred, Repo, PR, PrReview, #{post_method => queue}).
+
+-spec dismiss_old_pr_reviews(egithub:credentials(), egithub:repository(),
+                            integer()) ->
+  ok.
+dismiss_old_pr_reviews(Cred, Repo, PR) ->
+  {ok, ExistingReviews} = egithub:pr_reviews(Cred, Repo, PR),
+  Fun =
+    fun(#{<<"id">> := RId,
+          <<"user">> := #{<<"login">> := <<"elvisci">>},
+          <<"state">> := State}) ->
+         case State of
+           <<"DISMISSED">> ->
+             % Don't try to dismiss an already dismissed review ;)
+             ok;
+           _ ->
+             Body = #{message => <<"Old/outdated review">>},
+             {ok, _} = egithub:dismiss_pr_review(Cred, Repo, PR, RId, Body)
+         end;
+       (_) ->
+         ok
+    end,
+  _ = lists:foreach(Fun, ExistingReviews),
+  ok.

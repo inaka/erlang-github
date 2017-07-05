@@ -40,16 +40,28 @@ Cred = egithub:basic_auth("username", "password"),
 
 This library provides the basic functionality over which you can implement your own GitHub
 webhook service. The webhook events that are currently supported are only `ping` and
-`pull_request`. These two allow you to process the contents in a PR and write comments to
-it.
+`pull_request`. These two allow you to process the contents in a PR, write comments to
+it or add a PR review.
 
 To accomplish this you need to implement the `egithub_webhook` behavior, which requires a
 single `handle_pull_request/3` callback. This function receives the GitHub's credentials
 the PR data and the associated files.
 
-After you process the information according to what your webhook is supposed to do, if
-successful the function must return the  tuple `{ok, [message()]}`, where `message()` is a
-map with information regarding the comment (e.g. `commit_id`, `path`, etc).
+By default, this library uses the GitHub's [PR reviews][pr_review] feature. So, once your
+`handle_pull_request/3` implementation is done processing the PR it will have to return the
+tuple `{ok, pr_review()}`, where `pr_review()` is a map with information regarding the
+Review (e.g. *commit_id*, *body*, *event*, and *comments*).
+
+In case you want to use individual comments in your PR, you will have to set the `review_style`
+parameter within your application's config file to `individual_comments`, i.e:
+```erlang
+{egithub, [{review_style, individual_comments}]},
+```
+
+And then, your `handle_pull_request/3` will have to return the tuple `{ok, [message()]}`,
+where `message()` is a map with information regarding the comment (e.g. *commit_id*, *path*, etc).
+
+*Both, `pr_review/0` and `message/0` types are documented within the `egithub_webhook` module.*
 
 To start the whole webhook flow once you receive the request from GitHub on your endpoint
 you can call either `egithub_webhook:event/3` or `egithub_webhook:event/6`. The function
@@ -118,3 +130,4 @@ issue](https://github.com/inaka/erlang-github/issues/new) in this repo (or a pul
 And you can check all of our open-source projects at [inaka.github.io](http://inaka.github.io)
 
 [1]: https://developer.github.com/v3/
+[pr_review]: https://developer.github.com/v3/pulls/reviews/
