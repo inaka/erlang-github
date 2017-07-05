@@ -9,6 +9,7 @@
 -export([
          pull_reqs/1,
          issue_comments/1,
+         pr_review/1,
          issues/1,
          files/1,
          users/1,
@@ -123,6 +124,33 @@ issue_comments(_Config) ->
                                  get),
     meck:expect(hackney, request, IssueCommentsFun),
     {ok, _} = egithub:issue_comments(Credentials, "user/repo", 1)
+  after
+    meck:unload(hackney)
+  end.
+
+-spec pr_review(config()) -> result().
+pr_review(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(hackney, [passthrough]),
+  try
+    Self = self(),
+    PrReviewQueueFun = fun(post, Url, _, _) ->
+                           <<"https://api.github.com/"
+                             "repos/user/repo/pulls/1/reviews">> = Url,
+                           Self ! ok,
+                           {ok, 200, [], #client{}}
+                       end,
+    meck:expect(hackney, request, PrReviewQueueFun),
+    ReqBody = #{body  => <<>>,
+                comments => [#{path => <<"/path/to/file">>,
+                               position => 20,
+                               body => <<"bad function naming">>}],
+                commit_id => <<"c0m1tt1d">>,
+                event => <<"REQUEST_CHANGES">>},
+    ok = egithub:pr_review(Credentials, "user/repo", 1, ReqBody,
+                           #{post_method => queue}),
+    ok = receive ok -> ok after 5000 -> timeout end
   after
     meck:unload(hackney)
   end.

@@ -19,6 +19,9 @@
          pull_req_comment_line/7,
          pull_req_comment_line/8,
          pull_req_comments/3,
+         pr_review/5,
+         pr_reviews/3,
+         dismiss_pr_review/5,
          issue_comment/4,
          issue_comment/5,
          issue_comments/3,
@@ -188,6 +191,44 @@ pull_req_comments(Cred, Repo, PR) ->
     {ok, Result} = egithub_req:run(Cred, Url),
     Comments = egithub_json:decode(Result),
     {ok, Comments}.
+
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame", the issue/pull number, the PR review object
+%%      and some options.
+%%      Returns <code>{ok, RespBody}</code> if everything goes well, where
+%%      <code>RespBody</code> is the plain text body returned by GitHub.
+%% @end
+-spec pr_review(credentials(), repository(), integer(),
+                egithub_webhook:review(), options()) ->
+   result().
+pr_review(Cred, Repo, PR, Body, Options) ->
+    Url = make_url(reviews, {Repo, PR}),
+    maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
+
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame", and the issue/pull number.
+%%      Returns <code>{ok, [map()]}</code> if everything goes well, where
+%%      <code>[map()]</code> is a list of reviews.
+%% @end
+-spec pr_reviews(credentials(), repository(), integer()) ->
+   result().
+pr_reviews(Cred, Repo, PR) ->
+    Url = make_url(reviews, {Repo, PR}),
+    {ok, Reviews} = egithub_req:run(Cred, Url),
+    {ok, egithub_json:decode(Reviews)}.
+
+%% @doc Takes valid credentials, a string representing a repository (i.e
+%%      "username/reponame", the issue/pull number, review ID, and a PR
+%%      review dismissal message.
+%%      Returns <code>{ok, RespBody}</code> if everything goes well, where
+%%      <code>RespBody</code> is the plain text body returned by GitHub.
+%% @end
+-spec dismiss_pr_review(credentials(), repository(), integer(), integer(),
+                        iodata()) ->
+   result().
+dismiss_pr_review(Cred, Repo, PR, RId, Body) ->
+    Url = make_url({reviews, dismissals}, {Repo, PR, RId}),
+    egithub_req:run(Cred, Url, put, egithub_json:encode(Body)).
 
 %% Issues
 %% @doc Create an issue
@@ -664,11 +705,20 @@ make_url(status, {Repo, Sha}) ->
     Url = "/repos/~s/commits/~s/status",
     io_lib:format(Url, [Repo, Sha]);
 
-%% Pull Resquest
+%% Pull Request
 make_url({pull_req, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = "/repos/~s/pulls/~p/" ++ SubentityStr,
     io_lib:format(Url, [Repo, PR]);
+
+%% Pull Request Reviews
+make_url(reviews, {Repo, PR}) ->
+    Url = "/repos/~s/pulls/~p/reviews",
+    io_lib:format(Url, [Repo, PR]);
+make_url({reviews, Subentity}, {Repo, PR, RId}) ->
+    SubentityStr = to_str(Subentity),
+    Url = "/repos/~s/pulls/~p/reviews/~p/" ++ SubentityStr,
+    io_lib:format(Url, [Repo, PR, RId]);
 
 %% Issues
 make_url(issue, {User, Repo}) ->
