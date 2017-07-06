@@ -36,7 +36,7 @@
 -export_type([req_data/0, message/0, file/0, webhook_target_url/0, review/0]).
 
 -callback handle_pull_request(egithub:credentials(), req_data(), [file()]) ->
-  {ok, [message()]} | {error, term()}.
+  {ok, [message()]} | {ok, review()} | {error, term()}.
 
 -callback handle_error({error, term()}, req_data(), [file()]) ->
     {error, term(),  webhook_target_url()}
@@ -284,8 +284,7 @@ line_comment_exists(Comments, Path, Position, Body) ->
                                 integer(), review() | [message()]) ->
   egithub:result().
 handle_messages_or_review(Cred, Repo, PR, Messages) ->
-  {ok, ReviewStyle} = application:get_env(egithub, review_style, pr_review),
-  case ReviewStyle of
+  case application:get_env(egithub, review_style, pr_review) of
     individual_comments ->
       {ok, LineComments} = egithub:pull_req_comments(Cred, Repo, PR),
       {ok, IssueComments} = egithub:issue_comments(Cred, Repo, PR),
