@@ -1,5 +1,17 @@
 # Change Log
 
+## [0.5.1](https://github.com/inaka/erlang-github/tree/0.5.1) (2017-07-06)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.0...0.5.1)
+
+**Closed issues:**
+
+- Fix issues left after pull\#146 [\#149](https://github.com/inaka/erlang-github/issues/149)
+- Fix tests [\#134](https://github.com/inaka/erlang-github/issues/134)
+
+**Merged pull requests:**
+
+- \[Fix \#149\] Fix dialyzer and code issues left after pull\#146 [\#150](https://github.com/inaka/erlang-github/pull/150) ([harenson](https://github.com/harenson))
+
 ## [0.5.0](https://github.com/inaka/erlang-github/tree/0.5.0) (2017-07-05)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.4.0...0.5.0)
 
@@ -9,10 +21,12 @@
 
 **Closed issues:**
 
+- Bump version to 0.5.0 and hex.pm it! [\#147](https://github.com/inaka/erlang-github/issues/147)
 - Bump Version to 0.4.1 [\#144](https://github.com/inaka/erlang-github/issues/144)
 
 **Merged pull requests:**
 
+- \[Fix \#147\] Bump version to 0.5.0 [\#148](https://github.com/inaka/erlang-github/pull/148) ([harenson](https://github.com/harenson))
 - \[Fix \#138\] Allow the users to use the new GitHub's PR review feature [\#146](https://github.com/inaka/erlang-github/pull/146) ([harenson](https://github.com/harenson))
 - \[Close \#144\] bump version to 0.4.1 [\#145](https://github.com/inaka/erlang-github/pull/145) ([Euen](https://github.com/Euen))
 - Update dependencies to publish in hex [\#143](https://github.com/inaka/erlang-github/pull/143) ([Euen](https://github.com/Euen))
