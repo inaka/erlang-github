@@ -105,8 +105,7 @@ This would create a comment with the text `Hello` for the issue `username/repo#1
 API Documentation
 =====
 
-There is an automatically generated API documentation page in this project's GitHub page
-[here](http://inaka.github.io/erlang-github/).
+There is an automatically generated API documentation page [here][api_doc].
 
 Example
 =====
@@ -131,3 +130,4 @@ And you can check all of our open-source projects at [inaka.github.io](http://in
 
 [1]: https://developer.github.com/v3/
 [pr_review]: https://developer.github.com/v3/pulls/reviews/
+[api_doc]: https://hexdocs.pm/egithub/
