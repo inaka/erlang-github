@@ -186,6 +186,9 @@ do_handle_pull_request(Module, Cred, #{<<"number">> := PR,
   {ok, GithubFiles} = egithub:pull_req_files(Cred, Repo, PR),
   case Module:handle_pull_request(Cred, Data, GithubFiles) of
     {ok, []} -> clean;
+    {ok, #{event := <<"APPROVE">>, comments := []} = Messages} ->
+      ok = handle_messages_or_review(Cred, Repo, PR, Messages),
+      clean;
     {ok, Messages} ->
       ok = handle_messages_or_review(Cred, Repo, PR, Messages),
       with_warnings;
