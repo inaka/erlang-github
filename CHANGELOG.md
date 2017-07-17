@@ -1,15 +1,28 @@
 # Change Log
 
+## [0.5.2](https://github.com/inaka/erlang-github/tree/0.5.2) (2017-07-17)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.1...0.5.2)
+
+**Fixed bugs:**
+
+- Elvis approves the changes but the check fails [\#153](https://github.com/inaka/erlang-github/issues/153)
+
+**Merged pull requests:**
+
+- \[Fix \#153\] Make check pass when PR is approved [\#154](https://github.com/inaka/erlang-github/pull/154) ([harenson](https://github.com/harenson))
+
 ## [0.5.1](https://github.com/inaka/erlang-github/tree/0.5.1) (2017-07-06)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.0...0.5.1)
 
 **Closed issues:**
 
+- Bump version to 0.5.1 [\#151](https://github.com/inaka/erlang-github/issues/151)
 - Fix issues left after pull\#146 [\#149](https://github.com/inaka/erlang-github/issues/149)
 - Fix tests [\#134](https://github.com/inaka/erlang-github/issues/134)
 
 **Merged pull requests:**
 
+- \[Fix \#151\] Bump version to 0.5.1 [\#152](https://github.com/inaka/erlang-github/pull/152) ([harenson](https://github.com/harenson))
 - \[Fix \#149\] Fix dialyzer and code issues left after pull\#146 [\#150](https://github.com/inaka/erlang-github/pull/150) ([harenson](https://github.com/harenson))
 
 ## [0.5.0](https://github.com/inaka/erlang-github/tree/0.5.0) (2017-07-05)
