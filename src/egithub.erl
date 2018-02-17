@@ -68,7 +68,11 @@
          statuses/3,
          combined_status/3,
          %% Languages
-         languages/2
+         languages/2,
+         %% Releases
+         release/3,
+         releases/2,
+         releases/3
         ]).
 
 %% Files
@@ -670,10 +674,39 @@ combined_status(Cred, Repo, Ref) ->
     api_call_json_result(Cred, Url).
 
 -spec languages(Cred::credentials(), Repo::repository()) ->
-  {ok, map()} | egithub_req:error().
+    {ok, map()} | egithub_req:error().
 languages(Cred, Repo) ->
-  Url = make_url(languages, {Repo}),
-  api_call_json_result(Cred, Url).
+    Url = make_url(languages, {Repo}),
+    api_call_json_result(Cred, Url).
+
+%% Releases
+
+%% @doc Get a single release for a repository of the
+%%      authenticated user.
+%% @end
+-spec release(credentials(), repository(), pos_integer()) ->
+    {ok, map()} | egithub_req:error().
+release(Cred, Repo, Id) ->
+    Url = make_url(release, {Repo, Id}),
+    api_call_json_result(Cred, Url).
+
+%% @doc List all releases for a repository for the
+%%      authenticated user
+%% @end
+-spec releases(credentials(), repository()) ->
+    {ok, map()} | egithub_req:error().
+releases(Cred, Repo) ->
+    Url = make_url(releases, {Repo}),
+    api_call_json_result(Cred, Url).
+
+%% @doc List all releases for a repository for the
+%%      authenticated user.
+%% @end
+-spec releases(credentials(), repository(), map()) ->
+    {ok, map()} | egithub_req:error().
+releases(Cred, Repo, Opts) ->
+    Url = make_url(releases, {Repo, Opts}),
+    api_call_json_result(Cred, Url).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private Functions
@@ -823,8 +856,20 @@ make_url(collaborators, {Repo, Username}) ->
 
 %% Languages
 make_url(languages, {Repo}) ->
-  Url = "/repos/~s/languages",
-  io_lib:format(Url, [Repo]).
+    Url = "/repos/~s/languages",
+    io_lib:format(Url, [Repo]);
+
+%% Releases
+make_url(release, {Repo, Id}) ->
+    Url = "/repos/~s/releases/~p",
+    io_lib:format(Url, [Repo, Id]);
+make_url(releases, {Repo}) ->
+    Url = "/repos/~s/releases",
+    io_lib:format(Url, [Repo]);
+make_url(releases, {Repo, Opts}) ->
+    Page = maps:get(page, Opts, 1),
+    Url = "/repos/~s/releases?page=~p",
+    io_lib:format(Url, [Repo, Page]).
 
 api_call_json_result(Cred, Url) ->
     case egithub_req:run(Cred, Url) of
