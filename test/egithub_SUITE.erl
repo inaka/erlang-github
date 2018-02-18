@@ -506,7 +506,11 @@ releases(_Config) ->
 
       ReposPageFun = match_fun("/repos/inaka/whatever/releases?page=2", get),
       meck:expect(hackney, request, ReposPageFun),
-      {ok, _} = egithub:releases(Credentials, "inaka/whatever", #{page => 2})
+      {ok, _} = egithub:releases(Credentials, "inaka/whatever", #{page => 2}),
+
+      LatesReleaseFun = match_fun("/repos/inaka/whatever/releases/latest", get),
+      meck:expect(hackney, request, LatesReleaseFun),
+      {ok, _} = egithub:release_latest(Credentials, "inaka/whatever")
     after
       meck:unload(hackney)
     end.

@@ -72,7 +72,8 @@
          %% Releases
          release/3,
          releases/2,
-         releases/3
+         releases/3,
+         release_latest/2
         ]).
 
 %% Files
@@ -708,6 +709,15 @@ releases(Cred, Repo, Opts) ->
     Url = make_url(releases, {Repo, Opts}),
     api_call_json_result(Cred, Url).
 
+%% @doc Get the latest release for a repository of the
+%%      authenticated user.
+%% @end
+-spec release_latest(credentials(), repository()) ->
+    {ok, map()} | egithub_req:error().
+release_latest(Cred, Repo) ->
+    Url = make_url(release_lastest, {Repo}),
+    api_call_json_result(Cred, Url).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private Functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -869,7 +879,10 @@ make_url(releases, {Repo}) ->
 make_url(releases, {Repo, Opts}) ->
     Page = maps:get(page, Opts, 1),
     Url = "/repos/~s/releases?page=~p",
-    io_lib:format(Url, [Repo, Page]).
+    io_lib:format(Url, [Repo, Page]);
+make_url(release_lastest, {Repo}) ->
+    Url = "/repos/~s/releases/latest",
+    io_lib:format(Url, [Repo]).
 
 api_call_json_result(Cred, Url) ->
     case egithub_req:run(Cred, Url) of
