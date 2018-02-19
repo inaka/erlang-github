@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.5.3](https://github.com/inaka/erlang-github/tree/0.5.3) (2018-02-19)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.2...0.5.3)
+
+**Closed issues:**
+
+- Bump version to 0.5.2 [\#155](https://github.com/inaka/erlang-github/issues/155)
+
+**Merged pull requests:**
+
+- Releases API [\#158](https://github.com/inaka/erlang-github/pull/158) ([tgrk](https://github.com/tgrk))
+
 ## [0.5.2](https://github.com/inaka/erlang-github/tree/0.5.2) (2017-07-17)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.1...0.5.2)
 
@@ -9,6 +20,7 @@
 
 **Merged pull requests:**
 
+- Bump version to 0.5.2 [\#156](https://github.com/inaka/erlang-github/pull/156) ([harenson](https://github.com/harenson))
 - \[Fix \#153\] Make check pass when PR is approved [\#154](https://github.com/inaka/erlang-github/pull/154) ([harenson](https://github.com/harenson))
 
 ## [0.5.1](https://github.com/inaka/erlang-github/tree/0.5.1) (2017-07-06)
