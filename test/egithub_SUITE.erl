@@ -18,7 +18,8 @@
          teams/1,
          hooks/1,
          collaborators/1,
-         statuses/1
+         statuses/1,
+         releases/1
         ]).
 
 -record(client, {}).
@@ -486,6 +487,33 @@ statuses(_Config) ->
     meck:unload(hackney)
   end.
 
+-spec releases(config()) -> result().
+releases(_Config) ->
+    Credentials = github_credentials(),
+
+    meck:new(hackney, [passthrough]),
+    try
+      BodyReturnFun = fun(_) -> {ok, <<"[]">>} end,
+      meck:expect(hackney, body, BodyReturnFun),
+
+      ReleaseFun = match_fun("/repos/inaka/whatever/releases/1", get),
+      meck:expect(hackney, request, ReleaseFun),
+      {ok, _} = egithub:release(Credentials, "inaka/whatever", 1),
+
+      ReleasesFun = match_fun("/repos/inaka/whatever/releases", get),
+      meck:expect(hackney, request, ReleasesFun),
+      {ok, _} = egithub:releases(Credentials, "inaka/whatever"),
+
+      ReposPageFun = match_fun("/repos/inaka/whatever/releases?page=2", get),
+      meck:expect(hackney, request, ReposPageFun),
+      {ok, _} = egithub:releases(Credentials, "inaka/whatever", #{page => 2}),
+
+      LatesReleaseFun = match_fun("/repos/inaka/whatever/releases/latest", get),
+      meck:expect(hackney, request, LatesReleaseFun),
+      {ok, _} = egithub:release_latest(Credentials, "inaka/whatever")
+    after
+      meck:unload(hackney)
+    end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Helper
