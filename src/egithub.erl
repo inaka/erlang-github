@@ -15,6 +15,7 @@
          basic_auth/2,
          oauth/1,
          %% Pull Requests
+         pull_reqs/3,
          pull_req_files/3,
          pull_req_comment_line/7,
          pull_req_comment_line/8,
@@ -138,6 +139,17 @@ oauth(Token) ->
     {oauth, Token}.
 
 %% Pull Requests
+
+
+%% @doc List pull requests for a repository for the
+%%      authenticated user
+%% @end
+-spec pull_reqs(credentials(), repository(), map()) -> result().
+pull_reqs(Cred, Repo, Opts) ->
+    Url = make_url(pull_reqs, {Repo, Opts}),
+    {ok, Result} = egithub_req:run(Cred, Url),
+    PullRequests = egithub_json:decode(Result),
+    {ok, PullRequests}.
 
 %% @doc Takes valid credentials, a string representing a repository (i.e
 %%      "username/reponame" and the pull request number.
@@ -749,6 +761,10 @@ make_url(status, {Repo, Sha}) ->
     io_lib:format(Url, [Repo, Sha]);
 
 %% Pull Request
+make_url(pull_reqs, {Repo, Opts}) ->
+    Url = io_lib:format("/repos/~s/pulls", [Repo]),
+    Params = build_params(pull_reqs, Opts),
+    maybe_append_qs_params(Url, Params);
 make_url({pull_req, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = "/repos/~s/pulls/~p/" ++ SubentityStr,
@@ -768,14 +784,18 @@ make_url(issue, {User, Repo}) ->
     io_lib:format("/repos/~s/~s/issues", [User, Repo]);
 make_url(issues, {Repo, Opts}) ->
     Url = io_lib:format("/repos/~s/issues", [Repo]),
-    maybe_append_qs_params(issues, Url, Opts);
+    Params = build_params(issues, Opts),
+    maybe_append_qs_params(Url, Params);
 make_url(issues, {Opts}) ->
-    maybe_append_qs_params(issues, "/issues", Opts);
+    Params = build_params(issues, Opts),
+    maybe_append_qs_params("/issues", Params);
 make_url(issues_user, {Opts}) ->
-    maybe_append_qs_params(issues, "/user/issues", Opts);
+    Params = build_params(issues, Opts),
+    maybe_append_qs_params("/user/issues", Params);
 make_url(issues_org, {Org, Opts}) ->
     Url = io_lib:format("/orgs/~s/issues", [Org]),
-    maybe_append_qs_params(issues, Url, Opts);
+    Params = build_params(issues, Opts),
+    maybe_append_qs_params(Url, Params);
 
 %% Issues comments etc
 make_url({issue, Subentity}, {Repo, PR}) ->
@@ -901,24 +921,35 @@ maybe_queue_request(Cred, Url, JsonBody, Options) ->
             egithub_req:queue(Cred, Url, post, JsonBody)
     end.
 
-maybe_append_qs_params(issues, Url, Opts) ->
-    Params = #{filter    => maps:get(filter, Opts, "assigned"),
-               state     => maps:get(state, Opts, "open"),
-               labels    => maps:get(labels, Opts, ""),
-               sort      => maps:get(sort, Opts, "created"),
-               direction => maps:get(direction, Opts, "asc"),
-               since     => maps:get(since, Opts, "")},
-    case maps:size(Opts) > 0 of
+maybe_append_qs_params(Url, Params) ->
+    case maps:size(Params) > 0 of
         false ->
             io_lib:format(Url, []);
         true ->
             QS = maps:fold(fun (_K, "", Acc) ->
-                                   Acc;
-                               (K, V, Acc) ->
-                                   [io_lib:format("~s=~s", [K, V]) | Acc]
-                           end, [], Params),
+                                    Acc;
+                                (K, V, Acc) ->
+                                    [io_lib:format("~s=~s", [K, V]) | Acc]
+                            end, [], Params),
             io_lib:format("~s?~s", [Url, string:join(lists:reverse(QS), "&")])
     end.
+
+build_params(issues, Opts) ->
+    #{  filter    => maps:get(filter, Opts, "assigned"),
+        state     => maps:get(state, Opts, "open"),
+        labels    => maps:get(labels, Opts, ""),
+        sort      => maps:get(sort, Opts, "created"),
+        direction => maps:get(direction, Opts, "asc"),
+        since     => maps:get(since, Opts, "")
+    };
+build_params(pull_reqs, Opts) ->
+    #{  state     => maps:get(state, Opts, "open"),
+        head      => maps:get(head, Opts, ""),
+        base      => maps:get(base, Opts, ""),
+        sort      => maps:get(sort, Opts, "created"),
+        direction => maps:get(direction, Opts, "asc"),
+        page      => maps:get(page, Opts, 1)
+    }.
 
 to_str(Arg) when is_binary(Arg) ->
     unicode:characters_to_list(Arg);
