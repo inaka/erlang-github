@@ -929,10 +929,15 @@ maybe_append_qs_params(Url, Params) ->
             QS = maps:fold(fun (_K, "", Acc) ->
                                     Acc;
                                 (K, V, Acc) ->
-                                    [io_lib:format("~s=~s", [K, V]) | Acc]
+                                    [format_qs_param(K, V) | Acc]
                             end, [], Params),
             io_lib:format("~s?~s", [Url, string:join(lists:reverse(QS), "&")])
     end.
+
+format_qs_param(K, V) when is_number(V) ->
+    io_lib:format("~s=~p", [K, V]);
+format_qs_param(K, V) ->
+    io_lib:format("~s=~s", [K, V]).
 
 build_params(issues, Opts) ->
     #{  filter    => maps:get(filter, Opts, "assigned"),
