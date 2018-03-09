@@ -74,7 +74,10 @@
          release/3,
          releases/2,
          releases/3,
-         release_latest/2
+         release_latest/2,
+         %% Branches
+         branch/3,
+         branches/3
         ]).
 
 %% Files
@@ -730,6 +733,26 @@ release_latest(Cred, Repo) ->
     Url = make_url(release_lastest, {Repo}),
     api_call_json_result(Cred, Url).
 
+%% Branches
+
+%% @doc Get a single branch for a repository of the
+%%      authenticated user.
+%% @end
+-spec branch(credentials(), repository(), binary()) ->
+    {ok, map()} | egithub_req:error().
+branch(Cred, Repo, Name) ->
+    Url = make_url(branch, {Repo, Name}),
+    api_call_json_result(Cred, Url).
+
+%% @doc List all branches for a repository for the
+%%      authenticated user
+%% @end
+-spec branches(credentials(), repository(), map()) ->
+    {ok, map()} | egithub_req:error().
+branches(Cred, Repo, Opts) ->
+    Url = make_url(branches, {Repo, Opts}),
+    api_call_json_result(Cred, Url).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private Functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -902,7 +925,17 @@ make_url(releases, {Repo, Opts}) ->
     io_lib:format(Url, [Repo, Page]);
 make_url(release_lastest, {Repo}) ->
     Url = "/repos/~s/releases/latest",
-    io_lib:format(Url, [Repo]).
+    io_lib:format(Url, [Repo]);
+
+%% Branches
+make_url(branch, {Repo, Name}) ->
+    Url = "/repos/~s/branches/~s",
+    io_lib:format(Url, [Repo, Name]);
+make_url(branches, {Repo, Opts}) ->
+    Page = maps:get(page, Opts, 1),
+    Protected = maps:get(proteced, Opts, false),
+    Url = "/repos/~s/branches?page=~p&protected=~s",
+    io_lib:format(Url, [Repo, Page, Protected]).
 
 api_call_json_result(Cred, Url) ->
     case egithub_req:run(Cred, Url) of
