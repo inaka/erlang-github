@@ -738,7 +738,7 @@ release_latest(Cred, Repo) ->
 %% @doc Get a single branch for a repository of the
 %%      authenticated user.
 %% @end
--spec branch(credentials(), repository(), binary()) ->
+-spec branch(credentials(), repository(), string()) ->
     {ok, map()} | egithub_req:error().
 branch(Cred, Repo, Name) ->
     Url = make_url(branch, {Repo, Name}),
@@ -785,9 +785,13 @@ make_url(status, {Repo, Sha}) ->
 
 %% Pull Request
 make_url(pull_reqs, {Repo, Opts}) ->
-    Url = io_lib:format("/repos/~s/pulls", [Repo]),
+    Url = lists:flatten(
+        io_lib:format("/repos/~s/pulls", [Repo])),
+    error_logger:info_msg("DEBUG: url='~s'", [Url]),
     Params = build_params(pull_reqs, Opts),
-    maybe_append_qs_params(Url, Params);
+    R = maybe_append_qs_params(Url, Params),
+    error_logger:info_msg("DEBUG: url='~p'", [R]),
+    R;
 make_url({pull_req, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = "/repos/~s/pulls/~p/" ++ SubentityStr,
@@ -871,19 +875,13 @@ make_url(team_membership, {TeamId, Username}) ->
 make_url(repo, {RepoFullName}) ->
     Url = "/repos/~s",
     io_lib:format(Url, [RepoFullName]);
+make_url(repos, {undefined, Opts}) ->
+    Params = build_params(repos, Opts),
+    maybe_append_qs_params("/user/repos", Params);
 make_url(repos, {User, Opts}) ->
-    Type = maps:get(type, Opts, "all"),
-    Sort = maps:get(sort, Opts, "full_name"),
-    Direction = maps:get(direction, Opts, "asc"),
     Page = maps:get(page, Opts, 1),
-    case User of
-        undefined ->
-            Url = "/user/repos?type=~s&sort=~s&direction=~s&page=~p",
-            io_lib:format(Url, [Type, Sort, Direction, Page]);
-        User ->
-            Url = "/users/~s/repos?page=~p",
-            io_lib:format(Url, [User, Page])
-    end;
+    Url = "/users/~s/repos?page=~p",
+    io_lib:format(Url, [User, Page]);
 make_url(org_repos, {User, Opts}) ->
     Page = maps:get(page, Opts, 1),
     % 100 by default to reduce the number of requests
@@ -933,7 +931,7 @@ make_url(branch, {Repo, Name}) ->
     io_lib:format(Url, [Repo, Name]);
 make_url(branches, {Repo, Opts}) ->
     Page = maps:get(page, Opts, 1),
-    Protected = maps:get(proteced, Opts, false),
+    Protected = maps:get(protected, Opts, false),
     Url = "/repos/~s/branches?page=~p&protected=~s",
     io_lib:format(Url, [Repo, Page, Protected]).
 
@@ -959,19 +957,29 @@ maybe_append_qs_params(Url, Params) ->
         false ->
             io_lib:format(Url, []);
         true ->
-            QS = maps:fold(fun (_K, "", Acc) ->
-                                    Acc;
-                                (K, V, Acc) ->
-                                    [format_qs_param(K, V) | Acc]
-                            end, [], Params),
-            io_lib:format("~s?~s", [Url, string:join(lists:reverse(QS), "&")])
+            QS = format_qs_params(maps:to_list(Params), []),
+            [lists:flatten(io_lib:format("~s?~s", [Url, QS]))]
     end.
+format_qs_params([], Acc) ->
+    lists:flatten(string:join(lists:reverse(Acc), "&"));
+format_qs_params([{_K, ""} | Params], Acc) ->
+    format_qs_params(Params, Acc);
+format_qs_params([{K, V} | Params], Acc) ->
+    format_qs_params(Params, [format_qs_param(K, V) | Acc]).
 
 format_qs_param(K, V) when is_number(V) ->
     io_lib:format("~s=~p", [K, V]);
 format_qs_param(K, V) ->
     io_lib:format("~s=~s", [K, V]).
 
+build_params(repos, Opts) ->
+    #{  type      => maps:get(type, Opts, "all"),
+        sort      => maps:get(sort, Opts, "full_name"),
+        direction => maps:get(direction, Opts, "asc"),
+        page      => maps:get(page, Opts, 1)
+    };
+build_params(issues, Opts) when map_size(Opts) == 0 ->
+    #{};
 build_params(issues, Opts) ->
     #{  filter    => maps:get(filter, Opts, "assigned"),
         state     => maps:get(state, Opts, "open"),
