@@ -174,6 +174,7 @@ issues(_Config) ->
   meck:new(hackney, [passthrough]),
   try
       BodyReturnFun = fun(_) -> {ok, <<"[]">>} end,
+
       meck:expect(hackney, body, BodyReturnFun),
       CreateIssueFun = match_fun("/repos/user/repo/issues", post),
       meck:expect(hackney, request, CreateIssueFun),
@@ -200,8 +201,11 @@ issues(_Config) ->
 
       OrgIssuesFun = match_fun("/orgs/foo/issues", get),
       meck:expect(hackney, request, OrgIssuesFun),
-      {ok, _} = egithub:issues_org(Credentials, "foo", #{})
+      {ok, _} = egithub:issues_org(Credentials, "foo", #{}),
 
+      SingleIssueFun = match_fun("/repos/user/repo/issues/1", get),
+      meck:expect(hackney, request, SingleIssueFun),
+      {ok, _} = egithub:issue(Credentials, "user/repo", 1)
   after
       meck:unload(hackney)
   end.

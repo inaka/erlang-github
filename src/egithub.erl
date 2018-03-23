@@ -34,6 +34,7 @@
          all_issues/3,
          issues_user/2,
          issues_org/3,
+         issue/3,
          %% Users
          user/1,
          user/2,
@@ -298,6 +299,16 @@ all_issues(Cred, Repo, Opts) ->
     {ok, Result} = egithub_req:run(Cred, Url),
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
+
+%% @doc Get a single issue  for a specific owner repository
+%%      and its id.
+%% @end
+-spec issue(credentials(), repository(), integer()) -> result().
+issue(Cred, Repo, IssueId) ->
+    Url = make_url(issue, {Repo, IssueId}),
+    {ok, Result} = egithub_req:run(Cred, Url),
+    Issue = egithub_json:decode(Result),
+    {ok, Issue}.
 
 %% @doc List all issues across owned and member repositories for the
 %%      authenticated user.
@@ -807,6 +818,8 @@ make_url({reviews, Subentity}, {Repo, PR, RId}) ->
     io_lib:format(Url, [Repo, PR, RId]);
 
 %% Issues
+make_url(issue, {Repo, IssueId}) when is_integer(IssueId) ->
+    io_lib:format("/repos/~s/issues/~p", [Repo, IssueId]);
 make_url(issue, {User, Repo}) ->
     io_lib:format("/repos/~s/~s/issues", [User, Repo]);
 make_url(issues, {Repo, Opts}) ->
