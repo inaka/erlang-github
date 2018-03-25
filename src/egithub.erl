@@ -798,11 +798,8 @@ make_url(status, {Repo, Sha}) ->
 make_url(pull_reqs, {Repo, Opts}) ->
     Url = lists:flatten(
         io_lib:format("/repos/~s/pulls", [Repo])),
-    error_logger:info_msg("DEBUG: url='~s'", [Url]),
     Params = build_params(pull_reqs, Opts),
-    R = maybe_append_qs_params(Url, Params),
-    error_logger:info_msg("DEBUG: url='~p'", [R]),
-    R;
+    maybe_append_qs_params(Url, Params);
 make_url({pull_req, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = "/repos/~s/pulls/~p/" ++ SubentityStr,
@@ -819,7 +816,9 @@ make_url({reviews, Subentity}, {Repo, PR, RId}) ->
 
 %% Issues
 make_url(issue, {Repo, IssueId}) when is_integer(IssueId) ->
-    io_lib:format("/repos/~s/issues/~p", [Repo, IssueId]);
+    R = io_lib:format("/repos/~s/issues/~p", [Repo, IssueId]),
+    error_logger:info_msg("issue.url=~p", [hd(R)]),
+    R;
 make_url(issue, {User, Repo}) ->
     io_lib:format("/repos/~s/~s/issues", [User, Repo]);
 make_url(issues, {Repo, Opts}) ->

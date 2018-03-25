@@ -68,16 +68,14 @@ pull_reqs(_Config) ->
   try
     BodyReturnFun = fun(_) -> {ok, <<"[]">>} end,
 
-    PRsUrl = "/repos/user/repo/pulls?direction=asc&page=1&sort=created&"
-             "state=opened",
-
-    error_logger:info_msg("DEBUG: url=~s", [PRsUrl]),
+    PRsUrl = "/repos/user/repo/pulls?direction=asc&page=1&sort=created"
+             "&state=open",
     AllOpenPRFun = match_fun(PRsUrl, get),
+    meck:expect(hackney, body, BodyReturnFun),
     meck:expect(hackney, request, AllOpenPRFun),
-    {ok, _} = egithub:pull_reqs(Credentials, "user/repo", #{state => "opened"}),
+    {ok, _} = egithub:pull_reqs(Credentials, "user/repo", #{state => "open"}),
 
     PRFilesFun = match_fun("/repos/user/repo/pulls/1/files", get),
-    BodyReturnFun = fun(_) -> {ok, <<"[]">>} end,
     meck:expect(hackney, body, BodyReturnFun),
     meck:expect(hackney, request, PRFilesFun),
     {ok, _} = egithub:pull_req_files(Credentials, "user/repo", 1),
