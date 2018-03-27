@@ -816,9 +816,7 @@ make_url({reviews, Subentity}, {Repo, PR, RId}) ->
 
 %% Issues
 make_url(issue, {Repo, IssueId}) when is_integer(IssueId) ->
-    R = io_lib:format("/repos/~s/issues/~p", [Repo, IssueId]),
-    error_logger:info_msg("issue.url=~p", [hd(R)]),
-    R;
+    io_lib:format("/repos/~s/issues/~p", [Repo, IssueId]);
 make_url(issue, {User, Repo}) ->
     io_lib:format("/repos/~s/~s/issues", [User, Repo]);
 make_url(issues, {Repo, Opts}) ->
