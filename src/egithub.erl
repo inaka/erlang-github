@@ -100,7 +100,7 @@
                           | {oauth, Token :: string()}.
 -type repository()   :: string(). %% "username/reponame"
 -type options()      :: #{post_method => queue | run}.
--type result()       :: ok | {ok, term()} | {error, term()}.
+-type result()       :: ok | {ok, map() | [map()]} | egithub_req:error().
 -type issue_labels() :: list(string()).
 
 -define(MAX_DESCRIPTION_LENGTH, 140).
@@ -700,8 +700,7 @@ combined_status(Cred, Repo, Ref) ->
     Url = make_url(status, {Repo, Ref}),
     api_call_json_result(Cred, Url).
 
--spec languages(Cred::credentials(), Repo::repository()) ->
-    {ok, map()} | egithub_req:error().
+-spec languages(Cred::credentials(), Repo::repository()) -> result().
 languages(Cred, Repo) ->
     Url = make_url(languages, {Repo}),
     api_call_json_result(Cred, Url).
@@ -711,8 +710,7 @@ languages(Cred, Repo) ->
 %% @doc Get a single release for a repository of the
 %%      authenticated user.
 %% @end
--spec release(credentials(), repository(), pos_integer()) ->
-    {ok, map()} | egithub_req:error().
+-spec release(credentials(), repository(), pos_integer()) -> result().
 release(Cred, Repo, Id) ->
     Url = make_url(release, {Repo, Id}),
     api_call_json_result(Cred, Url).
@@ -720,8 +718,7 @@ release(Cred, Repo, Id) ->
 %% @doc List all releases for a repository for the
 %%      authenticated user
 %% @end
--spec releases(credentials(), repository()) ->
-    {ok, map()} | egithub_req:error().
+-spec releases(credentials(), repository()) -> result().
 releases(Cred, Repo) ->
     Url = make_url(releases, {Repo}),
     api_call_json_result(Cred, Url).
@@ -729,8 +726,7 @@ releases(Cred, Repo) ->
 %% @doc List all releases for a repository for the
 %%      authenticated user.
 %% @end
--spec releases(credentials(), repository(), map()) ->
-    {ok, map()} | egithub_req:error().
+-spec releases(credentials(), repository(), map()) -> result().
 releases(Cred, Repo, Opts) ->
     Url = make_url(releases, {Repo, Opts}),
     api_call_json_result(Cred, Url).
@@ -738,8 +734,7 @@ releases(Cred, Repo, Opts) ->
 %% @doc Get the latest release for a repository of the
 %%      authenticated user.
 %% @end
--spec release_latest(credentials(), repository()) ->
-    {ok, map()} | egithub_req:error().
+-spec release_latest(credentials(), repository()) ->  result().
 release_latest(Cred, Repo) ->
     Url = make_url(release_lastest, {Repo}),
     api_call_json_result(Cred, Url).
@@ -749,8 +744,7 @@ release_latest(Cred, Repo) ->
 %% @doc Get a single branch for a repository of the
 %%      authenticated user.
 %% @end
--spec branch(credentials(), repository(), string()) ->
-    {ok, map()} | egithub_req:error().
+-spec branch(credentials(), repository(), string()) -> result().
 branch(Cred, Repo, Name) ->
     Url = make_url(branch, {Repo, Name}),
     api_call_json_result(Cred, Url).
@@ -758,8 +752,7 @@ branch(Cred, Repo, Name) ->
 %% @doc List all branches for a repository for the
 %%      authenticated user
 %% @end
--spec branches(credentials(), repository(), map()) ->
-    {ok, map()} | egithub_req:error().
+-spec branches(credentials(), repository(), map()) -> result().
 branches(Cred, Repo, Opts) ->
     Url = make_url(branches, {Repo, Opts}),
     api_call_json_result(Cred, Url).
