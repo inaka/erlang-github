@@ -963,6 +963,7 @@ maybe_append_qs_params(Url, Params) ->
             QS = format_qs_params(maps:to_list(Params), []),
             [lists:flatten(io_lib:format("~s?~s", [Url, QS]))]
     end.
+
 format_qs_params([], Acc) ->
     lists:flatten(string:join(lists:reverse(Acc), "&"));
 format_qs_params([{_K, ""} | Params], Acc) ->
