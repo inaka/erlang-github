@@ -19,7 +19,8 @@
          hooks/1,
          collaborators/1,
          statuses/1,
-         releases/1
+         releases/1,
+         branches/1
         ]).
 
 -record(client, {}).
@@ -65,8 +66,16 @@ pull_reqs(_Config) ->
 
   meck:new(hackney, [passthrough]),
   try
-    PRFilesFun = match_fun("/repos/user/repo/pulls/1/files", get),
     BodyReturnFun = fun(_) -> {ok, <<"[]">>} end,
+
+    PRsUrl = "/repos/user/repo/pulls?direction=asc&page=1&sort=created"
+             "&state=open",
+    AllOpenPRFun = match_fun(PRsUrl, get),
+    meck:expect(hackney, body, BodyReturnFun),
+    meck:expect(hackney, request, AllOpenPRFun),
+    {ok, _} = egithub:pull_reqs(Credentials, "user/repo", #{state => "open"}),
+
+    PRFilesFun = match_fun("/repos/user/repo/pulls/1/files", get),
     meck:expect(hackney, body, BodyReturnFun),
     meck:expect(hackney, request, PRFilesFun),
     {ok, _} = egithub:pull_req_files(Credentials, "user/repo", 1),
@@ -163,6 +172,7 @@ issues(_Config) ->
   meck:new(hackney, [passthrough]),
   try
       BodyReturnFun = fun(_) -> {ok, <<"[]">>} end,
+
       meck:expect(hackney, body, BodyReturnFun),
       CreateIssueFun = match_fun("/repos/user/repo/issues", post),
       meck:expect(hackney, request, CreateIssueFun),
@@ -189,8 +199,11 @@ issues(_Config) ->
 
       OrgIssuesFun = match_fun("/orgs/foo/issues", get),
       meck:expect(hackney, request, OrgIssuesFun),
-      {ok, _} = egithub:issues_org(Credentials, "foo", #{})
+      {ok, _} = egithub:issues_org(Credentials, "foo", #{}),
 
+      SingleIssueFun = match_fun("/repos/user/repo/issues/1", get),
+      meck:expect(hackney, request, SingleIssueFun),
+      {ok, _} = egithub:issue(Credentials, "user/repo", 1)
   after
       meck:unload(hackney)
   end.
@@ -270,7 +283,7 @@ repos(_Config) ->
     {ok, _} = egithub:repo(Credentials, "inaka/whatever"),
 
     ReposFun = match_fun("/user/repos?"
-                         "type=all&sort=full_name&direction=asc&page=1",
+                         "direction=asc&page=1&sort=full_name&type=all",
                          get),
     meck:expect(hackney, request, ReposFun),
     {ok, _} = egithub:repos(Credentials, #{}),
@@ -281,7 +294,7 @@ repos(_Config) ->
     {ok, _} = egithub:repos(Credentials, "gadgetci", #{}),
 
     AllReposFun = match_fun("/user/repos?"
-                             "type=all&sort=full_name&direction=asc&page=1",
+                             "direction=asc&page=1&sort=full_name&type=all",
                              get),
     meck:expect(hackney, request, AllReposFun),
     {ok, _} = egithub:all_repos(Credentials, #{}),
@@ -504,13 +517,42 @@ releases(_Config) ->
       meck:expect(hackney, request, ReleasesFun),
       {ok, _} = egithub:releases(Credentials, "inaka/whatever"),
 
-      ReposPageFun = match_fun("/repos/inaka/whatever/releases?page=2", get),
-      meck:expect(hackney, request, ReposPageFun),
+      ReleasesPageFun = match_fun("/repos/inaka/whatever/releases?page=2",
+                                  get),
+      meck:expect(hackney, request, ReleasesPageFun),
       {ok, _} = egithub:releases(Credentials, "inaka/whatever", #{page => 2}),
 
-      LatesReleaseFun = match_fun("/repos/inaka/whatever/releases/latest", get),
-      meck:expect(hackney, request, LatesReleaseFun),
+      LatestReleaseFun = match_fun("/repos/inaka/whatever/releases/latest",
+                                   get),
+      meck:expect(hackney, request, LatestReleaseFun),
       {ok, _} = egithub:release_latest(Credentials, "inaka/whatever")
+    after
+      meck:unload(hackney)
+    end.
+
+-spec branches(config()) -> result().
+branches(_Config) ->
+    Credentials = github_credentials(),
+
+    meck:new(hackney, [passthrough]),
+    try
+      BodyReturnFun = fun(_) -> {ok, <<"[]">>} end,
+      meck:expect(hackney, body, BodyReturnFun),
+
+      BranchFun = match_fun("/repos/inaka/whatever/branches/master", get),
+      meck:expect(hackney, request, BranchFun),
+      {ok, _} = egithub:branch(Credentials, "inaka/whatever", "master"),
+
+      BranchesUrl = "/repos/inaka/whatever/branches?page=1&protected=false",
+      BranchesFun = match_fun(BranchesUrl, get),
+      meck:expect(hackney, request, BranchesFun),
+      {ok, _} = egithub:branches(Credentials, "inaka/whatever", #{}),
+
+      BranchesUrl2 = "/repos/inaka/whatever/branches?page=2&protected=true",
+      BranchesFun2 = match_fun(BranchesUrl2, get),
+      meck:expect(hackney, request, BranchesFun2),
+      {ok, _} = egithub:branches(Credentials, "inaka/whatever",
+                                 #{page => 2, protected => true})
     after
       meck:unload(hackney)
     end.

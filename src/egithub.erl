@@ -15,6 +15,7 @@
          basic_auth/2,
          oauth/1,
          %% Pull Requests
+         pull_reqs/3,
          pull_req_files/3,
          pull_req_comment_line/7,
          pull_req_comment_line/8,
@@ -33,6 +34,7 @@
          all_issues/3,
          issues_user/2,
          issues_org/3,
+         issue/3,
          %% Users
          user/1,
          user/2,
@@ -73,7 +75,10 @@
          release/3,
          releases/2,
          releases/3,
-         release_latest/2
+         release_latest/2,
+         %% Branches
+         branch/3,
+         branches/3
         ]).
 
 %% Files
@@ -95,7 +100,7 @@
                           | {oauth, Token :: string()}.
 -type repository()   :: string(). %% "username/reponame"
 -type options()      :: #{post_method => queue | run}.
--type result()       :: ok | {ok, term()} | {error, term()}.
+-type result()       :: ok | {ok, map() | [map()]} | egithub_req:error().
 -type issue_labels() :: list(string()).
 
 -define(MAX_DESCRIPTION_LENGTH, 140).
@@ -138,6 +143,17 @@ oauth(Token) ->
     {oauth, Token}.
 
 %% Pull Requests
+
+
+%% @doc List pull requests for a repository for the
+%%      authenticated user
+%% @end
+-spec pull_reqs(credentials(), repository(), map()) -> result().
+pull_reqs(Cred, Repo, Opts) ->
+    Url = make_url(pull_reqs, {Repo, Opts}),
+    {ok, Result} = egithub_req:run(Cred, Url),
+    PullRequests = egithub_json:decode(Result),
+    {ok, PullRequests}.
 
 %% @doc Takes valid credentials, a string representing a repository (i.e
 %%      "username/reponame" and the pull request number.
@@ -283,6 +299,16 @@ all_issues(Cred, Repo, Opts) ->
     {ok, Result} = egithub_req:run(Cred, Url),
     Issues = egithub_json:decode(Result),
     {ok, Issues}.
+
+%% @doc Get a single issue  for a specific owner repository
+%%      and its id.
+%% @end
+-spec issue(credentials(), repository(), integer()) -> result().
+issue(Cred, Repo, IssueId) ->
+    Url = make_url(issue, {Repo, IssueId}),
+    {ok, Result} = egithub_req:run(Cred, Url),
+    Issue = egithub_json:decode(Result),
+    {ok, Issue}.
 
 %% @doc List all issues across owned and member repositories for the
 %%      authenticated user.
@@ -674,8 +700,7 @@ combined_status(Cred, Repo, Ref) ->
     Url = make_url(status, {Repo, Ref}),
     api_call_json_result(Cred, Url).
 
--spec languages(Cred::credentials(), Repo::repository()) ->
-    {ok, map()} | egithub_req:error().
+-spec languages(Cred::credentials(), Repo::repository()) -> result().
 languages(Cred, Repo) ->
     Url = make_url(languages, {Repo}),
     api_call_json_result(Cred, Url).
@@ -685,8 +710,7 @@ languages(Cred, Repo) ->
 %% @doc Get a single release for a repository of the
 %%      authenticated user.
 %% @end
--spec release(credentials(), repository(), pos_integer()) ->
-    {ok, map()} | egithub_req:error().
+-spec release(credentials(), repository(), pos_integer()) -> result().
 release(Cred, Repo, Id) ->
     Url = make_url(release, {Repo, Id}),
     api_call_json_result(Cred, Url).
@@ -694,8 +718,7 @@ release(Cred, Repo, Id) ->
 %% @doc List all releases for a repository for the
 %%      authenticated user
 %% @end
--spec releases(credentials(), repository()) ->
-    {ok, map()} | egithub_req:error().
+-spec releases(credentials(), repository()) -> result().
 releases(Cred, Repo) ->
     Url = make_url(releases, {Repo}),
     api_call_json_result(Cred, Url).
@@ -703,8 +726,7 @@ releases(Cred, Repo) ->
 %% @doc List all releases for a repository for the
 %%      authenticated user.
 %% @end
--spec releases(credentials(), repository(), map()) ->
-    {ok, map()} | egithub_req:error().
+-spec releases(credentials(), repository(), map()) -> result().
 releases(Cred, Repo, Opts) ->
     Url = make_url(releases, {Repo, Opts}),
     api_call_json_result(Cred, Url).
@@ -712,10 +734,27 @@ releases(Cred, Repo, Opts) ->
 %% @doc Get the latest release for a repository of the
 %%      authenticated user.
 %% @end
--spec release_latest(credentials(), repository()) ->
-    {ok, map()} | egithub_req:error().
+-spec release_latest(credentials(), repository()) ->  result().
 release_latest(Cred, Repo) ->
     Url = make_url(release_lastest, {Repo}),
+    api_call_json_result(Cred, Url).
+
+%% Branches
+
+%% @doc Get a single branch for a repository of the
+%%      authenticated user.
+%% @end
+-spec branch(credentials(), repository(), string()) -> result().
+branch(Cred, Repo, Name) ->
+    Url = make_url(branch, {Repo, Name}),
+    api_call_json_result(Cred, Url).
+
+%% @doc List all branches for a repository for the
+%%      authenticated user
+%% @end
+-spec branches(credentials(), repository(), map()) -> result().
+branches(Cred, Repo, Opts) ->
+    Url = make_url(branches, {Repo, Opts}),
     api_call_json_result(Cred, Url).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -749,6 +788,11 @@ make_url(status, {Repo, Sha}) ->
     io_lib:format(Url, [Repo, Sha]);
 
 %% Pull Request
+make_url(pull_reqs, {Repo, Opts}) ->
+    Url = lists:flatten(
+        io_lib:format("/repos/~s/pulls", [Repo])),
+    Params = build_params(pull_reqs, Opts),
+    maybe_append_qs_params(Url, Params);
 make_url({pull_req, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = "/repos/~s/pulls/~p/" ++ SubentityStr,
@@ -764,18 +808,24 @@ make_url({reviews, Subentity}, {Repo, PR, RId}) ->
     io_lib:format(Url, [Repo, PR, RId]);
 
 %% Issues
+make_url(issue, {Repo, IssueId}) when is_integer(IssueId) ->
+    io_lib:format("/repos/~s/issues/~p", [Repo, IssueId]);
 make_url(issue, {User, Repo}) ->
     io_lib:format("/repos/~s/~s/issues", [User, Repo]);
 make_url(issues, {Repo, Opts}) ->
     Url = io_lib:format("/repos/~s/issues", [Repo]),
-    maybe_append_qs_params(issues, Url, Opts);
+    Params = build_params(issues, Opts),
+    maybe_append_qs_params(Url, Params);
 make_url(issues, {Opts}) ->
-    maybe_append_qs_params(issues, "/issues", Opts);
+    Params = build_params(issues, Opts),
+    maybe_append_qs_params("/issues", Params);
 make_url(issues_user, {Opts}) ->
-    maybe_append_qs_params(issues, "/user/issues", Opts);
+    Params = build_params(issues, Opts),
+    maybe_append_qs_params("/user/issues", Params);
 make_url(issues_org, {Org, Opts}) ->
     Url = io_lib:format("/orgs/~s/issues", [Org]),
-    maybe_append_qs_params(issues, Url, Opts);
+    Params = build_params(issues, Opts),
+    maybe_append_qs_params(Url, Params);
 
 %% Issues comments etc
 make_url({issue, Subentity}, {Repo, PR}) ->
@@ -828,19 +878,13 @@ make_url(team_membership, {TeamId, Username}) ->
 make_url(repo, {RepoFullName}) ->
     Url = "/repos/~s",
     io_lib:format(Url, [RepoFullName]);
+make_url(repos, {undefined, Opts}) ->
+    Params = build_params(repos, Opts),
+    maybe_append_qs_params("/user/repos", Params);
 make_url(repos, {User, Opts}) ->
-    Type = maps:get(type, Opts, "all"),
-    Sort = maps:get(sort, Opts, "full_name"),
-    Direction = maps:get(direction, Opts, "asc"),
     Page = maps:get(page, Opts, 1),
-    case User of
-        undefined ->
-            Url = "/user/repos?type=~s&sort=~s&direction=~s&page=~p",
-            io_lib:format(Url, [Type, Sort, Direction, Page]);
-        User ->
-            Url = "/users/~s/repos?page=~p",
-            io_lib:format(Url, [User, Page])
-    end;
+    Url = "/users/~s/repos?page=~p",
+    io_lib:format(Url, [User, Page]);
 make_url(org_repos, {User, Opts}) ->
     Page = maps:get(page, Opts, 1),
     % 100 by default to reduce the number of requests
@@ -882,7 +926,17 @@ make_url(releases, {Repo, Opts}) ->
     io_lib:format(Url, [Repo, Page]);
 make_url(release_lastest, {Repo}) ->
     Url = "/repos/~s/releases/latest",
-    io_lib:format(Url, [Repo]).
+    io_lib:format(Url, [Repo]);
+
+%% Branches
+make_url(branch, {Repo, Name}) ->
+    Url = "/repos/~s/branches/~s",
+    io_lib:format(Url, [Repo, Name]);
+make_url(branches, {Repo, Opts}) ->
+    Page = maps:get(page, Opts, 1),
+    Protected = maps:get(protected, Opts, false),
+    Url = "/repos/~s/branches?page=~p&protected=~s",
+    io_lib:format(Url, [Repo, Page, Protected]).
 
 api_call_json_result(Cred, Url) ->
     case egithub_req:run(Cred, Url) of
@@ -901,24 +955,51 @@ maybe_queue_request(Cred, Url, JsonBody, Options) ->
             egithub_req:queue(Cred, Url, post, JsonBody)
     end.
 
-maybe_append_qs_params(issues, Url, Opts) ->
-    Params = #{filter    => maps:get(filter, Opts, "assigned"),
-               state     => maps:get(state, Opts, "open"),
-               labels    => maps:get(labels, Opts, ""),
-               sort      => maps:get(sort, Opts, "created"),
-               direction => maps:get(direction, Opts, "asc"),
-               since     => maps:get(since, Opts, "")},
-    case maps:size(Opts) > 0 of
+maybe_append_qs_params(Url, Params) ->
+    case maps:size(Params) > 0 of
         false ->
             io_lib:format(Url, []);
         true ->
-            QS = maps:fold(fun (_K, "", Acc) ->
-                                   Acc;
-                               (K, V, Acc) ->
-                                   [io_lib:format("~s=~s", [K, V]) | Acc]
-                           end, [], Params),
-            io_lib:format("~s?~s", [Url, string:join(lists:reverse(QS), "&")])
+            QS = format_qs_params(maps:to_list(Params), []),
+            [lists:flatten(io_lib:format("~s?~s", [Url, QS]))]
     end.
+
+format_qs_params([], Acc) ->
+    lists:flatten(string:join(lists:reverse(Acc), "&"));
+format_qs_params([{_K, ""} | Params], Acc) ->
+    format_qs_params(Params, Acc);
+format_qs_params([{K, V} | Params], Acc) ->
+    format_qs_params(Params, [format_qs_param(K, V) | Acc]).
+
+format_qs_param(K, V) when is_number(V) ->
+    io_lib:format("~s=~p", [K, V]);
+format_qs_param(K, V) ->
+    io_lib:format("~s=~s", [K, V]).
+
+build_params(repos, Opts) ->
+    #{  type      => maps:get(type, Opts, "all"),
+        sort      => maps:get(sort, Opts, "full_name"),
+        direction => maps:get(direction, Opts, "asc"),
+        page      => maps:get(page, Opts, 1)
+    };
+build_params(issues, Opts) when map_size(Opts) == 0 ->
+    #{};
+build_params(issues, Opts) ->
+    #{  filter    => maps:get(filter, Opts, "assigned"),
+        state     => maps:get(state, Opts, "open"),
+        labels    => maps:get(labels, Opts, ""),
+        sort      => maps:get(sort, Opts, "created"),
+        direction => maps:get(direction, Opts, "asc"),
+        since     => maps:get(since, Opts, "")
+    };
+build_params(pull_reqs, Opts) ->
+    #{  state     => maps:get(state, Opts, "open"),
+        head      => maps:get(head, Opts, ""),
+        base      => maps:get(base, Opts, ""),
+        sort      => maps:get(sort, Opts, "created"),
+        direction => maps:get(direction, Opts, "asc"),
+        page      => maps:get(page, Opts, 1)
+    }.
 
 to_str(Arg) when is_binary(Arg) ->
     unicode:characters_to_list(Arg);
