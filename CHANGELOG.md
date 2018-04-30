@@ -1,14 +1,32 @@
 # Change Log
 
+## [0.5.4](https://github.com/inaka/erlang-github/tree/0.5.4) (2018-04-29)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.3...0.5.4)
+
+**Fixed bugs:**
+
+- Elvis don't check the code correctly in meta\_suite [\#132](https://github.com/inaka/erlang-github/issues/132)
+
+**Closed issues:**
+
+- Update Dependencies [\#162](https://github.com/inaka/erlang-github/issues/162)
+
+**Merged pull requests:**
+
+- Implemet branches API and extend issues API [\#161](https://github.com/inaka/erlang-github/pull/161) ([tgrk](https://github.com/tgrk))
+- Remove dead hipchat link [\#157](https://github.com/inaka/erlang-github/pull/157) ([elbrujohalcon](https://github.com/elbrujohalcon))
+
 ## [0.5.3](https://github.com/inaka/erlang-github/tree/0.5.3) (2018-02-19)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.2...0.5.3)
 
 **Closed issues:**
 
+- Bump Version to 0.5.3 [\#159](https://github.com/inaka/erlang-github/issues/159)
 - Bump version to 0.5.2 [\#155](https://github.com/inaka/erlang-github/issues/155)
 
 **Merged pull requests:**
 
+- \[\#159\] Version Bump to 0.5.3 [\#160](https://github.com/inaka/erlang-github/pull/160) ([ferigis](https://github.com/ferigis))
 - Releases API [\#158](https://github.com/inaka/erlang-github/pull/158) ([tgrk](https://github.com/tgrk))
 
 ## [0.5.2](https://github.com/inaka/erlang-github/tree/0.5.2) (2017-07-17)
