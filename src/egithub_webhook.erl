@@ -94,13 +94,12 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
         _:Error ->
           _ = lager:warning(
             "event:Error ~p Module: ~p ToolName: ~p "
-            "Context: ~p EventData: ~p get_stacktrace: ~p",
+            "Context: ~p EventData: ~p",
             [ Error
             , Module
             , ToolName
             , Context
-            , EventData
-            , erlang:get_stacktrace()]),
+            , EventData]),
           ErrSource =
             do_handle_error_source(Error, Module, CommentsCred, EventData),
           _ =
