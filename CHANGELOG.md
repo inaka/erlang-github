@@ -1,6 +1,17 @@
 # Change Log
 
-## [0.5.4](https://github.com/inaka/erlang-github/tree/0.5.4) (2018-04-29)
+## [0.5.5](https://github.com/inaka/erlang-github/tree/0.5.5) (2018-06-28)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.4...0.5.5)
+
+**Fixed bugs:**
+
+- egithub\_webhook.erl fails to compile on OTP 21 [\#164](https://github.com/inaka/erlang-github/issues/164)
+
+**Merged pull requests:**
+
+- Add stacktrace\_compat to the mix resolves \#164 [\#165](https://github.com/inaka/erlang-github/pull/165) ([starbelly](https://github.com/starbelly))
+
+## [0.5.4](https://github.com/inaka/erlang-github/tree/0.5.4) (2018-04-30)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.3...0.5.4)
 
 **Fixed bugs:**
@@ -13,6 +24,7 @@
 
 **Merged pull requests:**
 
+- Bump Version to 0.5.4 [\#163](https://github.com/inaka/erlang-github/pull/163) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - Implemet branches API and extend issues API [\#161](https://github.com/inaka/erlang-github/pull/161) ([tgrk](https://github.com/tgrk))
 - Remove dead hipchat link [\#157](https://github.com/inaka/erlang-github/pull/157) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
