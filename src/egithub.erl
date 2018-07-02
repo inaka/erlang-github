@@ -91,10 +91,12 @@
               repository/0,
               options/0,
               result/0,
-              state/0
+              state/0,
+              user/0
              ]).
 
 %% Types
+-type user()         :: string() | undefined.
 -type state()        :: pending | success | error | failure.
 -type credentials()  :: {basic, Username :: string(), Password :: string()}
                           | {oauth, Token :: string()}.
@@ -245,11 +247,12 @@ pr_reviews(Cred, Repo, PR) ->
 %%      <code>RespBody</code> is the plain text body returned by GitHub.
 %% @end
 -spec dismiss_pr_review(credentials(), repository(), integer(), integer(),
-                        iodata()) ->
+                        map()) ->
    result().
 dismiss_pr_review(Cred, Repo, PR, RId, Body) ->
     Url = make_url({reviews, dismissals}, {Repo, PR, RId}),
-    egithub_req:run(Cred, Url, put, egithub_json:encode(Body)).
+    {ok, Result} = egithub_req:run(Cred, Url, put, egithub_json:encode(Body)),
+    {ok, egithub_json:decode(Result)}.
 
 %% Issues
 %% @doc Create an issue
@@ -364,7 +367,8 @@ issue_comments(Cred, Repo, PR) ->
 %% Files
 
 %% @doc Fetches the contents of a file for a given repository and commit SHA.
--spec file_content(credentials(), repository(), string(), string()) -> result().
+-spec file_content(credentials(), repository(), string(), string()) ->
+  {ok, binary()} | egithub_req:error().
 file_content(Cred, Repo, CommitId, Filename) ->
     Url = make_url(file_content, {Repo, CommitId, Filename}),
     case egithub_req:run(Cred, Url) of
@@ -415,7 +419,7 @@ orgs(Cred) ->
 %% @doc Get the organizations for the user associated with the provided
 %%      <code>Username</code>.
 %% @end
--spec orgs(credentials(), string()) -> result().
+-spec orgs(credentials(), user()) -> result().
 orgs(Cred, User) ->
     Url = make_url(orgs, {User}),
     api_call_json_result(Cred, Url).
@@ -452,7 +456,7 @@ repos(Cred, Opts) ->
 %%      <a href="https://developer.github.com/v3/repos/#parameters">here</a>
 %%      for more information.
 %% @end
--spec repos(credentials(), string(), map()) -> result().
+-spec repos(credentials(), user(), map()) -> result().
 repos(Cred, User, Opts) ->
     Url = make_url(repos, {User, Opts}),
     api_call_json_result(Cred, Url).
@@ -471,6 +475,7 @@ all_repos(Cred, Opts) ->
 all_repos(Cred, User, Opts) ->
     all_repos(Cred, User, Opts#{page => 1}, []).
 
+-spec all_repos(credentials(), user(), map(), [map()]) -> result().
 all_repos(Cred, User, Opts = #{page := Page}, Results) ->
     case repos(Cred, User, Opts) of
         {ok, []} ->

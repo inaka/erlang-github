@@ -218,7 +218,7 @@ do_handle_error_source(Error, Module, Cred, Data) ->
 
 %% @doc Comment files that failed rules.
 -spec write_comments(
-    egithub:credentials(), string(), map(), [map()], [message()]) -> ok.
+    egithub:credentials(), string(), integer(), [map()], [message()]) -> ok.
 write_comments(Cred, Repo, PR, Comments, Messages) ->
   _ = lager:debug(
     "[Github WH] About to write ~p messages (there are already ~p comments)",
