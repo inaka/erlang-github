@@ -175,7 +175,7 @@ pull_req_files(Cred, Repo, PR) ->
 %% @end
 -spec pull_req_comment_line(credentials(), repository(), integer(),
                             string(), binary(), integer(), iodata()) ->
-    result().
+    egithub_req:result().
 pull_req_comment_line(Cred, Repo, PR,
                       CommitId, Filename, Line, Text) ->
     pull_req_comment_line(Cred, Repo, PR,
@@ -191,7 +191,7 @@ pull_req_comment_line(Cred, Repo, PR,
 -spec pull_req_comment_line(credentials(), repository(), integer(),
                             string(), binary(), integer(), iodata(),
                             options()) ->
-    result().
+    ok | egithub_req:result().
 pull_req_comment_line(Cred, Repo, PR,
                       CommitId, Filename, Line, Text, Options) ->
     Url = make_url({pull_req, comments}, {Repo, PR}),
@@ -257,7 +257,7 @@ dismiss_pr_review(Cred, Repo, PR, RId, Body) ->
 %% Issues
 %% @doc Create an issue
 -spec create_issue(credentials(), string(), repository(), string(), string(),
-                   string(), issue_labels()) -> result().
+                   string(), issue_labels()) -> egithub_req:result().
 create_issue(Cred, Username, Repo, Title, Text, Assignee, Labels) ->
     create_issue(Cred, Username, Repo, Title, Text, Assignee, 1, Labels,
                  #{post_method => run}).
@@ -272,7 +272,7 @@ create_issue(Cred, Username, Repo, Title, Text, Assignee, Milestone, Labels) ->
 %% @doc Create an issue
 -spec create_issue(credentials(), string(), repository(), string(), string(),
                    string(), pos_integer(), issue_labels(), options()) ->
-                          result().
+    egithub_req:result() | ok.
 create_issue(Cred, Username, Repo, Title, Text, Assignee, Milestone, Labels,
              Options) ->
     Url = make_url(issue, {Username, Repo}),
@@ -333,7 +333,7 @@ issues_org(Cred, Org, Opts) ->
 
 %% @equiv issue_comment(Cred, Repo, PR, Text, #{post_method => run})
 -spec issue_comment(credentials(), repository(), integer(), iodata()) ->
-    result().
+    egithub_req:result().
 issue_comment(Cred, Repo, PR, Text) ->
     issue_comment(Cred, Repo, PR, Text, #{post_method => run}).
 
@@ -345,7 +345,7 @@ issue_comment(Cred, Repo, PR, Text) ->
 %% @end
 -spec issue_comment(credentials(), repository(), integer(), iodata(),
                     options()) ->
-   result().
+    egithub_req:result() | ok.
 issue_comment(Cred, Repo, PR, Text, Options) ->
     Url = make_url({issue, comments}, {Repo, PR}),
     Body = #{<<"body">> => Text},
@@ -519,7 +519,7 @@ teams(Cred, Org) ->
 
 %% @doc Creates a team in an organization.
 -spec create_team(credentials(), string(), string(), string(), [string()]) ->
-    result().
+    {ok, already_exists} | {ok, egithub_json:json()} | egithub_req:result().
 create_team(Cred, Org, Name, Permission, Repos) ->
     Url = make_url(teams, {Org}),
     BodyMap = #{name => to_bin(Name),
