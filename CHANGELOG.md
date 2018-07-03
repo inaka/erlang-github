@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.5.6](https://github.com/inaka/erlang-github/tree/0.5.6) (2018-07-03)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.5...0.5.6)
+
+**Merged pull requests:**
+
+- fix dialyzer warnings for OTP 21 [\#167](https://github.com/inaka/erlang-github/pull/167) ([f3c0](https://github.com/f3c0))
+
 ## [0.5.5](https://github.com/inaka/erlang-github/tree/0.5.5) (2018-06-28)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.4...0.5.5)
 
@@ -9,6 +16,7 @@
 
 **Merged pull requests:**
 
+- Bump Version to 0.5.5 [\#166](https://github.com/inaka/erlang-github/pull/166) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - Add stacktrace\_compat to the mix resolves \#164 [\#165](https://github.com/inaka/erlang-github/pull/165) ([starbelly](https://github.com/starbelly))
 
 ## [0.5.4](https://github.com/inaka/erlang-github/tree/0.5.4) (2018-04-30)
