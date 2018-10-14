@@ -16,6 +16,7 @@
          oauth/1,
          %% Pull Requests
          pull_reqs/3,
+         pull_req/3,
          pull_req_files/3,
          pull_req_comment_line/7,
          pull_req_comment_line/8,
@@ -146,6 +147,15 @@ oauth(Token) ->
 
 %% Pull Requests
 
+%% @doc Get a list of details of a pull request by providing its number.
+%%      for authenticated user
+%% @end
+-spec pull_req(credentials(), repository(), integer()) -> result().
+pull_req(Cred, Repo, PR) ->
+    Url = make_url(pull_req, {Repo, PR}),
+    {ok, Result} = egithub_req:run(Cred, Url),
+    PullRequests = egithub_json:decode(Result),
+    {ok, PullRequests}.
 
 %% @doc List pull requests for a repository for the
 %%      authenticated user
@@ -798,6 +808,8 @@ make_url(pull_reqs, {Repo, Opts}) ->
         io_lib:format("/repos/~s/pulls", [Repo])),
     Params = build_params(pull_reqs, Opts),
     maybe_append_qs_params(Url, Params);
+make_url(pull_req, {Repo, PR}) when is_integer(PR) ->
+    io_lib:format("/repos/~s/pulls/~p", [Repo, PR]);
 make_url({pull_req, Subentity}, {Repo, PR}) ->
     SubentityStr = to_str(Subentity),
     Url = "/repos/~s/pulls/~p/" ++ SubentityStr,
