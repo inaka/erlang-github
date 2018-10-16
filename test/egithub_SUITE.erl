@@ -75,6 +75,11 @@ pull_reqs(_Config) ->
     meck:expect(hackney, request, AllOpenPRFun),
     {ok, _} = egithub:pull_reqs(Credentials, "user/repo", #{state => "open"}),
 
+    SinglePRFun = match_fun("/repos/user/repo/pulls/1", get),
+    meck:expect(hackney, body, BodyReturnFun),
+    meck:expect(hackney, request, SinglePRFun),
+    {ok, _} = egithub:pull_req(Credentials, "user/repo", 1),
+
     PRFilesFun = match_fun("/repos/user/repo/pulls/1/files", get),
     meck:expect(hackney, body, BodyReturnFun),
     meck:expect(hackney, request, PRFilesFun),
