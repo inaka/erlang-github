@@ -13,6 +13,12 @@
 
 -type config() :: [{atom(), term()}].
 
+%% Specifications for functions mixed in from ktn_meta_SUITE
+-spec all() -> config().
+-spec xref(config()) -> config().
+-spec dialyzer(config()) -> config().
+-spec elvis(config()) -> config().
+
 -spec init_per_suite(config()) -> config().
 init_per_suite(Config) ->
   [ {application,  egithub}
