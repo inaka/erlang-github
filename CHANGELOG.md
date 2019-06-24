@@ -1,10 +1,25 @@
 # Change Log
 
-## [0.5.6](https://github.com/inaka/erlang-github/tree/0.5.6) (2018-07-03)
+## [0.5.7](https://github.com/inaka/erlang-github/tree/0.5.7) (2019-06-24)
+
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.6...0.5.7)
+
+**Fixed bugs:**
+
+- Can't compile the project on OTP21 - dependency update needed [\#172](https://github.com/inaka/erlang-github/issues/172)
+
+**Merged pull requests:**
+
+- \[Closes \#172\] Bump lager to 3.7.0 [\#173](https://github.com/inaka/erlang-github/pull/173) ([jfacorro](https://github.com/jfacorro))
+- Implement API for retrieving a single pull request [\#171](https://github.com/inaka/erlang-github/pull/171) ([tgrk](https://github.com/tgrk))
+
+## [0.5.6](https://github.com/inaka/erlang-github/tree/0.5.6) (2018-07-04)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.5...0.5.6)
 
 **Merged pull requests:**
 
+- OTP 21 dialyzer fixes in common tests [\#170](https://github.com/inaka/erlang-github/pull/170) ([f3c0](https://github.com/f3c0))
+- Bump Version to 0.5.6 [\#168](https://github.com/inaka/erlang-github/pull/168) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - fix dialyzer warnings for OTP 21 [\#167](https://github.com/inaka/erlang-github/pull/167) ([f3c0](https://github.com/f3c0))
 
 ## [0.5.5](https://github.com/inaka/erlang-github/tree/0.5.5) (2018-06-28)
