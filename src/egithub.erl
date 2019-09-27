@@ -79,7 +79,10 @@
          release_latest/2,
          %% Branches
          branch/3,
-         branches/3
+         branches/3,
+         %% Tags
+         tag/3,
+         tags/3
         ]).
 
 %% Files
@@ -772,6 +775,24 @@ branches(Cred, Repo, Opts) ->
     Url = make_url(branches, {Repo, Opts}),
     api_call_json_result(Cred, Url).
 
+%% Tags
+
+%% @doc Get one tags for a repository of the
+%%      authenticated user.
+%% @end
+-spec tag(credentials(), string(), string()) -> result().
+tag(Cred, Repo, Tag) ->
+  Url = make_url(tag, {Repo, Tag}),
+  api_call_json_result(Cred, Url).
+
+%% @doc Get all of the tags for a repository of the
+%%      authenticated user.
+%% @end
+-spec tags(credentials(), string(), map()) -> result().
+tags(Cred, Repo, Opts) ->
+    Url = make_url(tags, {Repo, Opts}),
+    api_call_json_result(Cred, Url).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private Functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -917,7 +938,7 @@ make_url(hooks, {Repo, Id}) ->
     Url = "/repos/~s/hooks/~s",
     io_lib:format(Url, [Repo, Id]);
 
-%% Colaborators
+%% Collaborators
 make_url(collaborators, {Repo}) ->
     Url = "/repos/~s/collaborators",
     io_lib:format(Url, [Repo]);
@@ -953,7 +974,16 @@ make_url(branches, {Repo, Opts}) ->
     Page = maps:get(page, Opts, 1),
     Protected = maps:get(protected, Opts, false),
     Url = "/repos/~s/branches?page=~p&protected=~s",
-    io_lib:format(Url, [Repo, Page, Protected]).
+    io_lib:format(Url, [Repo, Page, Protected]);
+
+%% Tags
+make_url(tag, {Repo, Tag})->
+    Url = "/repos/~s/tags/~s",
+    io_lib:format(Url, [Repo, Tag]);
+make_url(tags, {Repo, Opts}) ->
+    AfterTag = maps:get(after_tag, Opts, ""),
+    Url = "/repos/~s/tags?after=~s",
+    io_lib:format(Url, [Repo, AfterTag]).
 
 api_call_json_result(Cred, Url) ->
     case egithub_req:run(Cred, Url) of
