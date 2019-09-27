@@ -572,20 +572,22 @@ tags(_Config) ->
       BodyReturnFun = fun(_) -> {ok, <<"[]">>} end,
       meck:expect(hackney, body, BodyReturnFun),
 
-      TagFun = match_fun("/repos/inaka/whatever/tags/v1.2", get),
+      TagFun = match_fun(
+        "/repos/inaka/whatever/tags/940bd336248efae0f9ee5bc7b2d5c985887b16ac", get),
       meck:expect(hackney, request, TagFun),
-      {ok, _} = egithub:tag(Credentials, "inaka/whatever", "v1.2"),
+      {ok, _} = egithub:tag(Credentials, "inaka/whatever",
+        "940bd336248efae0f9ee5bc7b2d5c985887b16ac"),
 
-      TagsUrl = "/repos/inaka/whatever/tags?after=",
+      TagsUrl = "/repos/inaka/whatever/tags?page=1",
       TagsFun = match_fun(TagsUrl, get),
       meck:expect(hackney, request, TagsFun),
       {ok, _} = egithub:tags(Credentials, "inaka/whatever", #{}),
 
-      TagsUrl2 = "/repos/inaka/whatever/tags?after=v1.3",
+      TagsUrl2 = "/repos/inaka/whatever/tags?page=2",
       TagsFun2 = match_fun(TagsUrl2, get),
       meck:expect(hackney, request, TagsFun2),
       {ok, _} = egithub:tags(Credentials, "inaka/whatever",
-                                 #{after_tag => "v1.3"})
+                                 #{page => 2})
     after
       meck:unload(hackney)
     end.
