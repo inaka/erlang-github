@@ -781,8 +781,8 @@ branches(Cred, Repo, Opts) ->
 %%      authenticated user.
 %% @end
 -spec tag(credentials(), string(), string()) -> result().
-tag(Cred, Repo, Tag) ->
-  Url = make_url(tag, {Repo, Tag}),
+tag(Cred, Repo, TagSha) ->
+  Url = make_url(tag, {Repo, TagSha}),
   api_call_json_result(Cred, Url).
 
 %% @doc Get all of the tags for a repository of the
@@ -977,13 +977,13 @@ make_url(branches, {Repo, Opts}) ->
     io_lib:format(Url, [Repo, Page, Protected]);
 
 %% Tags
-make_url(tag, {Repo, Tag})->
+make_url(tag, {Repo, TagSha})->
     Url = "/repos/~s/tags/~s",
-    io_lib:format(Url, [Repo, Tag]);
+    io_lib:format(Url, [Repo, TagSha]);
 make_url(tags, {Repo, Opts}) ->
-    AfterTag = maps:get(after_tag, Opts, ""),
-    Url = "/repos/~s/tags?after=~s",
-    io_lib:format(Url, [Repo, AfterTag]).
+    Page = maps:get(page, Opts, 1),
+    Url = "/repos/~s/tags?page=~p",
+    io_lib:format(Url, [Repo, Page]).
 
 api_call_json_result(Cred, Url) ->
     case egithub_req:run(Cred, Url) of
