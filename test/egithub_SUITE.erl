@@ -21,7 +21,8 @@
          statuses/1,
          releases/1,
          branches/1,
-         tags/1
+         tags/1,
+         custom_host/1
         ]).
 
 -record(client, {}).
@@ -592,6 +593,25 @@ tags(_Config) ->
       meck:unload(hackney)
     end.
 
+-spec custom_host(config()) -> result().
+custom_host(_Config) ->
+  Credentials = github_credentials(),
+
+  meck:new(hackney, [passthrough]),
+  try
+    application:set_env(egithub, egithub_host, <<"github.inaka-enterprise-api.com">>),
+    RepoFun = match_fun("/repos/inaka/whatever", get),
+    meck:expect(hackney, request, RepoFun),
+    BodyReturnFun = fun(_) -> {ok, <<"[]">>} end,
+    meck:expect(hackney, body, BodyReturnFun),
+    {ok, _} = egithub:repo(Credentials, "inaka/whatever"),
+    <<"https://github.inaka-enterprise-api.com/repos/inaka/whatever">>
+      = meck:capture(first, hackney, request, '_', 2),
+    ok
+  after
+    meck:unload(hackney)
+  end.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Helper
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -601,7 +621,8 @@ github_credentials() ->
   egithub:basic_auth("username", "password").
 
 match_fun(Url, Method) ->
-  UrlBin = list_to_binary("https://api.github.com" ++ Url),
+  Host = application:get_env(egithub, egithub_host, <<"api.github.com">>),
+  UrlBin = iolist_to_binary(["https://", Host,  Url]),
   fun(MethodParam, UrlParam, _, _) ->
       UrlBin = UrlParam,
       Method = MethodParam,
