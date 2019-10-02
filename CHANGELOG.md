@@ -1,7 +1,15 @@
 # Change Log
 
-## [0.5.7](https://github.com/inaka/erlang-github/tree/0.5.7) (2019-06-24)
+## [0.5.8](https://github.com/inaka/erlang-github/tree/0.5.8) (2019-10-02)
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.7...0.5.8)
 
+**Merged pull requests:**
+
+- Add custom API host [\#179](https://github.com/inaka/erlang-github/pull/179) ([samwar](https://github.com/samwar))
+- Correct the tag API [\#178](https://github.com/inaka/erlang-github/pull/178) ([samwar](https://github.com/samwar))
+- Implement API for retrieving tags [\#176](https://github.com/inaka/erlang-github/pull/176) ([samwar](https://github.com/samwar))
+
+## [0.5.7](https://github.com/inaka/erlang-github/tree/0.5.7) (2019-06-24)
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.6...0.5.7)
 
 **Fixed bugs:**
@@ -10,6 +18,8 @@
 
 **Merged pull requests:**
 
+- Bump version in .app.src, remove deprecated maintainers field [\#175](https://github.com/inaka/erlang-github/pull/175) ([jfacorro](https://github.com/jfacorro))
+- Update changelog before tagging 0.5.7 [\#174](https://github.com/inaka/erlang-github/pull/174) ([jfacorro](https://github.com/jfacorro))
 - \[Closes \#172\] Bump lager to 3.7.0 [\#173](https://github.com/inaka/erlang-github/pull/173) ([jfacorro](https://github.com/jfacorro))
 - Implement API for retrieving a single pull request [\#171](https://github.com/inaka/erlang-github/pull/171) ([tgrk](https://github.com/tgrk))
 
