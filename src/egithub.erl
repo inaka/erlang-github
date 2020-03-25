@@ -157,7 +157,7 @@ oauth(Token) ->
 pull_req(Cred, Repo, PR) ->
     Url = make_url(pull_req, {Repo, PR}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    PullRequests = egithub_json:decode(Result),
+    PullRequests = jsx:decode(Result),
     {ok, PullRequests}.
 
 %% @doc List pull requests for a repository for the
@@ -167,7 +167,7 @@ pull_req(Cred, Repo, PR) ->
 pull_reqs(Cred, Repo, Opts) ->
     Url = make_url(pull_reqs, {Repo, Opts}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    PullRequests = egithub_json:decode(Result),
+    PullRequests = jsx:decode(Result),
     {ok, PullRequests}.
 
 %% @doc Takes valid credentials, a string representing a repository (i.e
@@ -180,7 +180,7 @@ pull_reqs(Cred, Repo, Opts) ->
 pull_req_files(Cred, Repo, PR) ->
     Url = make_url({pull_req, files}, {Repo, PR}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    Files = egithub_json:decode(Result),
+    Files = jsx:decode(Result),
     {ok, Files}.
 
 %% @equiv pull_req_comment_line(Credentials, Repo, PR, CommitId, Filename,
@@ -213,7 +213,7 @@ pull_req_comment_line(Cred, Repo, PR,
              <<"position">> => Line,
              <<"body">> => Text
             },
-    maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
+    maybe_queue_request(Cred, Url, jsx:encode(Body), Options).
 
 %% @doc Takes valid credentials, a string representing a repository (i.e
 %%      "username/reponame" and the pull request number.
@@ -225,7 +225,7 @@ pull_req_comment_line(Cred, Repo, PR,
 pull_req_comments(Cred, Repo, PR) ->
     Url = make_url({pull_req, comments}, {Repo, PR}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    Comments = egithub_json:decode(Result),
+    Comments = jsx:decode(Result),
     {ok, Comments}.
 
 %% @doc Takes valid credentials, a string representing a repository (i.e
@@ -239,7 +239,7 @@ pull_req_comments(Cred, Repo, PR) ->
    result().
 pr_review(Cred, Repo, PR, Body, Options) ->
     Url = make_url(reviews, {Repo, PR}),
-    maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
+    maybe_queue_request(Cred, Url, jsx:encode(Body), Options).
 
 %% @doc Takes valid credentials, a string representing a repository (i.e
 %%      "username/reponame", and the issue/pull number.
@@ -251,7 +251,7 @@ pr_review(Cred, Repo, PR, Body, Options) ->
 pr_reviews(Cred, Repo, PR) ->
     Url = make_url(reviews, {Repo, PR}),
     {ok, Reviews} = egithub_req:run(Cred, Url),
-    {ok, egithub_json:decode(Reviews)}.
+    {ok, jsx:decode(Reviews)}.
 
 %% @doc Takes valid credentials, a string representing a repository (i.e
 %%      "username/reponame", the issue/pull number, review ID, and a PR
@@ -264,8 +264,8 @@ pr_reviews(Cred, Repo, PR) ->
    result().
 dismiss_pr_review(Cred, Repo, PR, RId, Body) ->
     Url = make_url({reviews, dismissals}, {Repo, PR, RId}),
-    {ok, Result} = egithub_req:run(Cred, Url, put, egithub_json:encode(Body)),
-    {ok, egithub_json:decode(Result)}.
+    {ok, Result} = egithub_req:run(Cred, Url, put, jsx:encode(Body)),
+    {ok, jsx:decode(Result)}.
 
 %% Issues
 %% @doc Create an issue
@@ -294,7 +294,7 @@ create_issue(Cred, Username, Repo, Title, Text, Assignee, Milestone, Labels,
              assignee  => to_bin(Assignee),
              milestone => Milestone,
              labels    => lists:map(fun to_bin/1, Labels)},
-    maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
+    maybe_queue_request(Cred, Url, jsx:encode(Body), Options).
 
 
 %% @doc List all issues across all the authenticated user's visible repositories
@@ -305,7 +305,7 @@ create_issue(Cred, Username, Repo, Title, Text, Assignee, Milestone, Labels,
 all_issues(Cred, Opts) ->
     Url = make_url(issues, {Opts}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    Issues = egithub_json:decode(Result),
+    Issues = jsx:decode(Result),
     {ok, Issues}.
 
 %% @doc List issues for a specific owner repository
@@ -313,7 +313,7 @@ all_issues(Cred, Opts) ->
 all_issues(Cred, Repo, Opts) ->
     Url = make_url(issues, {Repo, Opts}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    Issues = egithub_json:decode(Result),
+    Issues = jsx:decode(Result),
     {ok, Issues}.
 
 %% @doc Get a single issue  for a specific owner repository
@@ -323,7 +323,7 @@ all_issues(Cred, Repo, Opts) ->
 issue(Cred, Repo, IssueId) ->
     Url = make_url(issue, {Repo, IssueId}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    Issue = egithub_json:decode(Result),
+    Issue = jsx:decode(Result),
     {ok, Issue}.
 
 %% @doc List all issues across owned and member repositories for the
@@ -333,7 +333,7 @@ issue(Cred, Repo, IssueId) ->
 issues_user(Cred, Opts) ->
     Url = make_url(issues_user, {Opts}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    Issues = egithub_json:decode(Result),
+    Issues = jsx:decode(Result),
     {ok, Issues}.
 
 %% @doc List all issues for a given organization for the authenticated user.
@@ -341,7 +341,7 @@ issues_user(Cred, Opts) ->
 issues_org(Cred, Org, Opts) ->
     Url = make_url(issues_org, {Org, Opts}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    Issues = egithub_json:decode(Result),
+    Issues = jsx:decode(Result),
     {ok, Issues}.
 
 %% @equiv issue_comment(Cred, Repo, PR, Text, #{post_method => run})
@@ -362,7 +362,7 @@ issue_comment(Cred, Repo, PR, Text) ->
 issue_comment(Cred, Repo, PR, Text, Options) ->
     Url = make_url({issue, comments}, {Repo, PR}),
     Body = #{<<"body">> => Text},
-    maybe_queue_request(Cred, Url, egithub_json:encode(Body), Options).
+    maybe_queue_request(Cred, Url, jsx:encode(Body), Options).
 
 %% @doc Takes valid credentials, a string representing a repository (i.e
 %%      "username/reponame" and the issue number.
@@ -374,7 +374,7 @@ issue_comment(Cred, Repo, PR, Text, Options) ->
 issue_comments(Cred, Repo, PR) ->
     Url = make_url({issue, comments}, {Repo, PR}),
     {ok, Result} = egithub_req:run(Cred, Url),
-    Comments = egithub_json:decode(Result),
+    Comments = jsx:decode(Result),
     {ok, Comments}.
 
 %% Files
@@ -386,7 +386,7 @@ file_content(Cred, Repo, CommitId, Filename) ->
     Url = make_url(file_content, {Repo, CommitId, Filename}),
     case egithub_req:run(Cred, Url) of
         {ok, Result} ->
-            JsonResult = egithub_json:decode(Result),
+            JsonResult = jsx:decode(Result),
             ContentBase64 = maps:get(<<"content">>, JsonResult),
             Content = base64:decode(ContentBase64),
             {ok, Content};
@@ -532,16 +532,16 @@ teams(Cred, Org) ->
 
 %% @doc Creates a team in an organization.
 -spec create_team(credentials(), string(), string(), string(), [string()]) ->
-    {ok, already_exists} | {ok, egithub_json:json()} | egithub_req:result().
+    {ok, already_exists} | {ok, jsx:json_term()} | egithub_req:result().
 create_team(Cred, Org, Name, Permission, Repos) ->
     Url = make_url(teams, {Org}),
     BodyMap = #{name => to_bin(Name),
                 permission => to_bin(Permission),
                 repo_names => [to_bin(Repo) || Repo <- Repos]},
-    Body = egithub_json:encode(BodyMap),
+    Body = jsx:encode(BodyMap),
     case egithub_req:run(Cred, Url, post, Body) of
         {ok, Result} ->
-            JsonResult = egithub_json:decode(Result),
+            JsonResult = jsx:decode(Result),
             {ok, JsonResult};
         {error, {422, _, _}} ->
             {ok, already_exists};
@@ -613,10 +613,10 @@ create_webhook(Cred, Repo, WebhookUrl, Events) ->
              <<"events">> => BinEvents,
              <<"config">> => #{<<"url">> => to_bin(WebhookUrl),
                                <<"content_type">> => <<"json">>}},
-    Body = egithub_json:encode(Data),
+    Body = jsx:encode(Data),
     case egithub_req:run(Cred, Url, post, Body) of
         {ok, Result} ->
-            JsonResult = egithub_json:decode(Result),
+            JsonResult = jsx:decode(Result),
             {ok, JsonResult};
         {error, Reason} ->
             {error, Reason}
@@ -643,7 +643,7 @@ collaborators(Cred, Repo) ->
     Url = make_url(collaborators, {Repo}),
     case egithub_req:run(Cred, Url) of
         {ok, Result} ->
-            JsonResult = egithub_json:decode(Result),
+            JsonResult = jsx:decode(Result),
             {ok, JsonResult};
         {error, Reason} ->
             {error, Reason}
@@ -695,10 +695,10 @@ create_status(Cred, Repo, Sha, State, Description, Context, TargetUrl) ->
                 undefined -> Data;
                 _ -> Data#{<<"target_url">> => list_to_binary(TargetUrl)}
             end,
-    Body = egithub_json:encode(Data1),
+    Body = jsx:encode(Data1),
     case egithub_req:run(Cred, Url, post, Body) of
         {ok, Result} ->
-            JsonResult = egithub_json:decode(Result),
+            JsonResult = jsx:decode(Result),
             {ok, JsonResult};
         {error, Reason} ->
             {error, Reason}
@@ -988,7 +988,7 @@ make_url(tags, {Repo, Opts}) ->
 api_call_json_result(Cred, Url) ->
     case egithub_req:run(Cred, Url) of
         {ok, Result} ->
-            JsonResult = egithub_json:decode(Result),
+            JsonResult = jsx:decode(Result),
             {ok, JsonResult};
         {error, Reason} ->
             {error, Reason}
