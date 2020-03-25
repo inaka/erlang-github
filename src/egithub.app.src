@@ -3,7 +3,7 @@
   [
    {description, "GitHub API client"},
    {vsn, "0.5.8"},
-   {applications, [kernel, stdlib, crypto, public_key, hackney, lager, jiffy]},
+   {applications, [kernel, stdlib, crypto, public_key, hackney, lager, jsx]},
    {mod, {egithub, []}},
    {modules, []},
    {registered, []},

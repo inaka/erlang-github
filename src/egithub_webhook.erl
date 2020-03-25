@@ -117,7 +117,7 @@ event(Module, StatusCred, ToolName, Context, CommentsCred, Request) ->
 %%% Statuses
 -spec specify_status( atom() | {atom(), any()} | {atom(), any(), string()}
                     , egithub:credentials(), atom(), string()
-                    , egithub_json:json()) -> ok | {error, any()}.
+                    , jsx:json_term()) -> ok | {error, any()}.
 specify_status(clean, StatusCred, ToolName, Context, EventData) ->
   set_status(success, StatusCred, ToolName, Context, EventData),
   ok;

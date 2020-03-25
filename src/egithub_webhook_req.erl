@@ -31,5 +31,5 @@ payload(Request=#{body := DecodedBody}) when is_map(DecodedBody) ->
 
 -spec with_decoded_body(request()) -> {request(), map()}.
 with_decoded_body(Request=#{body := Body}) ->
-  DecodedBody = egithub_json:decode(Body),
+  DecodedBody = jsx:decode(Body),
   {Request#{body => DecodedBody}, DecodedBody}.

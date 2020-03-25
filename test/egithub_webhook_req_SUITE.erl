@@ -47,7 +47,7 @@ end_per_suite(Config) ->
 
 setup_test_data() ->
   EncodedBody = <<"{\"foo\":\"bar\"}">>,
-  DecodedBody = egithub_json:decode(EncodedBody),
+  DecodedBody = jsx:decode(EncodedBody),
   TestHeaders = #{<<"Accept">> => <<"*">>,
     <<"Content-Type">> => <<"application/json">>},
   EncodedReq = egithub_webhook_req:new(TestHeaders, EncodedBody),
