@@ -1,15 +1,35 @@
-# Change Log
+# Changelog
+
+## [0.6.0](https://github.com/inaka/erlang-github/tree/0.6.0)
+
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.8...0.6.0)
+
+**Fixed bugs:**
+
+- Fix dialyzer warnings from meta SUITE [\#169](https://github.com/inaka/erlang-github/issues/169)
+
+**Closed issues:**
+
+- Replace jiffy with jsx [\#182](https://github.com/inaka/erlang-github/issues/182)
+- Version Bump to 0.5.8 [\#180](https://github.com/inaka/erlang-github/issues/180)
+
+**Merged pull requests:**
+
+- \[\#182\] Replace jiffy with jsx [\#183](https://github.com/inaka/erlang-github/pull/183) ([jfacorro](https://github.com/jfacorro))
 
 ## [0.5.8](https://github.com/inaka/erlang-github/tree/0.5.8) (2019-10-02)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.7...0.5.8)
 
 **Merged pull requests:**
 
+- Update deps and bump version to 0.5.8 [\#181](https://github.com/inaka/erlang-github/pull/181) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - Add custom API host [\#179](https://github.com/inaka/erlang-github/pull/179) ([samwar](https://github.com/samwar))
 - Correct the tag API [\#178](https://github.com/inaka/erlang-github/pull/178) ([samwar](https://github.com/samwar))
 - Implement API for retrieving tags [\#176](https://github.com/inaka/erlang-github/pull/176) ([samwar](https://github.com/samwar))
 
 ## [0.5.7](https://github.com/inaka/erlang-github/tree/0.5.7) (2019-06-24)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.6...0.5.7)
 
 **Fixed bugs:**
@@ -24,6 +44,7 @@
 - Implement API for retrieving a single pull request [\#171](https://github.com/inaka/erlang-github/pull/171) ([tgrk](https://github.com/tgrk))
 
 ## [0.5.6](https://github.com/inaka/erlang-github/tree/0.5.6) (2018-07-04)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.5...0.5.6)
 
 **Merged pull requests:**
@@ -33,6 +54,7 @@
 - fix dialyzer warnings for OTP 21 [\#167](https://github.com/inaka/erlang-github/pull/167) ([f3c0](https://github.com/f3c0))
 
 ## [0.5.5](https://github.com/inaka/erlang-github/tree/0.5.5) (2018-06-28)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.4...0.5.5)
 
 **Fixed bugs:**
@@ -45,6 +67,7 @@
 - Add stacktrace\_compat to the mix resolves \#164 [\#165](https://github.com/inaka/erlang-github/pull/165) ([starbelly](https://github.com/starbelly))
 
 ## [0.5.4](https://github.com/inaka/erlang-github/tree/0.5.4) (2018-04-30)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.3...0.5.4)
 
 **Fixed bugs:**
@@ -62,6 +85,7 @@
 - Remove dead hipchat link [\#157](https://github.com/inaka/erlang-github/pull/157) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.5.3](https://github.com/inaka/erlang-github/tree/0.5.3) (2018-02-19)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.2...0.5.3)
 
 **Closed issues:**
@@ -75,6 +99,7 @@
 - Releases API [\#158](https://github.com/inaka/erlang-github/pull/158) ([tgrk](https://github.com/tgrk))
 
 ## [0.5.2](https://github.com/inaka/erlang-github/tree/0.5.2) (2017-07-17)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.1...0.5.2)
 
 **Fixed bugs:**
@@ -87,6 +112,7 @@
 - \[Fix \#153\] Make check pass when PR is approved [\#154](https://github.com/inaka/erlang-github/pull/154) ([harenson](https://github.com/harenson))
 
 ## [0.5.1](https://github.com/inaka/erlang-github/tree/0.5.1) (2017-07-06)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.0...0.5.1)
 
 **Closed issues:**
@@ -101,6 +127,7 @@
 - \[Fix \#149\] Fix dialyzer and code issues left after pull\#146 [\#150](https://github.com/inaka/erlang-github/pull/150) ([harenson](https://github.com/harenson))
 
 ## [0.5.0](https://github.com/inaka/erlang-github/tree/0.5.0) (2017-07-05)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.4.0...0.5.0)
 
 **Implemented enhancements:**
@@ -120,6 +147,7 @@
 - Update dependencies to publish in hex [\#143](https://github.com/inaka/erlang-github/pull/143) ([Euen](https://github.com/Euen))
 
 ## [0.4.0](https://github.com/inaka/erlang-github/tree/0.4.0) (2017-06-16)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.2...0.4.0)
 
 **Closed issues:**
@@ -134,6 +162,7 @@
 - \[Close \#139\] Move from Erlang.mk to rebar3. [\#140](https://github.com/inaka/erlang-github/pull/140) ([Euen](https://github.com/Euen))
 
 ## [0.3.2](https://github.com/inaka/erlang-github/tree/0.3.2) (2017-02-16)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.1...0.3.2)
 
 **Fixed bugs:**
@@ -152,6 +181,7 @@
 - fix egithub\_webhook:handle\_error spec [\#130](https://github.com/inaka/erlang-github/pull/130) ([mfelsche](https://github.com/mfelsche))
 
 ## [0.3.1](https://github.com/inaka/erlang-github/tree/0.3.1) (2016-10-24)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.3.0...0.3.1)
 
 **Closed issues:**
@@ -164,6 +194,7 @@
 - Fix specification [\#127](https://github.com/inaka/erlang-github/pull/127) ([Euen](https://github.com/Euen))
 
 ## [0.3.0](https://github.com/inaka/erlang-github/tree/0.3.0) (2016-10-19)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.9...0.3.0)
 
 **Closed issues:**
@@ -177,6 +208,7 @@
 - add handle\_error for descriptive errors in gadget [\#124](https://github.com/inaka/erlang-github/pull/124) ([Euen](https://github.com/Euen))
 
 ## [0.2.9](https://github.com/inaka/erlang-github/tree/0.2.9) (2016-09-13)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.8...0.2.9)
 
 **Closed issues:**
@@ -189,9 +221,9 @@
 
 - \[Fix \#120\] Make egithub works with R19.0.5 by updating lager dep to 3.2.1 version [\#121](https://github.com/inaka/erlang-github/pull/121) ([harenson](https://github.com/harenson))
 - \[Fix \#118\] Bump version to 0.2.9 [\#119](https://github.com/inaka/erlang-github/pull/119) ([harenson](https://github.com/harenson))
-- \[Fix \#115\] Fix wrong specs according to dialyzer@r19.0.5 [\#116](https://github.com/inaka/erlang-github/pull/116) ([harenson](https://github.com/harenson))
 
 ## [0.2.8](https://github.com/inaka/erlang-github/tree/0.2.8) (2016-07-22)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.7...0.2.8)
 
 **Closed issues:**
@@ -204,6 +236,7 @@
 - \[Fix \#112\] Add support for getting languages by repository [\#113](https://github.com/inaka/erlang-github/pull/113) ([harenson](https://github.com/harenson))
 
 ## [0.2.7](https://github.com/inaka/erlang-github/tree/0.2.7) (2016-06-14)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.6...0.2.7)
 
 **Fixed bugs:**
@@ -215,14 +248,17 @@
 - Version bump to 0.2.7 [\#111](https://github.com/inaka/erlang-github/pull/111) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.2.6](https://github.com/inaka/erlang-github/tree/0.2.6) (2016-05-17)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.5...0.2.6)
 
 **Merged pull requests:**
 
+- \[Fix \#115\] Fix wrong specs according to dialyzer@r19.0.5 [\#116](https://github.com/inaka/erlang-github/pull/116) ([harenson](https://github.com/harenson))
 - Version Bump to 0.2.6 [\#109](https://github.com/inaka/erlang-github/pull/109) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - Add `jiffy` to the applications list [\#108](https://github.com/inaka/erlang-github/pull/108) ([alemata](https://github.com/alemata))
 
 ## [0.2.5](https://github.com/inaka/erlang-github/tree/0.2.5) (2016-05-09)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.4...0.2.5)
 
 **Fixed bugs:**
@@ -234,6 +270,7 @@
 - Version Bump to 0.2.5 [\#107](https://github.com/inaka/erlang-github/pull/107) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.2.4](https://github.com/inaka/erlang-github/tree/0.2.4) (2016-05-04)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.3...0.2.4)
 
 **Fixed bugs:**
@@ -247,11 +284,11 @@
 
 **Merged pull requests:**
 
-- \[\#103\] fix hackney issue in suite [\#104](https://github.com/inaka/erlang-github/pull/104) ([Euen](https://github.com/Euen))
 - Use hackney:request instead of hackney:send\_request [\#103](https://github.com/inaka/erlang-github/pull/103) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - Version Bump to 0.2.4 [\#102](https://github.com/inaka/erlang-github/pull/102) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.2.3](https://github.com/inaka/erlang-github/tree/0.2.3) (2016-04-18)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.2.2...0.2.3)
 
 **Closed issues:**
@@ -264,6 +301,7 @@
 - \[\#97\] replaced shotgun with hackney dependency [\#98](https://github.com/inaka/erlang-github/pull/98) ([davecaos](https://github.com/davecaos))
 
 ## [0.2.2](https://github.com/inaka/erlang-github/tree/0.2.2) (2016-04-06)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.19...0.2.2)
 
 **Fixed bugs:**
@@ -295,6 +333,7 @@
 - Replace ibrowse by shotgun [\#60](https://github.com/inaka/erlang-github/pull/60) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.19](https://github.com/inaka/erlang-github/tree/0.1.19) (2016-01-05)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.18...0.1.19)
 
 **Fixed bugs:**
@@ -309,9 +348,9 @@
 **Merged pull requests:**
 
 - \[Fix \#77\] Bump version to 0.1.19 [\#78](https://github.com/inaka/erlang-github/pull/78) ([harenson](https://github.com/harenson))
-- \[Fix \#75\] Rename egithub\_webhook:handle\_pull\_request/3 [\#76](https://github.com/inaka/erlang-github/pull/76) ([harenson](https://github.com/harenson))
 
 ## [0.1.18](https://github.com/inaka/erlang-github/tree/0.1.18) (2016-01-04)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.16...0.1.18)
 
 **Closed issues:**
@@ -320,12 +359,14 @@
 
 **Merged pull requests:**
 
+- \[Fix \#75\] Rename egithub\_webhook:handle\_pull\_request/3 [\#76](https://github.com/inaka/erlang-github/pull/76) ([harenson](https://github.com/harenson))
 - Version Bump to 0.1.18 [\#74](https://github.com/inaka/erlang-github/pull/74) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - \[\#71\] Version Bump 0.1.17 [\#72](https://github.com/inaka/erlang-github/pull/72) ([davecaos](https://github.com/davecaos))
 - \[\#61\] Upload to hex.pm [\#69](https://github.com/inaka/erlang-github/pull/69) ([davecaos](https://github.com/davecaos))
 - Get the project up-to-date [\#63](https://github.com/inaka/erlang-github/pull/63) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.16](https://github.com/inaka/erlang-github/tree/0.1.16) (2015-11-23)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.15...0.1.16)
 
 **Fixed bugs:**
@@ -350,6 +391,7 @@
 - Use https protocol for git dependencies [\#55](https://github.com/inaka/erlang-github/pull/55) ([guilleiguaran](https://github.com/guilleiguaran))
 
 ## [0.1.15](https://github.com/inaka/erlang-github/tree/0.1.15) (2015-06-18)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.14...0.1.15)
 
 **Closed issues:**
@@ -365,6 +407,7 @@
 - Updated license [\#50](https://github.com/inaka/erlang-github/pull/50) ([spike886](https://github.com/spike886))
 
 ## [0.1.14](https://github.com/inaka/erlang-github/tree/0.1.14) (2015-06-11)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.13...0.1.14)
 
 **Closed issues:**
@@ -379,6 +422,7 @@
 - \[\#42\] Updated change log [\#44](https://github.com/inaka/erlang-github/pull/44) ([davecaos](https://github.com/davecaos))
 
 ## [0.1.13](https://github.com/inaka/erlang-github/tree/0.1.13) (2015-04-23)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.12...0.1.13)
 
 **Closed issues:**
@@ -391,6 +435,7 @@
 - \[\#42\] Add fix for error 422 \[The message submitted is longer that the ma... [\#43](https://github.com/inaka/erlang-github/pull/43) ([davecaos](https://github.com/davecaos))
 
 ## [0.1.12](https://github.com/inaka/erlang-github/tree/0.1.12) (2015-04-08)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.11...0.1.12)
 
 **Closed issues:**
@@ -405,6 +450,7 @@
 - \[Close \#34\] add function to get user email [\#37](https://github.com/inaka/erlang-github/pull/37) ([Euen](https://github.com/Euen))
 
 ## [0.1.11](https://github.com/inaka/erlang-github/tree/0.1.11) (2015-03-30)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.10...0.1.11)
 
 **Implemented enhancements:**
@@ -416,6 +462,7 @@
 - \[Close \#34\] add function to get user email [\#35](https://github.com/inaka/erlang-github/pull/35) ([Euen](https://github.com/Euen))
 
 ## [0.1.10](https://github.com/inaka/erlang-github/tree/0.1.10) (2015-03-23)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.9...0.1.10)
 
 **Merged pull requests:**
@@ -423,6 +470,7 @@
 - Support for Github Status API [\#33](https://github.com/inaka/erlang-github/pull/33) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.9](https://github.com/inaka/erlang-github/tree/0.1.9) (2015-03-09)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.8...0.1.9)
 
 **Implemented enhancements:**
@@ -437,16 +485,18 @@
 
 - \[\#30\] Bumped version. [\#32](https://github.com/inaka/erlang-github/pull/32) ([jfacorro](https://github.com/jfacorro))
 - \[Closes \#30\] User organisation membership. [\#31](https://github.com/inaka/erlang-github/pull/31) ([jfacorro](https://github.com/jfacorro))
+- Handle github rate limits [\#27](https://github.com/inaka/erlang-github/pull/27) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.8](https://github.com/inaka/erlang-github/tree/0.1.8) (2015-03-04)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.7...0.1.8)
 
 **Merged pull requests:**
 
 - Version Bump [\#28](https://github.com/inaka/erlang-github/pull/28) ([elbrujohalcon](https://github.com/elbrujohalcon))
-- Handle github rate limits [\#27](https://github.com/inaka/erlang-github/pull/27) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.7](https://github.com/inaka/erlang-github/tree/0.1.7) (2015-02-18)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.6...0.1.7)
 
 **Implemented enhancements:**
@@ -459,6 +509,7 @@
 - \[Closes \#25\] Handle messages with position 0 as global issue comments. [\#26](https://github.com/inaka/erlang-github/pull/26) ([jfacorro](https://github.com/jfacorro))
 
 ## [0.1.6](https://github.com/inaka/erlang-github/tree/0.1.6) (2015-02-13)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.5...0.1.6)
 
 **Merged pull requests:**
@@ -466,6 +517,7 @@
 - \[\#23\] Added issue comment creation and list API calls. [\#24](https://github.com/inaka/erlang-github/pull/24) ([jfacorro](https://github.com/jfacorro))
 
 ## [0.1.5](https://github.com/inaka/erlang-github/tree/0.1.5) (2015-01-14)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.4...0.1.5)
 
 **Merged pull requests:**
@@ -473,6 +525,7 @@
 - Bump Version to 0.1.5 [\#22](https://github.com/inaka/erlang-github/pull/22) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.4](https://github.com/inaka/erlang-github/tree/0.1.4) (2015-01-12)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.3...0.1.4)
 
 **Fixed bugs:**
@@ -487,6 +540,7 @@
 - Create a new behaviour: egithub\_webhook [\#16](https://github.com/inaka/erlang-github/pull/16) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.3](https://github.com/inaka/erlang-github/tree/0.1.3) (2014-11-13)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.2...0.1.3)
 
 **Implemented enhancements:**
@@ -502,6 +556,7 @@
 - \[Closes \#14\] Fixed bug. [\#15](https://github.com/inaka/erlang-github/pull/15) ([jfacorro](https://github.com/jfacorro))
 
 ## [0.1.2](https://github.com/inaka/erlang-github/tree/0.1.2) (2014-11-13)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.1...0.1.2)
 
 **Implemented enhancements:**
@@ -513,6 +568,7 @@
 - Wrong credentials tuple being created for basic authentication  [\#6](https://github.com/inaka/erlang-github/issues/6)
 
 ## [0.1.1](https://github.com/inaka/erlang-github/tree/0.1.1) (2014-10-16)
+
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.1.0...0.1.1)
 
 **Fixed bugs:**
@@ -526,6 +582,9 @@
 - \[Fixes \#8\] Corrected uri [\#9](https://github.com/inaka/erlang-github/pull/9) ([jfacorro](https://github.com/jfacorro))
 
 ## [0.1.0](https://github.com/inaka/erlang-github/tree/0.1.0) (2014-09-26)
+
+[Full Changelog](https://github.com/inaka/erlang-github/compare/66f13a56493357b8c87729922c4d3f52f408412b...0.1.0)
+
 **Closed issues:**
 
 - Basic project structure [\#2](https://github.com/inaka/erlang-github/issues/2)
@@ -539,4 +598,4 @@
 
 
 
-\* *This Change Log was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
+\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
