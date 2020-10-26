@@ -1,6 +1,18 @@
 # Changelog
 
-## [0.6.0](https://github.com/inaka/erlang-github/tree/0.6.0)
+## [0.6.1](https://github.com/inaka/erlang-github/tree/0.6.1) (2020-10-26)
+
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.6.0...0.6.1)
+
+**Closed issues:**
+
+- Prevent hackney compilation warnings on OTP 23 [\#185](https://github.com/inaka/erlang-github/issues/185)
+
+**Merged pull requests:**
+
+- Prevent hackney compilation warnings on OTP 23 [\#186](https://github.com/inaka/erlang-github/pull/186) ([paulo-ferraz-oliveira](https://github.com/paulo-ferraz-oliveira))
+
+## [0.6.0](https://github.com/inaka/erlang-github/tree/0.6.0) (2020-03-26)
 
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.5.8...0.6.0)
 
@@ -15,6 +27,7 @@
 
 **Merged pull requests:**
 
+- Prepare release 0.6.0 [\#184](https://github.com/inaka/erlang-github/pull/184) ([jfacorro](https://github.com/jfacorro))
 - \[\#182\] Replace jiffy with jsx [\#183](https://github.com/inaka/erlang-github/pull/183) ([jfacorro](https://github.com/jfacorro))
 
 ## [0.5.8](https://github.com/inaka/erlang-github/tree/0.5.8) (2019-10-02)
@@ -221,6 +234,7 @@
 
 - \[Fix \#120\] Make egithub works with R19.0.5 by updating lager dep to 3.2.1 version [\#121](https://github.com/inaka/erlang-github/pull/121) ([harenson](https://github.com/harenson))
 - \[Fix \#118\] Bump version to 0.2.9 [\#119](https://github.com/inaka/erlang-github/pull/119) ([harenson](https://github.com/harenson))
+- \[Fix \#115\] Fix wrong specs according to dialyzer@r19.0.5 [\#116](https://github.com/inaka/erlang-github/pull/116) ([harenson](https://github.com/harenson))
 
 ## [0.2.8](https://github.com/inaka/erlang-github/tree/0.2.8) (2016-07-22)
 
@@ -253,7 +267,6 @@
 
 **Merged pull requests:**
 
-- \[Fix \#115\] Fix wrong specs according to dialyzer@r19.0.5 [\#116](https://github.com/inaka/erlang-github/pull/116) ([harenson](https://github.com/harenson))
 - Version Bump to 0.2.6 [\#109](https://github.com/inaka/erlang-github/pull/109) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - Add `jiffy` to the applications list [\#108](https://github.com/inaka/erlang-github/pull/108) ([alemata](https://github.com/alemata))
 
@@ -348,6 +361,7 @@
 **Merged pull requests:**
 
 - \[Fix \#77\] Bump version to 0.1.19 [\#78](https://github.com/inaka/erlang-github/pull/78) ([harenson](https://github.com/harenson))
+- \[Fix \#75\] Rename egithub\_webhook:handle\_pull\_request/3 [\#76](https://github.com/inaka/erlang-github/pull/76) ([harenson](https://github.com/harenson))
 
 ## [0.1.18](https://github.com/inaka/erlang-github/tree/0.1.18) (2016-01-04)
 
@@ -359,7 +373,6 @@
 
 **Merged pull requests:**
 
-- \[Fix \#75\] Rename egithub\_webhook:handle\_pull\_request/3 [\#76](https://github.com/inaka/erlang-github/pull/76) ([harenson](https://github.com/harenson))
 - Version Bump to 0.1.18 [\#74](https://github.com/inaka/erlang-github/pull/74) ([elbrujohalcon](https://github.com/elbrujohalcon))
 - \[\#71\] Version Bump 0.1.17 [\#72](https://github.com/inaka/erlang-github/pull/72) ([davecaos](https://github.com/davecaos))
 - \[\#61\] Upload to hex.pm [\#69](https://github.com/inaka/erlang-github/pull/69) ([davecaos](https://github.com/davecaos))
@@ -485,7 +498,6 @@
 
 - \[\#30\] Bumped version. [\#32](https://github.com/inaka/erlang-github/pull/32) ([jfacorro](https://github.com/jfacorro))
 - \[Closes \#30\] User organisation membership. [\#31](https://github.com/inaka/erlang-github/pull/31) ([jfacorro](https://github.com/jfacorro))
-- Handle github rate limits [\#27](https://github.com/inaka/erlang-github/pull/27) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.8](https://github.com/inaka/erlang-github/tree/0.1.8) (2015-03-04)
 
@@ -494,6 +506,7 @@
 **Merged pull requests:**
 
 - Version Bump [\#28](https://github.com/inaka/erlang-github/pull/28) ([elbrujohalcon](https://github.com/elbrujohalcon))
+- Handle github rate limits [\#27](https://github.com/inaka/erlang-github/pull/27) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.1.7](https://github.com/inaka/erlang-github/tree/0.1.7) (2015-02-18)
 
