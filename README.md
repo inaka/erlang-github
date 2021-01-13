@@ -1,6 +1,8 @@
 erlang-github
 =============
 
+![build](https://github.com/inaka/erlang-github/workflows/build/badge.svg)
+
 [Github API v3][1] client for Erlang
 
 Usage
