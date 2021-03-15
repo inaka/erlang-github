@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0](https://github.com/inaka/erlang-github/tree/0.7.0) (2021-03-15)
+
+[Full Changelog](https://github.com/inaka/erlang-github/compare/0.6.1...0.7.0)
+
+**Closed issues:**
+
+- Move from Travis CI to GitHub Actions? [\#187](https://github.com/inaka/erlang-github/issues/187)
+
+**Merged pull requests:**
+
+- Prevent compilation issues on OTP 24 [\#189](https://github.com/inaka/erlang-github/pull/189) ([paulo-ferraz-oliveira](https://github.com/paulo-ferraz-oliveira))
+- Replace Travis CI with GitHub Actions [\#188](https://github.com/inaka/erlang-github/pull/188) ([paulo-ferraz-oliveira](https://github.com/paulo-ferraz-oliveira))
+
 ## [0.6.1](https://github.com/inaka/erlang-github/tree/0.6.1) (2020-10-26)
 
 [Full Changelog](https://github.com/inaka/erlang-github/compare/0.6.0...0.6.1)
