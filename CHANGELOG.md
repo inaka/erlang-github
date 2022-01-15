@@ -107,7 +107,7 @@
 **Merged pull requests:**
 
 - Bump Version to 0.5.4 [\#163](https://github.com/inaka/erlang-github/pull/163) ([elbrujohalcon](https://github.com/elbrujohalcon))
-- Implemet branches API and extend issues API [\#161](https://github.com/inaka/erlang-github/pull/161) ([tgrk](https://github.com/tgrk))
+- Implement branches API and extend issues API [\#161](https://github.com/inaka/erlang-github/pull/161) ([tgrk](https://github.com/tgrk))
 - Remove dead hipchat link [\#157](https://github.com/inaka/erlang-github/pull/157) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 ## [0.5.3](https://github.com/inaka/erlang-github/tree/0.5.3) (2018-02-19)
@@ -556,7 +556,7 @@
 
 **Fixed bugs:**
 
-- Typo in type name "messge" instead of "message"  [\#17](https://github.com/inaka/erlang-github/issues/17)
+- Typo in type name "message" instead of "message"  [\#17](https://github.com/inaka/erlang-github/issues/17)
 - Fix types in egithub\_webhook [\#20](https://github.com/inaka/erlang-github/pull/20) ([elbrujohalcon](https://github.com/elbrujohalcon))
 
 **Merged pull requests:**

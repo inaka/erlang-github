@@ -73,7 +73,7 @@ event(Module, Cred, Request) ->
 %%      for the webhook.
 %%
 %%      The credentials provided in the <code>StatusCred</code> argument need
-%%      to have the appropiate permissions to be able to change the
+%%      to have the appropriate permissions to be able to change the
 %%      repository's status.
 %% @end
 -spec event(
